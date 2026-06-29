@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rådbanken
 
-## Getting Started
+Rådbanken er et norsk oppslagsverk for tradisjonelle kjerringråd og husråd: det som funket
+for mormor, samlet på ett sted og stemt fram av brukerne selv.
 
-First, run the development server:
+Brukere kan søke på en plage, lese opp gamle husråd, stemme på hva som faktisk fungerte, og
+dele sine egne råd. Innholdet er ment som folkeopplysning, ikke medisinsk rådgivning, og
+appen er bygget med det som førsteprioritet (se "Sikkerhet og ordlyd" under).
+
+## Funksjoner
+
+- **Plager og råd**: bla i kategorier (Hals, Hode, Søvn, Hud & insekter, Muskel & ledd,
+  Mage & fordøyelse m.fl.), se råd rangert etter Wilson-score, og stem opp/ned
+- **Del eget råd**: brukere kan legge til nye råd under en eksisterende plage, eller velge
+  "Annet" på hoved-/underkategori og plage for å opprette en helt ny kategori selv
+- **Medisinplanter**: egne artikler om enkeltplanter (bruk, historie, dyrking, bivirkninger)
+- **Artikler**: lengre fagartikler om enkeltråd og plantemedisinens historie
+- **Søk**: fritekstsøk med synonymer og fuzzy-matching på tvers av plager og råd
+
+## Sikkerhet og ordlyd
+
+Innholdet følger strenge regler for å holde seg på trygg juridisk grunn:
+
+- Ingen kurerer/behandler-påstander; kun "lindrer", "tradisjonelt brukt mot", "kan bidra til"
+- Disclaimer-modal ved første besøk (må godtas før appen kan brukes)
+- Kontekstuell disclaimer nederst på hvert råd, inkl. automatisk honning-varsel for barn under 1 år
+- "Nødknapp" med lenke til Legevakten (116 117) på plager der akutte symptomer kan forveksles
+  med noe alvorlig (hodepine, muskel/ledd, kvalme, halsbrann, forstoppelse, forstuet fot)
+
+## Teknisk stack
+
+- [Next.js 16](https://nextjs.org) (App Router, Turbopack) + React 19 + TypeScript
+- [Tailwind CSS v4](https://tailwindcss.com) (CSS-first konfigurasjon, ingen `tailwind.config.js`)
+- [Firebase](https://firebase.google.com): Firestore (data), Anonymous Auth (stemmer er knyttet
+  til en anonym bruker-id, ingen innlogging kreves)
+
+## Komme i gang
 
 ```bash
+npm install
+cp .env.local.example .env.local   # fyll inn dine egne Firebase-nøkler
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Åpne [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Andre kommandoer
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build   # produksjonsbygg
+npm run lint    # eslint
+```
 
-## Learn More
+### Firestore-regler
 
-To learn more about Next.js, take a look at the following resources:
+Sikkerhetsreglene ligger i `firestore.rules`. Deploy med Firebase CLI:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx firebase deploy --only firestore:rules --project <ditt-prosjekt-id>
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Admin-skript
 
-## Deploy on Vercel
+`scripts/` inneholder noen frittstående skript for engangs-import/inspeksjon av data
+(`seed.ts`, `inspect-problems.ts` m.fl.). Disse bruker `firebase-admin` og en lokal,
+gitignored `service-account.json` (last ned fra Firebase Console → Project Settings →
+Service Accounts) — denne filen må **aldri** committes.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx tsx scripts/seed.ts
+```
