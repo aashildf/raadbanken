@@ -15,6 +15,7 @@ import { useAnonAuth } from "@/lib/useAnonAuth";
 import { castVote } from "@/lib/votes";
 import { REMEDY_DETAILS } from "@/lib/remedyImages";
 import { RemedyDisclaimer } from "@/components/RemedyDisclaimer";
+import { ThumbIcon } from "@/components/ThumbIcon";
 import type { Remedy, Vote } from "@/lib/types";
 
 export default function RemedyDetailPage({
@@ -95,8 +96,10 @@ export default function RemedyDetailPage({
         <span className="text-2xl font-bold text-emerald-600">
           {remedy.totalVotes > 0 ? `${remedy.successRate}%` : "-"}
         </span>
-        <span className="text-sm text-zinc-500">
-          👍 {remedy.votesUp} &nbsp; 👎 {remedy.votesDown} &nbsp; ({remedy.totalVotes} stemmer)
+        <span className="flex items-center gap-1 text-sm text-zinc-500">
+          <ThumbIcon direction="up" className="h-5 w-5" /> {remedy.votesUp}
+          <ThumbIcon direction="down" className="ml-2 h-5 w-5" /> {remedy.votesDown}
+          <span className="ml-1">({remedy.totalVotes} stemmer)</span>
         </span>
       </div>
 
@@ -115,24 +118,24 @@ export default function RemedyDetailPage({
           <button
             onClick={() => handleVote("up")}
             disabled={!uid || submitting !== null}
-            className={`flex-1 rounded-lg px-4 py-2 font-medium transition-colors disabled:opacity-50 ${
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors disabled:opacity-50 ${
               myVote?.voteType === "up"
-                ? "bg-emerald-600 text-white"
+                ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600"
                 : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
             }`}
           >
-            👍 Fungerte
+            <ThumbIcon direction="up" className="h-6 w-6" /> Fungerte
           </button>
           <button
             onClick={() => handleVote("down")}
             disabled={!uid || submitting !== null}
-            className={`flex-1 rounded-lg px-4 py-2 font-medium transition-colors disabled:opacity-50 ${
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors disabled:opacity-50 ${
               myVote?.voteType === "down"
-                ? "bg-red-600 text-white"
+                ? "bg-red-100 text-red-700 ring-1 ring-red-600"
                 : "bg-red-50 text-red-700 hover:bg-red-100"
             }`}
           >
-            👎 Fungerte ikke
+            <ThumbIcon direction="down" className="h-6 w-6" /> Fungerte ikke
           </button>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -172,7 +175,7 @@ export default function RemedyDetailPage({
               key={v.id}
               className="rounded-xl border border-zinc-200 px-4 py-3 text-sm text-zinc-700"
             >
-              <span className="mr-2">{v.voteType === "up" ? "👍" : "👎"}</span>
+              <ThumbIcon direction={v.voteType === "up" ? "up" : "down"} className="mr-2 inline h-5 w-5 align-text-bottom" />
               {v.comment}
             </li>
           ))}

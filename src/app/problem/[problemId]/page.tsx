@@ -9,6 +9,7 @@ import { castVote } from "@/lib/votes";
 import { wilsonScore } from "@/lib/wilson";
 import { ACUTE_RISK_SLUGS } from "@/lib/categories";
 import { EmergencyButton } from "@/components/EmergencyButton";
+import { ThumbIcon } from "@/components/ThumbIcon";
 import type { Problem, Remedy, Vote } from "@/lib/types";
 
 export default function RemediesPage({
@@ -113,24 +114,26 @@ export default function RemediesPage({
                 <button
                   onClick={() => handleVote(r.id, "up")}
                   disabled={!uid || votingId !== null}
-                  className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
                     myVote === "up"
-                      ? "bg-emerald-600 text-white"
+                      ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600"
                       : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                   }`}
                 >
-                  👍 {r.votesUp}
+                  <ThumbIcon direction="up" className="h-6 w-6" />
+                  {r.votesUp}
                 </button>
                 <button
                   onClick={() => handleVote(r.id, "down")}
                   disabled={!uid || votingId !== null}
-                  className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
                     myVote === "down"
-                      ? "bg-red-600 text-white"
+                      ? "bg-red-100 text-red-700 ring-1 ring-red-600"
                       : "bg-red-50 text-red-700 hover:bg-red-100"
                   }`}
                 >
-                  👎 {r.votesDown}
+                  <ThumbIcon direction="down" className="h-6 w-6" />
+                  {r.votesDown}
                 </button>
               </div>
             </li>

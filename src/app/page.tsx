@@ -14,11 +14,10 @@ import { MEDICINAL_PLANTS, plantOfTheMonth } from "@/lib/plants";
 import { REMEDY_IMAGES } from "@/lib/remedyImages";
 import { CategoryMenu } from "@/components/CategoryMenu";
 import { SiteMenu } from "@/components/SiteMenu";
+import { ThumbIcon } from "@/components/ThumbIcon";
 import type { Problem, Remedy, Vote } from "@/lib/types";
 import {
   CATEGORY_ICON,
-  IconChevronDown,
-  IconChevronUp,
   IconSearch,
   IconSparkle,
   PLANT_ICON,
@@ -126,10 +125,10 @@ function Reveal({
 }
 
 function voteButtonClass(active: boolean, type: "up" | "down") {
-  if (!active) return "border-ink/15 text-ink-soft hover:border-ink/30 hover:text-ink";
+  if (!active) return "border-ink/15 bg-paper text-ink-soft hover:border-ink/30 hover:text-ink";
   return type === "up"
-    ? "border-sage bg-sage text-paper"
-    : "border-rust bg-rust text-paper";
+    ? "border-sage bg-sage/15 text-ink"
+    : "border-rust bg-rust/15 text-ink";
 }
 
 export default function HomePage() {
@@ -588,23 +587,23 @@ export default function HomePage() {
                         <button
                           onClick={() => handleVote(r.id, "up")}
                           disabled={!uid || votingId !== null}
-                          className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
+                          className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
                             myVote === "up",
                             "up"
                           )}`}
                         >
-                          <IconChevronUp className="h-3.5 w-3.5" />
+                          <ThumbIcon direction="up" className="h-6 w-6" />
                           {r.votesUp}
                         </button>
                         <button
                           onClick={() => handleVote(r.id, "down")}
                           disabled={!uid || votingId !== null}
-                          className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
+                          className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
                             myVote === "down",
                             "down"
                           )}`}
                         >
-                          <IconChevronDown className="h-3.5 w-3.5" />
+                          <ThumbIcon direction="down" className="h-6 w-6" />
                           {r.votesDown}
                         </button>
                       </div>
@@ -643,23 +642,23 @@ export default function HomePage() {
                       <button
                         onClick={() => handleVote(r.id, "up")}
                         disabled={!uid || votingId !== null}
-                        className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
+                        className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
                           myVote === "up",
                           "up"
                         )}`}
                       >
-                        <IconChevronUp className="h-3.5 w-3.5" />
+                        <ThumbIcon direction="up" className="h-6 w-6" />
                         {r.votesUp}
                       </button>
                       <button
                         onClick={() => handleVote(r.id, "down")}
                         disabled={!uid || votingId !== null}
-                        className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
+                        className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
                           myVote === "down",
                           "down"
                         )}`}
                       >
-                        <IconChevronDown className="h-3.5 w-3.5" />
+                        <ThumbIcon direction="down" className="h-6 w-6" />
                         {r.votesDown}
                       </button>
                     </div>
@@ -722,23 +721,23 @@ export default function HomePage() {
                     <button
                       onClick={() => handleVote(r.id, "up")}
                       disabled={!uid || votingId !== null}
-                      className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
+                      className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
                         myVote === "up",
                         "up"
                       )}`}
                     >
-                      <IconChevronUp className="h-4 w-4" />
+                      <ThumbIcon direction="up" className="h-7 w-7" />
                       {r.votesUp}
                     </button>
                     <button
                       onClick={() => handleVote(r.id, "down")}
                       disabled={!uid || votingId !== null}
-                      className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
+                      className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
                         myVote === "down",
                         "down"
                       )}`}
                     >
-                      <IconChevronDown className="h-4 w-4" />
+                      <ThumbIcon direction="down" className="h-7 w-7" />
                       {r.votesDown}
                     </button>
                   </div>
