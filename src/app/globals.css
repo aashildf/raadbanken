@@ -1,26 +1,145 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --page-pad: 20px;
+
+  --page-bg: #f5f5f5;
+  --paper: #f6f0e3;
+  --paper-deep: #ede2c9;
+  --ink: #2c232e;
+  --ink-soft: #5c5063;
+
+  --logo-rad: #302732;
+  --logo-banken: #4a374f;
+  --navbar-bg: #f9f7eb;
+
+  --hero-bg: #e7dbf0;
+  --hero-bg-deep: #d8c3e8;
+
+  --plum-950: #160a22;
+  --plum-900: #20102f;
+  --plum-800: #321648;
+  --plum-700: #432065;
+  --plum-600: #5c2f86;
+  --lilac-400: #b07fe0;
+  --lilac-300: #cba5ec;
+
+  --gold: #c9a14a;
+  --gold-soft: #e2c98a;
+
+  --sage: #6f8f6c;
+  --rust: #b25a3f;
+
+  --background: var(--page-bg);
+  --foreground: var(--ink);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-pad: 40px;
+  }
 }
 
 @theme inline {
+  --color-page-bg: var(--page-bg);
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-logo-rad: var(--logo-rad);
+  --color-logo-banken: var(--logo-banken);
+  --color-navbar-bg: var(--navbar-bg);
+  --color-hero-bg: var(--hero-bg);
+  --color-hero-bg-deep: var(--hero-bg-deep);
+  --color-plum-950: var(--plum-950);
+  --color-plum-900: var(--plum-900);
+  --color-plum-800: var(--plum-800);
+  --color-plum-700: var(--plum-700);
+  --color-plum-600: var(--plum-600);
+  --color-lilac-400: var(--lilac-400);
+  --color-lilac-300: var(--lilac-300);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-sage: var(--sage);
+  --color-rust: var(--rust);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-bricolage);
+  --font-serif: var(--font-fraunces);
+  --font-logo: var(--font-ibarra);
+  --font-sans: var(--font-inter);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Inter, sans-serif;
+}
+
+::selection {
+  background: var(--lilac-400);
+  color: var(--plum-950);
+}
+
+.font-display {
+  font-family: var(--font-bricolage), sans-serif;
+}
+
+.font-serif-display {
+  font-family: var(--font-fraunces), serif;
+  font-optical-sizing: auto;
+}
+
+.font-logo {
+  font-family: var(--font-ibarra), serif;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.card-title {
+  font-family: var(--font-fraunces), serif;
+  font-optical-sizing: auto;
+  font-size: 34.4px;
+  line-height: 1.15;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .card-title {
+    font-size: 27px;
+  }
+}
+
+.texture-dots {
+  background-image: radial-gradient(circle, rgba(44, 35, 46, 0.1) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+.texture-dots-warm {
+  background-image: radial-gradient(circle, rgba(36, 21, 49, 0.05) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+}
+
+.hairline {
+  border: 1px solid rgba(36, 21, 49, 0.12);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
