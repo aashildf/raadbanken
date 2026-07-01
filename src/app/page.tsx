@@ -36,8 +36,8 @@ const NAV_RAD_SIZE = 32; // px, "Råd" når krympet i navbaren
 const HERO_RAD_MIN = 96;
 const HERO_RAD_MAX = 295.46;
 const LOGO_ICON_ASPECT = 162 / 138; // logo_r.png sitt bredde/høyde-forhold
-const NAV_ICON_HEIGHT_MIN = 32; // px, høyden på logo_r.png i navbaren på mobil
-const NAV_ICON_HEIGHT_MAX = 60; // px, høyden på logo_r.png i navbaren på desktop
+const NAV_ICON_HEIGHT_MIN = 44; // px, høyden på r_logo.svg i navbaren på mobil
+const NAV_ICON_HEIGHT_MAX = 62; // px, høyden på r_logo.svg i navbaren på desktop
 
 function clamp01(n: number) {
   return Math.min(1, Math.max(0, n));
@@ -283,9 +283,10 @@ export default function HomePage() {
   const bankenSize = navBankenSize + (heroBankenSize - navBankenSize) * (1 - progress);
 
   const heroLogoHeight = heroRadSize * 1.15 + heroBankenSize * 1.15 - heroRadSize * 0.22;
-  const heroCenterY = PILL_HEIGHT + 40 + heroLogoHeight / 2;
+  const heroLogoDisplayHeight = heroLogoHeight * 1.45;
+  const heroCenterY = PILL_HEIGHT + 40 + heroLogoDisplayHeight / 2;
   const logoOffsetY = (heroCenterY - PILL_CENTER) * (1 - progress);
-  const heroPaddingTop = PILL_HEIGHT + 40 + heroLogoHeight + 56;
+  const heroPaddingTop = PILL_HEIGHT + 40 + heroLogoDisplayHeight + 56;
 
   return (
     <div className="relative z-0 min-h-full bg-page-bg">
@@ -297,8 +298,8 @@ export default function HomePage() {
         className="pointer-events-none -z-20 object-cover"
       />
       <div
-        className="pointer-events-none absolute inset-x-0 mx-auto -z-10 max-w-6xl"
-        style={{ top: PILL_HEIGHT, bottom: 110, background: "rgba(163, 133, 160, 0.36)" }}
+        className="pointer-events-none absolute inset-x-5 sm:inset-x-0 mx-auto -z-10 max-w-6xl"
+        style={{ top: PILL_HEIGHT + 180, bottom: 110, background: "rgba(163, 133, 160, 0.36)" }}
       />
 
       {/* Sticky header, pill-formet navbar. Logoen lever her hele tiden og krymper/flytter seg med scroll-progresjon */}
@@ -324,38 +325,13 @@ export default function HomePage() {
             }}
           >
             <Image
-              src="/logo/logo_bg_only.png"
-              alt=""
-              aria-hidden
-              width={557}
-              height={452}
-              className="pointer-events-none absolute"
-              style={{
-                top: "50%",
-                left: "50%",
-                width: `${heroLogoHeight * 1.55}px`,
-                height: "auto",
-                transform: "translate(-50%, -50%)",
-                zIndex: -1,
-              }}
+              src="/logo/hele_logoen.svg"
+              alt="Rådbanken"
+              width={600}
+              height={400}
+              className="pointer-events-none"
+              style={{ height: `${heroLogoDisplayHeight}px`, width: "auto" }}
             />
-            <span
-              className="block"
-              style={{ fontSize: `${radSize}px`, letterSpacing: `${RAD_LETTER_SPACING_EM}em`, color: "var(--logo-rad)" }}
-            >
-              Råd
-            </span>
-            <span
-              className="block"
-              style={{
-                fontSize: `${bankenSize}px`,
-                letterSpacing: `${BANKEN_LETTER_SPACING_EM}em`,
-                color: "var(--logo-banken)",
-                marginTop: `${-radSize * 0.22}px`,
-              }}
-            >
-              banken
-            </span>
           </Link>
 
           <Link
@@ -372,11 +348,11 @@ export default function HomePage() {
             }}
           >
             <Image
-              src="/logo/logo_r.png"
+              src="/logo/r_logo.svg"
               alt="Rådbanken"
               width={162}
               height={138}
-              style={{ width: `${navIconHeight * LOGO_ICON_ASPECT}px`, height: `${navIconHeight}px` }}
+              style={{ height: `${navIconHeight}px`, width: "auto" }}
             />
           </Link>
 
@@ -389,8 +365,7 @@ export default function HomePage() {
                 className="flex items-center gap-2 px-4"
                 style={{
                   borderRadius: 20,
-                  border: "1px solid #8879A5",
-                  background: "rgba(215, 206, 220, 0.50)",
+                  background: "#FBF9FD",
                   height: 38,
                 }}
               >
@@ -401,7 +376,7 @@ export default function HomePage() {
                   onFocus={() => setHeaderFocused(true)}
                   onBlur={() => setHeaderFocused(false)}
                   placeholder="Søk etter en plage..."
-                  className="w-full bg-transparent font-sans text-sm text-ink placeholder:text-plum-800/70 focus:outline-none"
+                  className="w-full bg-transparent font-sans text-sm text-ink placeholder:text-ink-soft/70 focus:outline-none"
                 />
               </div>
 
@@ -449,7 +424,8 @@ export default function HomePage() {
             </div>
             <Link
               href="/del-rad"
-              className="font-logo text-base text-ink transition-opacity hover:opacity-70 sm:text-lg"
+              className="font-logo text-base transition-opacity hover:opacity-70 sm:text-lg"
+              style={{ color: "#FBF9FD" }}
             >
               Del råd
             </Link>
@@ -567,12 +543,17 @@ export default function HomePage() {
               const rankBg = [`var(--gold)`, `var(--plum-600)`, `var(--sage)`][i];
               return (
                 <Reveal key={r.id} delay={i * 80}>
-                  <div className="hairline relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl bg-paper pb-5 pt-14">
-                    <div
-                      className="absolute left-0 top-0 flex h-12 w-12 items-center justify-center rounded-br-2xl font-serif-display text-xl font-bold text-paper"
-                      style={{ background: rankBg }}
-                    >
-                      {i + 1}
+                  <div className="hairline relative flex h-full flex-col gap-3 rounded-2xl bg-paper pb-5 pt-20">
+                    <div className="absolute left-4 -top-4 flex h-24 w-24 items-center justify-center font-serif-display font-bold">
+                      <Image
+                        src="/logo/dandilion_emblem.svg"
+                        alt=""
+                        aria-hidden
+                        fill
+                        className="object-contain"
+                        style={{ filter: "drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25))" }}
+                      />
+                      <span className="relative z-10 text-4xl leading-none" style={{ color: "#3D2E3A" }}>{i + 1}</span>
                     </div>
                     <div className="flex items-center gap-2 px-5 text-xs uppercase tracking-wide text-plum-700">
                       {Icon && <Icon className="h-4 w-4" />}

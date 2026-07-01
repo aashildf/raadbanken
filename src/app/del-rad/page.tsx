@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
 import { addDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { useAnonAuth } from "@/lib/useAnonAuth";
@@ -105,8 +106,16 @@ function DelRadForm() {
   }
 
   return (
-    <main className="min-h-full bg-paper">
-      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-5 py-16">
+    <main className="relative min-h-full">
+      <Image
+        src="/bakgrunner/bg_purple.png"
+        alt=""
+        fill
+        style={{ objectFit: "cover" }}
+        priority
+        aria-hidden="true"
+      />
+      <div className="relative mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-5 py-16">
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
           &larr; Tilbake til Rådbanken
         </Link>
