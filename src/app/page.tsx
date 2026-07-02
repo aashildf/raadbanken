@@ -33,7 +33,7 @@ const BANKEN_RATIO = 107.255 / 295.46;
 const RAD_LETTER_SPACING_EM = -26.591 / 295.46;
 const BANKEN_LETTER_SPACING_EM = 5.363 / 107.255;
 const NAV_RAD_SIZE = 32; // px, "Råd" når krympet i navbaren
-const HERO_RAD_MIN = 96;
+const HERO_RAD_MIN = 76;
 const HERO_RAD_MAX = 295.46;
 const LOGO_ICON_ASPECT = 162 / 138; // logo_r.png sitt bredde/høyde-forhold
 const NAV_ICON_HEIGHT_MIN = 44; // px, høyden på r_logo.svg i navbaren på mobil
@@ -144,6 +144,7 @@ export default function HomePage() {
   const [headerQuery, setHeaderQuery] = useState("");
   const [headerFocused, setHeaderFocused] = useState(false);
   const [votingId, setVotingId] = useState<string | null>(null);
+  const heroSearchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "problems"), (snap) => {
@@ -271,7 +272,7 @@ export default function HomePage() {
   }
 
   // Responsiv hero-størrelse for "Råd" (96px–295.46px), "banken" skalerer med samme forhold
-  const heroRadSize = Math.min(HERO_RAD_MAX, Math.max(HERO_RAD_MIN, viewportWidth * 0.205));
+  const heroRadSize = Math.min(HERO_RAD_MAX, Math.max(HERO_RAD_MIN, viewportWidth * 0.10));
   const heroBankenSize = heroRadSize * BANKEN_RATIO;
   const navBankenSize = NAV_RAD_SIZE * BANKEN_RATIO;
   const navIconHeight = Math.min(
@@ -284,9 +285,9 @@ export default function HomePage() {
 
   const heroLogoHeight = heroRadSize * 1.15 + heroBankenSize * 1.15 - heroRadSize * 0.22;
   const heroLogoDisplayHeight = heroLogoHeight * 1.45;
-  const heroCenterY = PILL_HEIGHT + 40 + heroLogoDisplayHeight / 2;
+  const heroCenterY = PILL_HEIGHT + 80 + heroLogoDisplayHeight / 2;
   const logoOffsetY = (heroCenterY - PILL_CENTER) * (1 - progress);
-  const heroPaddingTop = PILL_HEIGHT + 40 + heroLogoDisplayHeight + 56;
+  const heroPaddingTop = PILL_HEIGHT + 80 + heroLogoDisplayHeight + (viewportWidth >= 640 ? 56 : 24);
 
   return (
     <div className="relative z-0 min-h-full bg-page-bg">
@@ -295,11 +296,12 @@ export default function HomePage() {
         alt=""
         aria-hidden
         fill
+        sizes="100vw"
         className="pointer-events-none -z-20 object-cover"
       />
       <div
-        className="pointer-events-none absolute inset-x-5 sm:inset-x-0 mx-auto -z-10 max-w-6xl"
-        style={{ top: PILL_HEIGHT + 180, bottom: 110, background: "rgba(163, 133, 160, 0.36)" }}
+        className="pointer-events-none absolute inset-x-0 mx-auto -z-10 max-w-5xl sm:rounded-[36px]"
+        style={{ top: viewportWidth >= 640 ? PILL_HEIGHT + 48 : 0, bottom: 110, background: "rgba(163, 133, 160, 0.36)" }}
       />
 
       {/* Sticky header, pill-formet navbar. Logoen lever her hele tiden og krymper/flytter seg med scroll-progresjon */}
@@ -309,7 +311,7 @@ export default function HomePage() {
           style={{ background: "var(--navbar-bg)" }}
         />
         <div
-          className="relative mx-auto h-full max-w-6xl"
+          className="relative mx-auto h-full max-w-5xl"
           style={{ paddingLeft: "var(--page-pad)", paddingRight: "var(--page-pad)" }}
         >
           <Link
@@ -330,7 +332,7 @@ export default function HomePage() {
               width={600}
               height={400}
               className="pointer-events-none"
-              style={{ height: `${heroLogoDisplayHeight}px`, width: "auto" }}
+              style={{ height: `${heroLogoDisplayHeight}px`, width: "auto", filter: "drop-shadow(0 6px 24px rgba(50, 22, 72, 0.45))" }}
             />
           </Link>
 
@@ -357,8 +359,8 @@ export default function HomePage() {
           </Link>
 
           <div
-            className="absolute flex items-center gap-5 sm:gap-7"
-            style={{ right: "var(--page-pad)", top: "50%", transform: "translateY(-50%)" }}
+            className="absolute inset-y-0 right-0 flex items-center gap-5 sm:gap-7"
+            style={{ paddingRight: "var(--page-pad)" }}
           >
             <div className="relative hidden md:block" style={{ width: 220 }}>
               <div
@@ -422,6 +424,13 @@ export default function HomePage() {
             <div className="hidden sm:block">
               <CategoryMenu problems={problems} compact align="right" />
             </div>
+            <button
+              aria-label="Søk"
+              onClick={() => { heroSearchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); heroSearchRef.current?.focus(); }}
+              className="flex items-center justify-center text-[#FBF9FD] transition-opacity hover:opacity-70 sm:hidden"
+            >
+              <IconSearch className="h-5 w-5" />
+            </button>
             <Link
               href="/del-rad"
               className="font-logo text-base transition-opacity hover:opacity-70 sm:text-lg"
@@ -438,24 +447,25 @@ export default function HomePage() {
         {/* HERO */}
         <section
           className="text-ink"
-          style={{ paddingTop: heroPaddingTop, paddingBottom: 72 }}
+          style={{ paddingTop: heroPaddingTop, paddingBottom: viewportWidth >= 640 ? 40 : 32 }}
         >
-          <div className="relative mx-auto max-w-6xl" style={{ paddingInline: "var(--page-pad)" }}>
+          <div className="relative mx-auto max-w-5xl" style={{ paddingInline: "var(--page-pad)" }}>
             <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
               Et oppslagsverk for gamle husråd
             </p>
-            <h1 className="font-serif-display mt-4 max-w-xl text-3xl italic leading-snug text-ink sm:text-4xl">
-              Det som funket for mormor, samlet på ett sted, og stemt fram av deg.
+            <h1 className="font-serif-display mt-2 max-w-lg text-xl italic leading-snug text-ink sm:text-2xl lg:text-3xl">
+              «Det som funket for mormor, samlet på ett sted, og stemt fram av deg.»
             </h1>
 
-            <div className="relative mx-auto mt-10 max-w-2xl">
+            <div className="relative mx-auto mt-4 max-w-2xl">
               <div
-                className="bg-paper shadow-xl shadow-plum-950/10"
+                className="bg-[#FBF9FD] shadow-xl shadow-plum-950/10"
                 style={{ borderRadius: 9999, border: "1px solid #8879A5" }}
               >
                 <div className="flex items-center gap-3 px-5 py-5">
                   <IconSearch className="h-5 w-5 shrink-0 text-plum-700" />
                   <input
+                    ref={heroSearchRef}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setSearchFocused(true)}
@@ -518,11 +528,12 @@ export default function HomePage() {
                 </div>
               )}
             </div>
+
           </div>
         </section>
 
         {/* FOLKETS FAVORITTER, topp 3 som store kort, 4-10 som kompakt liste */}
-        <section className="mx-auto max-w-6xl px-5 py-10 sm:py-12" style={{ paddingInline: "var(--page-pad)" }}>
+        <section className="mx-auto max-w-5xl px-5 pb-10 pt-6 sm:py-10" style={{ paddingInline: "var(--page-pad)" }}>
           <Reveal>
             <h2 className="font-display text-xl font-bold text-ink sm:text-2xl">Folkets favoritter</h2>
             <p className="mt-1 text-sm text-ink-soft">De 10 mest pålitelige kjerringrådene.</p>
@@ -534,116 +545,80 @@ export default function HomePage() {
             </p>
           )}
 
-          {/* Topp 3 */}
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3">
-            {topTen.slice(0, 3).map((r, i) => {
-              const problem = problemById.get(r.problemId);
-              const Icon = problem ? CATEGORY_ICON[problem.slug] : undefined;
-              const myVote = myVoteByRemedy.get(r.id);
-              const rankBg = [`var(--gold)`, `var(--plum-600)`, `var(--sage)`][i];
-              return (
-                <Reveal key={r.id} delay={i * 80}>
-                  <div className="hairline relative flex h-full flex-col gap-3 rounded-2xl bg-paper pb-5 pt-20">
-                    <div className="absolute left-4 -top-4 flex h-24 w-24 items-center justify-center font-serif-display font-bold">
-                      <Image
-                        src="/logo/dandilion_emblem.svg"
-                        alt=""
-                        aria-hidden
-                        fill
-                        className="object-contain"
-                        style={{ filter: "drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25))" }}
-                      />
-                      <span className="relative z-10 text-4xl leading-none" style={{ color: "#3D2E3A" }}>{i + 1}</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-5 text-xs uppercase tracking-wide text-plum-700">
-                      {Icon && <Icon className="h-4 w-4" />}
-                      {problem?.name}
-                    </div>
-                    <Link href={`/remedy/${r.id}`} className="px-5 text-lg leading-snug text-ink hover:text-plum-700">
-                      <strong className="font-semibold">{r.title}</strong>
-                    </Link>
-                    <p className="px-5 text-sm text-ink-soft line-clamp-3">{r.description}</p>
-                    <div className="mt-auto flex items-center justify-between gap-3 px-5 pt-2">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleVote(r.id, "up")}
-                          disabled={!uid || votingId !== null}
-                          className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
-                            myVote === "up",
-                            "up"
-                          )}`}
+          {/* Nr. 1–3: bilde-kort. Mobil: nr 1 full bredde, 2+3 side om side */}
+          {(() => {
+            const TOP3_IMAGES = [
+              { src: "/pictures/honey_F7EBE0.png", bg: "#F7EBE0" },
+              { src: "/pictures/ginger_EFEADF.png", bg: "#EFEADF" },
+              { src: "/pictures/lavendel_F4EBE4.png", bg: "#F4EBE4" },
+            ];
+            const badgeColor = ["var(--gold)", "var(--lilac-400)", "var(--plum-600)"];
+            return (
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                {topTen.slice(0, 3).map((r, i) => {
+                  const problem = problemById.get(r.problemId);
+                  const { src: imgSrc, bg: cardBg } = TOP3_IMAGES[i];
+                  return (
+                    <Reveal key={r.id} delay={i * 60} className={i === 0 ? "col-span-2 sm:col-span-1" : ""}>
+                      <Link
+                        href={`/remedy/${r.id}`}
+                        className="hairline group block h-full overflow-hidden rounded-2xl transition-transform hover:-translate-y-0.5"
+                        style={{ background: cardBg }}
+                      >
+                        <div
+                          className={`relative overflow-hidden ${i === 0 ? "aspect-[2/1]" : "aspect-square"} sm:aspect-[4/3]`}
                         >
-                          <ThumbIcon direction="up" className="h-6 w-6" />
-                          {r.votesUp}
-                        </button>
-                        <button
-                          onClick={() => handleVote(r.id, "down")}
-                          disabled={!uid || votingId !== null}
-                          className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
-                            myVote === "down",
-                            "down"
-                          )}`}
-                        >
-                          <ThumbIcon direction="down" className="h-6 w-6" />
-                          {r.votesDown}
-                        </button>
-                      </div>
-                      <span className="shrink-0 text-sm font-medium text-gold">{r.successRate}%</span>
-                    </div>
-                  </div>
-                </Reveal>
-              );
-            })}
-          </div>
+                          <Image
+                            src={imgSrc}
+                            alt=""
+                            fill
+                            sizes={i === 0 ? "(max-width:640px) 100vw, 33vw" : "(max-width:640px) 50vw, 33vw"}
+                            className="object-contain p-4 transition-transform duration-500 group-hover:scale-105 sm:p-6"
+                          />
+                          <span
+                            className="absolute left-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold text-white shadow"
+                            style={{ background: badgeColor[i] }}
+                          >
+                            {i + 1}
+                          </span>
+                        </div>
+                        <div className="p-3 sm:p-4" style={{ background: cardBg }}>
+                          <p className="text-[10px] font-semibold uppercase tracking-widest text-plum-700">{problem?.name}</p>
+                          <p className={`mt-0.5 font-bold leading-snug text-ink ${i === 0 ? "text-base" : "text-sm"} sm:text-base`}>
+                            {r.title}
+                          </p>
+                          <p className="mt-2 text-xs font-medium text-plum-700">Les mer →</p>
+                        </div>
+                      </Link>
+                    </Reveal>
+                  );
+                })}
+              </div>
+            );
+          })()}
 
-          {/* Plass 4–10 */}
+          {/* Nr. 4–10: ren lenkelist */}
           {topTen.length > 3 && (
-            <Reveal delay={120} className="hairline mt-5 divide-y divide-ink/10 overflow-hidden rounded-2xl">
-              {topTen.slice(3, 10).map((r, i) => {
+            <Reveal delay={180} className="hairline mt-3 overflow-hidden rounded-2xl bg-[#FBF8FE]">
+              {topTen.slice(3).map((r, i) => {
                 const problem = problemById.get(r.problemId);
                 const Icon = problem ? CATEGORY_ICON[problem.slug] : undefined;
-                const myVote = myVoteByRemedy.get(r.id);
-                const standout = r.successRate >= 90;
                 return (
-                  <div
+                  <Link
                     key={r.id}
-                    className={`flex items-center gap-3 px-5 py-3 sm:px-6 ${
-                      standout ? "bg-sage/10" : i % 2 === 1 ? "bg-paper-deep/30" : "bg-paper"
-                    }`}
+                    href={`/remedy/${r.id}`}
+                    className={`flex items-center gap-3 px-4 py-3 transition-colors hover:bg-plum-800/4 sm:px-5 ${i < topTen.length - 4 ? "border-b border-plum-800/8" : ""}`}
                   >
-                    <span className="font-serif-display w-6 shrink-0 text-right text-base text-gold">
-                      {i + 4}
+                    <span className="w-5 shrink-0 text-right text-xs font-bold text-plum-800/30">{i + 4}</span>
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-lilac-300/30">
+                      {Icon && <Icon className="h-3.5 w-3.5 text-plum-700" />}
                     </span>
-                    {Icon && <Icon className="h-4 w-4 shrink-0 text-plum-700" />}
-                    <Link href={`/remedy/${r.id}`} className="min-w-0 flex-1 truncate hover:text-plum-700">
-                      <strong className="font-semibold text-ink">{r.title}</strong>{" "}
-                      <span className="text-sm text-ink-soft">mot {problem?.name.toLowerCase()}</span>
-                    </Link>
-                    <div className="flex shrink-0 items-center gap-1.5">
-                      <button
-                        onClick={() => handleVote(r.id, "up")}
-                        disabled={!uid || votingId !== null}
-                        className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
-                          myVote === "up",
-                          "up"
-                        )}`}
-                      >
-                        <ThumbIcon direction="up" className="h-6 w-6" />
-                        {r.votesUp}
-                      </button>
-                      <button
-                        onClick={() => handleVote(r.id, "down")}
-                        disabled={!uid || votingId !== null}
-                        className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
-                          myVote === "down",
-                          "down"
-                        )}`}
-                      >
-                        <ThumbIcon direction="down" className="h-6 w-6" />
-                        {r.votesDown}
-                      </button>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-ink">{r.title}</p>
+                      <p className="truncate text-xs text-ink-soft">{problem?.name}</p>
                     </div>
-                  </div>
+                    <span className="text-sm text-plum-600/60">→</span>
+                  </Link>
                 );
               })}
             </Reveal>
@@ -659,7 +634,7 @@ export default function HomePage() {
             const myVote = myVoteByRemedy.get(r.id);
             const image = REMEDY_IMAGES[r.title];
             return (
-              <section className="mx-auto max-w-6xl px-5 py-10 sm:py-12" style={{ paddingInline: "var(--page-pad)" }}>
+              <section className="mx-auto max-w-5xl px-5 py-10 sm:py-12" style={{ paddingInline: "var(--page-pad)" }}>
                 <Reveal>
                   <div className="flex items-center gap-2">
                     <IconSparkle className="h-5 w-5 text-gold" />
@@ -678,12 +653,12 @@ export default function HomePage() {
                 >
                   <div className="flex items-start gap-4">
                     {image ? (
-                      <div className="hairline relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl sm:h-24 sm:w-24">
-                        <Image src={image.src} alt={r.title} fill className="object-cover" />
+                      <div className="hairline relative hidden h-20 w-20 shrink-0 overflow-hidden rounded-2xl sm:block sm:h-24 sm:w-24">
+                        <Image src={image.src} alt={r.title} fill sizes="96px" className="object-cover" />
                       </div>
                     ) : (
                       Icon && (
-                        <span className="hairline flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-paper-deep text-plum-700">
+                        <span className="hairline hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-paper-deep text-plum-700 sm:flex">
                           <Icon className="h-5 w-5" />
                         </span>
                       )
@@ -728,7 +703,7 @@ export default function HomePage() {
           })()}
 
         {/* I FOKUS: MEDISINPLANTER + HISTORIE */}
-        <section className="mx-auto max-w-6xl px-5 pb-20 sm:pb-28" style={{ paddingInline: "var(--page-pad)" }}>
+        <section className="mx-auto max-w-5xl px-5 pb-20 sm:pb-28" style={{ paddingInline: "var(--page-pad)" }}>
           <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-2">
             {/* Venstre: I fokus: medisinplanter */}
             <div className="flex h-full flex-col">
@@ -748,23 +723,21 @@ export default function HomePage() {
                   const FeaturedIcon = PLANT_ICON[featuredPlant.shape];
                   return (
                     <div className="hairline flex w-full flex-col overflow-hidden rounded-[2.5rem] bg-paper-deep/60 shadow-xl shadow-plum-950/5">
-                      <div className="flex flex-col gap-3 px-8 pb-3 pt-9 sm:px-10 sm:pt-11">
-                        <span className="hairline inline-flex h-11 w-11 items-center justify-center rounded-full bg-paper text-plum-700">
-                          <FeaturedIcon className="h-5 w-5" />
-                        </span>
-                        <p className="mt-2 text-xs uppercase tracking-[0.25em] text-ink-soft">
+                      <div className="flex flex-col gap-2 px-8 pb-3 pt-7 sm:px-10 sm:pt-9">
+                        <p className="text-xs uppercase tracking-[0.25em] text-ink-soft">
                           {featuredPlant.latinName}
                         </p>
                         <h3 className="card-title text-ink">{featuredPlant.name}</h3>
                         <p className="max-w-md text-ink-soft">{featuredPlant.description}</p>
                       </div>
 
-                      <div className="relative mt-6 aspect-square w-full" style={{ background: featuredPlant.bg }}>
+                      <div className="relative mt-5 aspect-[4/3] w-full" style={{ background: featuredPlant.bg }}>
                         {featuredPlant.image ? (
                           <Image
                             src={featuredPlant.image.src}
                             alt={featuredPlant.name}
                             fill
+                            sizes="(max-width: 1024px) 100vw, 50vw"
                             className={
                               featuredPlant.image.fit === "contain" ? "object-contain p-10" : "object-cover"
                             }
@@ -847,6 +820,7 @@ export default function HomePage() {
                       src="/pictures/urter_historie.png"
                       alt="En gammel tinkturflaske, merket for hånd, omgitt av blomster"
                       fill
+                      sizes="(max-width: 1024px) 100vw, 50vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
@@ -872,7 +846,7 @@ export default function HomePage() {
         </section>
 
         {/* ARTIKLER */}
-        <section className="mx-auto max-w-6xl px-5 pb-20 sm:pb-28" style={{ paddingInline: "var(--page-pad)" }}>
+        <section className="mx-auto max-w-5xl px-5 pb-20 sm:pb-28" style={{ paddingInline: "var(--page-pad)" }}>
           <Reveal>
             <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Lesestoff</p>
             <h2 className="font-display mt-2 text-2xl font-bold text-ink sm:text-3xl">Artikler</h2>
@@ -884,7 +858,7 @@ export default function HomePage() {
               className="hairline group flex flex-col gap-5 overflow-hidden rounded-[2.5rem] bg-paper-deep/60 p-3 shadow-xl shadow-plum-950/5 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:p-4"
             >
               <div className="relative aspect-5/4 overflow-hidden rounded-4xl sm:aspect-square sm:w-2/5 sm:shrink-0">
-                <Image src="/pictures/tyttebaer.png" alt="Tyttebær" fill className="object-cover" />
+                <Image src="/pictures/tyttebaer.png" alt="Tyttebær" fill sizes="(max-width: 640px) 100vw, 40vw" className="object-cover" />
               </div>
               <div className="flex flex-col gap-3 px-3 pb-4 sm:px-2 sm:pb-2">
                 <span className="font-serif-display text-xl italic text-ink">

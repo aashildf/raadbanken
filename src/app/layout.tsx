@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Fraunces, Ibarra_Real_Nova, Inter } from "next/font/google";
 import { DisclaimerGate } from "@/components/DisclaimerGate";
+import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -40,6 +41,7 @@ export default function RootLayout({
       className={`${bricolage.variable} ${fraunces.variable} ${ibarra.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <SiteHeader />
         {children}
         <DisclaimerGate />
       </body>

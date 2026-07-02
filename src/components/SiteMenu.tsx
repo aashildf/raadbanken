@@ -28,7 +28,7 @@ export function SiteMenu() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Meny"
-        className="flex items-center justify-center text-ink transition-opacity hover:opacity-70"
+        className="flex items-center justify-center text-[#FBF9FD] transition-opacity hover:opacity-70"
       >
         <IconMenu className="h-6 w-6 sm:h-7 sm:w-7" />
       </button>

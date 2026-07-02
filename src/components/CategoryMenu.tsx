@@ -34,7 +34,7 @@ export function CategoryMenu({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="font-logo flex items-center gap-1 text-base text-ink transition-opacity hover:opacity-70 sm:text-lg"
+        className="font-logo flex items-center gap-1 text-base text-[#FBF9FD] transition-opacity hover:opacity-70 sm:text-lg"
       >
         Kategorier
         <IconChevronDown

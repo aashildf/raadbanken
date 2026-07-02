@@ -36,7 +36,12 @@
 
 @media (min-width: 768px) {
   :root {
-    --page-pad: 40px;
+    --page-pad: 48px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --page-pad: 64px;
   }
 }
 

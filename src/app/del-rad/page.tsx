@@ -106,7 +106,7 @@ function DelRadForm() {
   }
 
   return (
-    <main className="relative min-h-full">
+    <main className="relative min-h-screen">
       <Image
         src="/bakgrunner/bg_purple.png"
         alt=""
@@ -116,17 +116,18 @@ function DelRadForm() {
         aria-hidden="true"
       />
       <div className="relative mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-5 py-16">
-        <Link href="/" className="text-sm text-ink-soft hover:text-ink">
-          &larr; Tilbake til Rådbanken
-        </Link>
-
-        <div>
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Del ditt råd</p>
-          <h1 className="font-serif-display mt-3 text-3xl text-ink">Hva har funket for deg?</h1>
-          <p className="mt-2 text-ink-soft">
-            Del et husråd eller kjerringråd andre kan prøve. Beskriv det som en erfaring, ikke en
-            medisinsk anbefaling.
-          </p>
+        <div className="hairline flex flex-col gap-3 rounded-2xl bg-paper/80 p-5 backdrop-blur-sm">
+          <Link href="/" className="text-sm text-ink-soft hover:text-ink">
+            &larr; Tilbake til Rådbanken
+          </Link>
+          <div>
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Del ditt råd</p>
+            <h1 className="font-serif-display mt-2 text-3xl text-ink">Hva har funket for deg?</h1>
+            <p className="mt-2 text-ink-soft">
+              Del et husråd eller kjerringråd andre kan prøve. Beskriv det som en erfaring, ikke en
+              medisinsk anbefaling.
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="hairline flex flex-col gap-5 rounded-2xl bg-white/40 p-6">
