@@ -4,7 +4,7 @@ function mentionsHoney(text: string) {
 
 export function RemedyDisclaimer({ text = "" }: { text?: string }) {
   return (
-    <div className="hairline rounded-xl bg-paper-deep/40 px-4 py-3 text-sm text-ink-soft">
+    <div className="hairline rounded-xl px-4 py-3 text-sm text-ink-soft" style={{ background: "#EDE4F5" }}>
       <p>
         <strong className="text-ink">Husk på: </strong> Dette rådet er ment som en naturlig hjelp på
         veien, ikke en medisinsk behandling. Lytt alltid til kroppen din: Blir du verre, eller

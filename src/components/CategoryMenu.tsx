@@ -51,6 +51,9 @@ export function CategoryMenu({
         >
           <div className="flex items-center justify-between">
             <span className="font-display text-sm font-bold text-ink">{helse?.name}</span>
+            <Link href="/alle" onClick={() => setOpen(false)} className="text-xs text-plum-700 hover:text-plum-800">
+              Se alle →
+            </Link>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-3">
             {HEALTH_SUBCATEGORIES.map((sub) => (

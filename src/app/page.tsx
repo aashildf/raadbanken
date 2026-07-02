@@ -14,7 +14,7 @@ import { MEDICINAL_PLANTS, plantOfTheMonth } from "@/lib/plants";
 import { REMEDY_IMAGES } from "@/lib/remedyImages";
 import { CategoryMenu } from "@/components/CategoryMenu";
 import { SiteMenu } from "@/components/SiteMenu";
-import { ThumbIcon } from "@/components/ThumbIcon";
+import { LottieVote } from "@/components/LottieVote";
 import type { Problem, Remedy, Vote } from "@/lib/types";
 import {
   CATEGORY_ICON,
@@ -124,12 +124,6 @@ function Reveal({
   );
 }
 
-function voteButtonClass(active: boolean, type: "up" | "down") {
-  if (!active) return "border-ink/15 bg-paper text-ink-soft hover:border-ink/30 hover:text-ink";
-  return type === "up"
-    ? "border-sage bg-sage/15 text-ink"
-    : "border-rust bg-rust/15 text-ink";
-}
 
 export default function HomePage() {
   const progress = useScrollProgress(SHRINK_DISTANCE);
@@ -332,7 +326,7 @@ export default function HomePage() {
               width={600}
               height={400}
               className="pointer-events-none"
-              style={{ height: `${heroLogoDisplayHeight}px`, width: "auto", filter: "drop-shadow(0 6px 24px rgba(50, 22, 72, 0.45))" }}
+              style={{ height: `${heroLogoDisplayHeight}px`, width: "auto" }}
             />
           </Link>
 
@@ -674,28 +668,20 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <button
+                    <LottieVote
+                      direction="up"
+                      count={r.votesUp}
+                      active={myVote === "up"}
+                      disabled={!uid || votingId !== null}
                       onClick={() => handleVote(r.id, "up")}
+                    />
+                    <LottieVote
+                      direction="down"
+                      count={r.votesDown}
+                      active={myVote === "down"}
                       disabled={!uid || votingId !== null}
-                      className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
-                        myVote === "up",
-                        "up"
-                      )}`}
-                    >
-                      <ThumbIcon direction="up" className="h-7 w-7" />
-                      {r.votesUp}
-                    </button>
-                    <button
                       onClick={() => handleVote(r.id, "down")}
-                      disabled={!uid || votingId !== null}
-                      className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-40 ${voteButtonClass(
-                        myVote === "down",
-                        "down"
-                      )}`}
-                    >
-                      <ThumbIcon direction="down" className="h-7 w-7" />
-                      {r.votesDown}
-                    </button>
+                    />
                   </div>
                 </Reveal>
               </section>

@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { useAnonAuth } from "@/lib/useAnonAuth";
 import { castVote } from "@/lib/votes";
@@ -18,6 +19,19 @@ import { RemedyDisclaimer } from "@/components/RemedyDisclaimer";
 import { ThumbIcon } from "@/components/ThumbIcon";
 import type { Remedy, Vote } from "@/lib/types";
 
+const BG = "/bakgrunner/rosa_bg.png";
+
+function Block({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`hairline rounded-2xl px-6 py-5 backdrop-blur-sm ${className}`}
+      style={{ background: "rgba(251, 248, 254, 0.88)" }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function RemedyDetailPage({
   params,
 }: {
@@ -25,8 +39,10 @@ export default function RemedyDetailPage({
 }) {
   const { remedyId } = use(params);
   const uid = useAnonAuth();
+  const router = useRouter();
 
   const [remedy, setRemedy] = useState<Remedy | null>(null);
+  const [problemName, setProblemName] = useState<string | null>(null);
   const [votes, setVotes] = useState<Vote[]>([]);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState<"up" | "down" | null>(null);
@@ -35,7 +51,11 @@ export default function RemedyDetailPage({
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "remedies", remedyId), (snap) => {
       if (snap.exists()) {
-        setRemedy({ id: snap.id, ...(snap.data() as Omit<Remedy, "id">) });
+        const r = { id: snap.id, ...(snap.data() as Omit<Remedy, "id">) };
+        setRemedy(r);
+        onSnapshot(doc(db, "problems", r.problemId), (pSnap) => {
+          if (pSnap.exists()) setProblemName((pSnap.data() as { name: string }).name);
+        });
       }
     });
     return unsub;
@@ -50,9 +70,7 @@ export default function RemedyDetailPage({
   }, [remedyId]);
 
   const details = remedy ? REMEDY_DETAILS[remedy.title] : undefined;
-
   const myVote = useMemo(() => votes.find((v) => v.userId === uid), [votes, uid]);
-
   const experiences = useMemo(
     () =>
       votes
@@ -75,131 +93,86 @@ export default function RemedyDetailPage({
     }
   }
 
-  if (!remedy) {
-    return (
-      <>
-        <div className="fixed inset-0 -z-10">
-          <Image
-            src="/bakgrunner/bg_remedy.png"
-            alt=""
-            fill
-            style={{ objectFit: "cover", transform: "scaleX(-1)" }}
-            priority
-            aria-hidden="true"
-          />
-        </div>
-        <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
-          <p className="text-sm text-zinc-500">Laster...</p>
-        </main>
-      </>
-    );
-  }
-
   return (
     <>
       <div className="fixed inset-0 -z-10">
-        <Image
-          src="/bakgrunner/bg_remedy.png"
-          alt=""
-          fill
-          style={{ objectFit: "cover", transform: "scaleX(-1)" }}
-          priority
-          aria-hidden="true"
-        />
+        <Image src={BG} alt="" fill style={{ objectFit: "cover" }} priority aria-hidden="true" />
       </div>
 
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
-        <Link href={`/problem/${remedy.problemId}`} className="text-sm text-zinc-500">
-          &larr; Tilbake
-        </Link>
+      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-4 px-5 py-8">
+        <div className="hairline inline-block self-start rounded-xl px-4 py-2 backdrop-blur-sm" style={{ background: "rgba(251,248,254,0.88)" }}>
+          <button onClick={() => router.back()} className="text-sm text-ink-soft hover:text-ink">
+            &larr; Tilbake
+          </button>
+        </div>
 
-        {/* Gradientpanel bak alle bokser – strekker seg fra over tittel til under siste boks */}
-        <div className="relative">
-          <div
-            className="absolute inset-0"
-            style={{
-              borderRadius: "50px",
-              background: "linear-gradient(180deg, #CCA355 0%, #FACFA2 100%)",
-            }}
-          />
+        {!remedy && <p className="text-sm text-ink-soft">Laster…</p>}
 
-          <div className="relative flex flex-col gap-4 py-4">
-            {/* Boks 1 – lysest: tittel + beskrivelse */}
-            <div
-              style={{ borderRadius: "30px", background: "rgba(245, 202, 153, 0.10)" }}
-              className="px-7 py-6"
-            >
-              <h1 className="text-2xl font-bold">{remedy.title}</h1>
+        {remedy && (
+          <>
+            {/* Tittel + beskrivelse */}
+            <Block>
+              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+                Kjerringråd{problemName ? ` mot ${problemName.toLowerCase()}` : ""}
+              </p>
+              <h1 className="font-serif-display mt-2 text-3xl text-ink">{remedy.title}</h1>
               {remedy.description && (
-                <p className="mt-3 text-zinc-700 leading-relaxed">{remedy.description}</p>
+                <p className="mt-3 leading-relaxed text-ink-soft">{remedy.description}</p>
               )}
-            </div>
+            </Block>
 
-            {/* Boks 2: stemmestatistikk – kompakt, bare tall */}
-            <div
-              style={{ borderRadius: "30px", background: "rgba(245, 202, 153, 0.22)" }}
-              className="flex items-center gap-3 px-6 py-3"
-            >
-              <span className="text-2xl font-bold text-emerald-600">
-                {remedy.totalVotes > 0 ? `${remedy.successRate}%` : "-"}
-              </span>
-              <span className="flex items-center gap-1 text-sm text-zinc-500">
-                <ThumbIcon direction="up" className="h-5 w-5" /> {remedy.votesUp}
-                <ThumbIcon direction="down" className="ml-2 h-5 w-5" /> {remedy.votesDown}
-                <span className="ml-1">({remedy.totalVotes} stemmer)</span>
-              </span>
-            </div>
-
-            {/* Boks 3: stemmeformular */}
-            <div
-              style={{ borderRadius: "30px", background: "rgba(245, 202, 153, 0.34)" }}
-              className="flex flex-col gap-3 px-6 py-5"
-            >
-              <span className="text-sm font-medium">
+            {/* Stemmeformular */}
+            <Block className="flex flex-col gap-4">
+              <span className="text-sm font-medium text-ink">
                 {myVote ? "Endre din stemme" : "Har du prøvd dette?"}
               </span>
+
+              {/* Tommelknapper øverst */}
+              <div className="flex justify-center gap-10">
+                {(["up", "down"] as const).map((dir) => (
+                  <div key={dir} className="flex flex-col items-center gap-2">
+                    <button
+                      onClick={() => handleVote(dir)}
+                      disabled={!uid || submitting !== null}
+                      className={`flex items-center justify-center rounded-full border-2 transition-all disabled:opacity-50 ${
+                        myVote?.voteType === dir
+                          ? dir === "up" ? "border-sage shadow-md" : "border-rust shadow-md"
+                          : "border-ink/15 hover:border-ink/30"
+                      }`}
+                      style={{ width: 72, height: 72, background: "#FBF8FE" }}
+                    >
+                      <ThumbIcon direction={dir} className="h-14 w-14" />
+                    </button>
+                    <span className="text-xs font-medium text-ink-soft">
+                      {dir === "up" ? "Fungerte" : "Fungerte ikke"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {remedy.totalVotes > 0 && (
+                <p className="text-center text-xs text-ink-soft">
+                  {remedy.votesUp} av {remedy.totalVotes} synes dette fungerte
+                </p>
+              )}
+
+              {/* Erfaringsfelt under */}
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Del din erfaring (valgfritt)"
                 rows={3}
-                className="rounded-lg border border-zinc-300 bg-white/60 px-3 py-2 text-sm"
+                className="rounded-lg border border-ink/15 px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-plum-600"
+                style={{ background: "#FBF8FE" }}
               />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleVote("up")}
-                  disabled={!uid || submitting !== null}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors disabled:opacity-50 ${
-                    myVote?.voteType === "up"
-                      ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600"
-                      : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                  }`}
-                >
-                  <ThumbIcon direction="up" className="h-6 w-6" /> Fungerte
-                </button>
-                <button
-                  onClick={() => handleVote("down")}
-                  disabled={!uid || submitting !== null}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors disabled:opacity-50 ${
-                    myVote?.voteType === "down"
-                      ? "bg-red-100 text-red-700 ring-1 ring-red-600"
-                      : "bg-red-50 text-red-700 hover:bg-red-100"
-                  }`}
-                >
-                  <ThumbIcon direction="down" className="h-6 w-6" /> Fungerte ikke
-                </button>
-              </div>
-              {error && <p className="text-sm text-red-600">{error}</p>}
-            </div>
+              {error && <p className="text-sm text-rust">{error}</p>}
+            </Block>
 
-            {/* Boks 4 (betinget): artikler – romslig for bilde + tekst */}
+            {/* Artikkelinnhold */}
             {details && (
-              <section
-                style={{ borderRadius: "30px", background: "rgba(245, 202, 153, 0.43)" }}
-                className="flex flex-col gap-4 px-6 py-6"
-              >
-                <h2 className="text-lg font-semibold">Artikler om dette rådet</h2>
-                <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-zinc-50">
+              <Block className="flex flex-col gap-4">
+                <h2 className="font-display text-lg font-semibold text-ink">Om dette rådet</h2>
+                <div className="relative aspect-4/3 overflow-hidden rounded-2xl" style={{ background: "#EDE4F5" }}>
                   <Image
                     src={details.drawing}
                     alt={`Illustrasjon: ${remedy.title}`}
@@ -208,30 +181,24 @@ export default function RemedyDetailPage({
                   />
                 </div>
                 {details.paragraphs.map((p, i) => (
-                  <p key={i} className="text-sm text-zinc-700 leading-relaxed">
+                  <p key={i} className="leading-relaxed text-ink-soft">
                     {p}
                   </p>
                 ))}
-              </section>
+              </Block>
             )}
 
-            {/* Boks 5 – mørkest: erfaringer + ansvarsfraskrivelse */}
-            <section
-              style={{ borderRadius: "30px", background: "rgba(245, 202, 153, 0.55)" }}
-              className="flex flex-col gap-3 px-6 py-5"
-            >
-              <h2 className="text-lg font-semibold">
+            {/* Erfaringer + ansvarsfraskrivelse */}
+            <Block className="flex flex-col gap-3">
+              <h2 className="font-display text-lg font-semibold text-ink">
                 Hva folk opplevde {experiences.length > 0 && `(${experiences.length})`}
               </h2>
               {experiences.length === 0 && (
-                <p className="text-sm text-zinc-500">Ingen har delt sin erfaring ennå.</p>
+                <p className="text-sm text-ink-soft">Ingen har delt sin erfaring ennå.</p>
               )}
               <ul className="flex flex-col gap-2">
                 {experiences.map((v) => (
-                  <li
-                    key={v.id}
-                    className="rounded-xl bg-white/30 px-4 py-3 text-sm text-zinc-700"
-                  >
+                  <li key={v.id} className="rounded-xl px-4 py-3 text-sm text-ink-soft" style={{ background: "#EDE4F5" }}>
                     <ThumbIcon
                       direction={v.voteType === "up" ? "up" : "down"}
                       className="mr-2 inline h-5 w-5 align-text-bottom"
@@ -243,10 +210,9 @@ export default function RemedyDetailPage({
               <RemedyDisclaimer
                 text={`${remedy.title} ${remedy.description} ${details?.paragraphs.join(" ") ?? ""}`}
               />
-            </section>
-          </div>
-        </div>
-
+            </Block>
+          </>
+        )}
       </main>
     </>
   );
