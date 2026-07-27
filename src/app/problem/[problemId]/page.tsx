@@ -3,6 +3,7 @@
 import { use, useEffect, useMemo, useState } from "react";
 import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import Link from "next/link";
+import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { useAnonAuth } from "@/lib/useAnonAuth";
 import { castVote } from "@/lib/votes";
@@ -72,85 +73,155 @@ export default function RemediesPage({
     try {
       await castVote(remedyId, uid, voteType, "");
     } catch {
-      // ignored: knappene går tilbake til normal tilstand, bruker kan prøve igjen
+      // ignored
     } finally {
       setVotingId(null);
     }
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
-      <div className="flex items-center justify-between gap-3">
-        <Link href="/" className="text-sm text-zinc-500">
-          &larr; Tilbake
-        </Link>
-        {problem && ACUTE_RISK_SLUGS.includes(problem.slug) && <EmergencyButton />}
-      </div>
-      <h1 className="text-2xl font-bold">
-        {problem ? `Råd mot ${problem.name.toLowerCase()}` : "Råd"}
-      </h1>
+    <main className="relative flex min-h-screen flex-col">
+      {/* Bakgrunn */}
+      <Image
+        src="/bakgrunner/beige_bg.png"
+        alt=""
+        fill
+        style={{ objectFit: "cover" }}
+        priority
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "rgba(210,195,168,0.4)" }}
+        aria-hidden="true"
+      />
+      {/* Gradient for lesbarhet på overskrift */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-72"
+        style={{ background: "linear-gradient(to bottom, rgba(238,223,196,0.72) 0%, transparent 100%)", zIndex: 1 }}
+        aria-hidden="true"
+      />
 
-      {loading && <p className="text-sm text-zinc-500">Laster...</p>}
-
-      <ul className="flex flex-col gap-2">
-        {rankedRemedies.map((r) => {
-          const myVote = myVoteByRemedy.get(r.id);
-          return (
-            <li
-              key={r.id}
-              className="flex flex-col gap-2 rounded-xl border border-zinc-200 px-4 py-3"
-            >
-              <Link href={`/remedy/${r.id}`} className="block hover:opacity-70">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-lg font-medium">{r.title}</span>
-                  <span className="shrink-0 text-sm font-semibold text-emerald-600">
-                    {r.totalVotes > 0 ? `${r.successRate}% positiv` : "Ingen stemmer"}
-                  </span>
-                </div>
-                <span className="text-xs text-zinc-500">{r.totalVotes} stemmer</span>
-              </Link>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleVote(r.id, "up")}
-                  disabled={!uid || votingId !== null}
-                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
-                    myVote === "up"
-                      ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600"
-                      : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                  }`}
-                >
-                  <ThumbIcon direction="up" className="h-6 w-6" />
-                  {r.votesUp}
-                </button>
-                <button
-                  onClick={() => handleVote(r.id, "down")}
-                  disabled={!uid || votingId !== null}
-                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
-                    myVote === "down"
-                      ? "bg-red-100 text-red-700 ring-1 ring-red-600"
-                      : "bg-red-50 text-red-700 hover:bg-red-100"
-                  }`}
-                >
-                  <ThumbIcon direction="down" className="h-6 w-6" />
-                  {r.votesDown}
-                </button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-
-      {!loading && remedies.length === 0 && (
-        <p className="text-sm text-zinc-500">Ingen råd registrert for denne plagen ennå.</p>
-      )}
-
-      <Link
-        href={`/problem/${problemId}/legg-til`}
-        className="mt-4 rounded-xl bg-zinc-900 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-zinc-700"
+      <div
+        className="relative mx-auto w-full max-w-2xl flex-1 py-8 sm:py-12"
+        style={{ paddingInline: "var(--page-pad)", zIndex: 2 }}
       >
-        + Legg til nytt råd
-      </Link>
+        {/* Toppraden */}
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <Link
+            href="/alle"
+            className="text-sm font-medium transition-opacity hover:opacity-70"
+            style={{ color: "#432065" }}
+          >
+            ← Alle kategorier
+          </Link>
+          {problem && ACUTE_RISK_SLUGS.includes(problem.slug) && <EmergencyButton />}
+        </div>
+
+        {/* Overskrift */}
+        <p
+          className="mt-4 font-display text-[10px] uppercase tracking-[0.3em] text-plum-800/70"
+          style={{ textShadow: "0 1px 6px rgba(238,223,196,0.9)" }}
+        >
+          Folkemedisin
+        </p>
+        <h1
+          className="font-serif-display mt-0.5 text-2xl text-ink sm:text-3xl"
+          style={{ textShadow: "0 1px 0 rgba(255,248,235,0.95), 0 2px 14px rgba(220,200,160,0.7)" }}
+        >
+          {problem ? `Råd mot ${problem.name.toLowerCase()}` : "Råd"}
+        </h1>
+
+        {loading && (
+          <p className="mt-8 text-sm text-ink/40">Laster råd…</p>
+        )}
+
+        {/* Råd-liste */}
+        <ul className="mt-4 flex flex-col gap-2">
+          {rankedRemedies.map((r) => {
+            const myVote = myVoteByRemedy.get(r.id);
+            return (
+              <li
+                key={r.id}
+                className="group relative overflow-hidden rounded-2xl"
+                style={{ background: "rgba(246,240,227,0.92)", border: "1px solid rgba(44,35,46,0.08)" }}
+              >
+                {/* Overlay-lenke — z-10, under knappene (z-20) men over bakgrunnen */}
+                <Link
+                  href={`/remedy/${r.id}`}
+                  className="absolute inset-0 z-10"
+                  aria-label={r.title}
+                />
+
+                <div className="relative flex items-center gap-3 px-4 py-3.5">
+                  {/* Venstre: tittel + les mer — pointer-events-none siden overlay tar klikk */}
+                  <div className="min-w-0 flex-1 pointer-events-none">
+                    <span className="block font-serif-display text-base leading-snug text-ink transition-colors group-hover:text-plum-700">
+                      {r.title}
+                    </span>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-xs font-medium text-plum-700 opacity-80">
+                        Les mer →
+                      </span>
+                      {r.totalVotes > 0 && (
+                        <span className="text-xs text-ink/35">
+                          {r.successRate}% positiv · {r.totalVotes} stemmer
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Høyre: tommelknapper — z-20, named groups så kun den hovrete ikonet skalerer */}
+                  <div className="relative z-20 flex shrink-0 items-center gap-2">
+                    <button
+                      onClick={() => handleVote(r.id, "up")}
+                      disabled={!uid || votingId !== null}
+                      className={`group/up flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all disabled:cursor-default disabled:opacity-40 ${myVote === "up" ? "scale-110" : ""}`}
+                      style={
+                        myVote === "up"
+                          ? { background: "rgba(255,255,255,0.95)", color: "#432065", boxShadow: "0 0 0 1.5px rgba(67,32,101,0.22)" }
+                          : { background: "rgba(255,255,255,0.70)", color: "rgba(44,35,46,0.55)" }
+                      }
+                    >
+                      <span className={`transition-transform duration-150 ${myVote === "up" ? "scale-110" : "group-hover/up:scale-125"}`}>
+                        <ThumbIcon direction="up" className="h-6 w-6" />
+                      </span>
+                      <span>{r.votesUp}</span>
+                    </button>
+                    <button
+                      onClick={() => handleVote(r.id, "down")}
+                      disabled={!uid || votingId !== null}
+                      className={`group/dn flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all disabled:cursor-default disabled:opacity-40 ${myVote === "down" ? "scale-110" : ""}`}
+                      style={
+                        myVote === "down"
+                          ? { background: "rgba(255,255,255,0.95)", color: "#432065", boxShadow: "0 0 0 1.5px rgba(67,32,101,0.22)" }
+                          : { background: "rgba(255,255,255,0.70)", color: "rgba(44,35,46,0.55)" }
+                      }
+                    >
+                      <span className={`transition-transform duration-150 ${myVote === "down" ? "scale-110" : "group-hover/dn:scale-125"}`}>
+                        <ThumbIcon direction="down" className="h-6 w-6" />
+                      </span>
+                      <span>{r.votesDown}</span>
+                    </button>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        {!loading && remedies.length === 0 && (
+          <p className="mt-8 text-sm text-ink/50">Ingen råd registrert for denne plagen ennå.</p>
+        )}
+
+        <Link
+          href={`/problem/${problemId}/legg-til`}
+          className="mt-6 block rounded-2xl px-5 py-3.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-85"
+          style={{ background: "#432065" }}
+        >
+          + Legg til nytt råd
+        </Link>
+      </div>
     </main>
   );
 }

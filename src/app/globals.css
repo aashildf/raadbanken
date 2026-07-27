@@ -44,6 +44,16 @@
     --page-pad: 64px;
   }
 }
+@media (min-width: 1280px) {
+  :root {
+    --page-pad: 80px;
+  }
+}
+@media (min-width: 1536px) {
+  :root {
+    --page-pad: 100px;
+  }
+}
 
 @theme inline {
   --color-page-bg: var(--page-bg);

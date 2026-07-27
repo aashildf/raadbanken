@@ -23,25 +23,9 @@ import {
   PLANT_ICON,
 } from "@/components/icons";
 
-const PILL_HEIGHT = 68; // px, høyden på navbaren
-const PILL_CENTER = PILL_HEIGHT / 2;
-const SHRINK_DISTANCE = 260; // px scrollet for at krympingen skal være fullført
-
-// "Råd" / "banken", forholdet mellom de to linjene og deres letter-spacing,
-// hentet fra design-spec (295.46px / 107.255px, -26.591px / 5.363px)
-const BANKEN_RATIO = 107.255 / 295.46;
-const RAD_LETTER_SPACING_EM = -26.591 / 295.46;
-const BANKEN_LETTER_SPACING_EM = 5.363 / 107.255;
-const NAV_RAD_SIZE = 32; // px, "Råd" når krympet i navbaren
-const HERO_RAD_MIN = 76;
-const HERO_RAD_MAX = 295.46;
-const LOGO_ICON_ASPECT = 162 / 138; // logo_r.png sitt bredde/høyde-forhold
-const NAV_ICON_HEIGHT_MIN = 44; // px, høyden på r_logo.svg i navbaren på mobil
-const NAV_ICON_HEIGHT_MAX = 62; // px, høyden på r_logo.svg i navbaren på desktop
-
-function clamp01(n: number) {
-  return Math.min(1, Math.max(0, n));
-}
+const PILL_HEIGHT = 68;
+const NAV_ICON_HEIGHT_MIN = 44;
+const NAV_ICON_HEIGHT_MAX = 62;
 
 function useViewportWidth() {
   const [width, setWidth] = useState(1440);
@@ -64,26 +48,6 @@ function useViewportWidth() {
   return width;
 }
 
-function useScrollProgress(distance: number) {
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    function onScroll() {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        setProgress(clamp01(window.scrollY / distance));
-        raf = 0;
-      });
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [distance]);
-  return progress;
-}
 
 function Reveal({
   children,
@@ -126,7 +90,6 @@ function Reveal({
 
 
 export default function HomePage() {
-  const progress = useScrollProgress(SHRINK_DISTANCE);
   const viewportWidth = useViewportWidth();
   const uid = useAnonAuth();
 
@@ -265,23 +228,10 @@ export default function HomePage() {
     }
   }
 
-  // Responsiv hero-størrelse for "Råd" (96px–295.46px), "banken" skalerer med samme forhold
-  const heroRadSize = Math.min(HERO_RAD_MAX, Math.max(HERO_RAD_MIN, viewportWidth * 0.10));
-  const heroBankenSize = heroRadSize * BANKEN_RATIO;
-  const navBankenSize = NAV_RAD_SIZE * BANKEN_RATIO;
   const navIconHeight = Math.min(
     NAV_ICON_HEIGHT_MAX,
     Math.max(NAV_ICON_HEIGHT_MIN, viewportWidth * 0.045)
   );
-
-  const radSize = NAV_RAD_SIZE + (heroRadSize - NAV_RAD_SIZE) * (1 - progress);
-  const bankenSize = navBankenSize + (heroBankenSize - navBankenSize) * (1 - progress);
-
-  const heroLogoHeight = heroRadSize * 1.15 + heroBankenSize * 1.15 - heroRadSize * 0.22;
-  const heroLogoDisplayHeight = heroLogoHeight * 1.45;
-  const heroCenterY = PILL_HEIGHT + 80 + heroLogoDisplayHeight / 2;
-  const logoOffsetY = (heroCenterY - PILL_CENTER) * (1 - progress);
-  const heroPaddingTop = PILL_HEIGHT + 80 + heroLogoDisplayHeight + (viewportWidth >= 640 ? 56 : 24);
 
   return (
     <div className="relative z-0 min-h-full bg-page-bg">
@@ -295,87 +245,67 @@ export default function HomePage() {
       />
       <div
         className="pointer-events-none absolute inset-x-0 mx-auto -z-10 max-w-5xl sm:rounded-[36px]"
-        style={{ top: viewportWidth >= 640 ? PILL_HEIGHT + 48 : 0, bottom: 110, background: "rgba(163, 133, 160, 0.36)" }}
+        style={{ top: viewportWidth >= 640 ? PILL_HEIGHT + 48 : 0, bottom: 0, background: "rgba(163, 133, 160, 0.36)" }}
       />
 
       {/* Sticky header, pill-formet navbar. Logoen lever her hele tiden og krymper/flytter seg med scroll-progresjon */}
       <header className="fixed inset-x-0 top-0 z-50 overflow-visible" style={{ height: PILL_HEIGHT }}>
         <div
           className="absolute inset-0"
-          style={{ background: "var(--navbar-bg)" }}
+          style={{
+            background: "rgba(255,255,255,0.58)",
+            backdropFilter: "saturate(180%) blur(20px)",
+            WebkitBackdropFilter: "saturate(180%) blur(20px)",
+            borderBottom: "1px solid rgba(50,22,72,0.08)",
+          }}
         />
-        <div
-          className="relative mx-auto h-full max-w-5xl"
-          style={{ paddingLeft: "var(--page-pad)", paddingRight: "var(--page-pad)" }}
-        >
-          <Link
-            href="/"
-            className="font-logo absolute"
-            style={{
-              left: "var(--page-pad)",
-              top: "50%",
-              transform: `translateY(calc(-50% + ${logoOffsetY}px))`,
-              opacity: 1 - progress,
-              zIndex: 1,
-              pointerEvents: progress > 0.5 ? "none" : "auto",
-            }}
-          >
-            <Image
-              src="/logo/hele_logoen.svg"
-              alt="Rådbanken"
-              width={600}
-              height={400}
-              className="pointer-events-none"
-              style={{ height: `${heroLogoDisplayHeight}px`, width: "auto" }}
-            />
-          </Link>
 
+        <div
+          className="relative h-full"
+          style={{ paddingInline: "var(--page-pad)" }}
+        >
+          {/* LEFT: logo */}
           <Link
             href="/"
             aria-label="Rådbanken"
             className="absolute"
-            style={{
-              left: "var(--page-pad)",
-              top: "50%",
-              transform: "translateY(-50%)",
-              opacity: progress,
-              zIndex: 1,
-              pointerEvents: progress > 0.5 ? "auto" : "none",
-            }}
+            style={{ left: "var(--page-pad)", top: "50%", transform: "translateY(-50%)", zIndex: 1 }}
           >
             <Image
-              src="/logo/r_logo.svg"
+              src="/logo/dandelionsircle.png"
               alt="Rådbanken"
-              width={162}
-              height={138}
+              width={842}
+              height={968}
               style={{ height: `${navIconHeight}px`, width: "auto" }}
             />
           </Link>
 
+          {/* CENTER: søkefelt (kun desktop) */}
           <div
-            className="absolute inset-y-0 right-0 flex items-center gap-5 sm:gap-7"
-            style={{ paddingRight: "var(--page-pad)" }}
+            className="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block"
+            style={{ width: 300 }}
           >
-            <div className="relative hidden md:block" style={{ width: 220 }}>
+            <div className="relative">
               <div
                 className="flex items-center gap-2 px-4"
                 style={{
-                  borderRadius: 20,
-                  background: "#FBF9FD",
                   height: 38,
+                  borderRadius: 20,
+                  background: "rgba(61,46,58,0.07)",
+                  border: "1px solid rgba(61,46,58,0.10)",
                 }}
               >
-                <IconSearch className="h-4 w-4 shrink-0 text-plum-800" />
+                <IconSearch className="h-4 w-4 shrink-0 text-[#3D2E3A]" />
                 <input
                   value={headerQuery}
                   onChange={(e) => setHeaderQuery(e.target.value)}
                   onFocus={() => setHeaderFocused(true)}
                   onBlur={() => setHeaderFocused(false)}
-                  placeholder="Søk etter en plage..."
-                  className="w-full bg-transparent font-sans text-sm text-ink placeholder:text-ink-soft/70 focus:outline-none"
+                  placeholder="Søk råd"
+                  className="w-full bg-transparent font-sans text-sm focus:outline-none"
+                  style={{ color: "#3D2E3A" }}
                 />
               </div>
-
               {headerFocused && headerQuery.trim() && (
                 <div className="hairline absolute inset-x-0 top-[calc(100%+8px)] z-10 overflow-hidden rounded-2xl bg-paper shadow-2xl">
                   {headerSearchResults.length > 0 ? (
@@ -395,7 +325,6 @@ export default function HomePage() {
                   ) : (
                     <div className="px-4 py-3">
                       <p className="text-sm text-ink-soft">Fant ingen treff på «{headerQuery.trim()}».</p>
-
                       {headerFuzzySuggestions.length > 0 && (
                         <ul className="mt-2 flex flex-wrap gap-2">
                           {headerFuzzySuggestions.map((s) => (
@@ -415,24 +344,33 @@ export default function HomePage() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* RIGHT: aksjoner */}
+          <div
+            className="absolute inset-y-0 right-0 flex items-center gap-4 sm:gap-6"
+            style={{ paddingRight: "var(--page-pad)" }}
+          >
             <div className="hidden sm:block">
-              <CategoryMenu problems={problems} compact align="right" />
+              <CategoryMenu problems={problems} compact align="right" textColor="#3D2E3A" />
             </div>
-            <button
-              aria-label="Søk"
-              onClick={() => { heroSearchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); heroSearchRef.current?.focus(); }}
-              className="flex items-center justify-center text-[#FBF9FD] transition-opacity hover:opacity-70 sm:hidden"
-            >
-              <IconSearch className="h-5 w-5" />
-            </button>
             <Link
               href="/del-rad"
-              className="font-logo text-base transition-opacity hover:opacity-70 sm:text-lg"
-              style={{ color: "#FBF9FD" }}
+              className="font-logo hidden text-base transition-opacity hover:opacity-70 sm:block sm:text-lg"
+              style={{ color: "#3D2E3A" }}
             >
               Del råd
             </Link>
-            <SiteMenu />
+            {/* Mobil søk-ikon */}
+            <button
+              aria-label="Søk"
+              onClick={() => { heroSearchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); heroSearchRef.current?.focus(); }}
+              className="flex items-center justify-center transition-opacity hover:opacity-70 md:hidden"
+              style={{ color: "#3D2E3A" }}
+            >
+              <IconSearch className="h-5 w-5" />
+            </button>
+            <SiteMenu textColor="#3D2E3A" />
           </div>
         </div>
       </header>
@@ -441,23 +379,56 @@ export default function HomePage() {
         {/* HERO */}
         <section
           className="text-ink"
-          style={{ paddingTop: heroPaddingTop, paddingBottom: viewportWidth >= 640 ? 40 : 32 }}
+          style={{ paddingTop: PILL_HEIGHT + 48, paddingBottom: viewportWidth >= 640 ? 40 : 32 }}
         >
-          <div className="relative mx-auto max-w-5xl" style={{ paddingInline: "var(--page-pad)" }}>
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
-              Et oppslagsverk for gamle husråd
-            </p>
-            <h1 className="font-serif-display mt-2 max-w-lg text-xl italic leading-snug text-ink sm:text-2xl lg:text-3xl">
-              «Det som funket for mormor, samlet på ett sted, og stemt fram av deg.»
+          <div
+            className="relative mx-auto max-w-5xl"
+            style={{ paddingInline: "var(--page-pad)" }}
+          >
+            {/* Logo + bilde rad */}
+            <div className="relative mb-5 flex items-start justify-between sm:mb-8">
+              {/* Logo + eyebrow */}
+              <div className="relative z-10 shrink-0">
+                <Image
+                  src="/logo/radbankenlogo2.png"
+                  alt="Rådbanken"
+                  width={499}
+                  height={455}
+                  className="h-auto w-48 sm:w-64 lg:w-72"
+                  priority
+                  style={{ filter: "drop-shadow(0 6px 28px rgba(50,22,72,0.20))" }}
+                />
+                <p className="ml-3 mt-2 text-xs uppercase tracking-[0.12em]" style={{ fontFamily: "var(--font-kantumruy)", color: "var(--logo-banken)" }}>
+                  Et oppslagsverk for gamle husråd
+                </p>
+              </div>
+              {/* Bilde — forskjøvet ned, flyr naturlig mot høyre */}
+              <div className="mt-12 sm:mt-16" style={{ width: "min(42%, 360px)" }}>
+                <Image
+                  src="/pictures/urter_historie.png"
+                  alt="Gammel tinkturflaske med blomster og urter"
+                  width={1073}
+                  height={716}
+                  className="w-full rounded-2xl"
+                  style={{ opacity: 0.82 }}
+                  priority
+                />
+              </div>
+            </div>
+
+            <h1 className="ml-3 mt-2 max-w-lg text-lg leading-snug text-plum-700 sm:text-xl" style={{ fontFamily: "var(--font-ibarra)", fontStyle: "italic", fontWeight: 400 }}>
+              «Det som funket for mormor,<br />
+              samlet på ett sted,<br />
+              og stemt fram av deg.»
             </h1>
 
-            <div className="relative mx-auto mt-4 max-w-2xl">
+            <div className="relative mx-auto mt-8 max-w-2xl">
               <div
-                className="bg-[#FBF9FD] shadow-xl shadow-plum-950/10"
-                style={{ borderRadius: 9999, border: "1px solid #8879A5" }}
+                className="bg-white/80 shadow-sm shadow-plum-950/8"
+                style={{ borderRadius: 9999, border: "1px solid rgba(50,22,72,0.13)" }}
               >
-                <div className="flex items-center gap-3 px-5 py-5">
-                  <IconSearch className="h-5 w-5 shrink-0 text-plum-700" />
+                <div className="flex items-center gap-3 px-5 py-3">
+                  <IconSearch className="h-4 w-4 shrink-0 text-ink/40" />
                   <input
                     ref={heroSearchRef}
                     value={searchQuery}
@@ -522,7 +493,6 @@ export default function HomePage() {
                 </div>
               )}
             </div>
-
           </div>
         </section>
 

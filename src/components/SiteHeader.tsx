@@ -47,18 +47,24 @@ export function SiteHeader() {
   return (
     <header
       className="sticky top-0 z-50"
-      style={{ height: HEIGHT, background: "var(--navbar-bg)" }}
+      style={{
+        height: HEIGHT,
+        background: "rgba(255,255,255,0.58)",
+        backdropFilter: "saturate(180%) blur(20px)",
+        WebkitBackdropFilter: "saturate(180%) blur(20px)",
+        borderBottom: "1px solid rgba(50,22,72,0.08)",
+      }}
     >
       <div
-        className="relative mx-auto flex h-full max-w-5xl items-center justify-between gap-3"
+        className="relative flex h-full items-center justify-between gap-3"
         style={{ paddingInline: "var(--page-pad)" }}
       >
         <Link href="/" aria-label="Rådbanken" className="shrink-0">
           <Image
-            src="/logo/r_logo.svg"
+            src="/logo/dandelionsircle.png"
             alt="Rådbanken"
-            width={162}
-            height={138}
+            width={842}
+            height={968}
             className="h-10 w-auto sm:h-12"
           />
         </Link>
@@ -71,37 +77,36 @@ export function SiteHeader() {
         >
           <div
             className="flex w-full items-center gap-2 px-3"
-            style={{ background: "rgba(251,249,253,0.18)", borderRadius: 9999, height: 38, border: "1px solid rgba(251,249,253,0.25)" }}
+            style={{ background: "rgba(61,46,58,0.07)", borderRadius: 9999, height: 38, border: "1px solid rgba(61,46,58,0.10)" }}
           >
-            <IconSearch className="h-4 w-4 shrink-0 text-[#FBF9FD]" />
+            <IconSearch className="h-4 w-4 shrink-0 text-[#3D2E3A]" />
             <input
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onBlur={() => { if (!query) setSearchOpen(false); }}
-              placeholder="Søk på en plage…"
-              className="w-full bg-transparent text-sm text-[#FBF9FD] placeholder:text-[#FBF9FD]/60 focus:outline-none"
+              placeholder="Søk råd"
+              className="w-full bg-transparent text-sm text-[#3D2E3A] placeholder:text-[#3D2E3A]/50 focus:outline-none"
             />
           </div>
         </form>
 
         <div className="flex shrink-0 items-center gap-4 sm:gap-7">
-          {/* Forstørrelseglass-knapp synlig på mobil når søk er lukket */}
           <button
             aria-label="Søk"
             onClick={() => setSearchOpen(true)}
-            className={`text-[#FBF9FD] transition-opacity hover:opacity-70 sm:hidden ${searchOpen ? "hidden" : ""}`}
+            className={`text-[#3D2E3A] transition-opacity hover:opacity-70 sm:hidden ${searchOpen ? "hidden" : ""}`}
           >
             <IconSearch className="h-5 w-5" />
           </button>
 
           <div className="hidden sm:flex sm:items-center sm:gap-7">
-            <CategoryMenu problems={problems} compact />
+            <CategoryMenu problems={problems} compact textColor="#3D2E3A" />
           </div>
           <div className="sm:hidden">
-            <CategoryMenu problems={problems} compact />
+            <CategoryMenu problems={problems} compact textColor="#3D2E3A" />
           </div>
-          <SiteMenu />
+          <SiteMenu textColor="#3D2E3A" />
         </div>
       </div>
     </header>

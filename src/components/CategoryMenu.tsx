@@ -2,89 +2,113 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { HEALTH_SUBCATEGORIES, TOP_CATEGORIES } from "@/lib/categories";
+import { HEALTH_SUBCATEGORIES } from "@/lib/categories";
 import { CATEGORY_ICON, IconChevronDown } from "@/components/icons";
 import type { Problem } from "@/lib/types";
 
 export function CategoryMenu({
   problems,
-  compact = false,
+  compact: _compact = false,
   align = "left",
+  textColor = "#FBF9FD",
 }: {
   problems: Problem[];
   compact?: boolean;
   align?: "left" | "right";
+  textColor?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setExpandedId(null);
+      }
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  const problemBySlug = new Map(problems.map((p) => [p.slug, p]));
-  const helse = TOP_CATEGORIES.find((c) => c.id === "helse");
-  const husholdning = TOP_CATEGORIES.find((c) => c.id === "husholdning");
+  const bySlug = new Map(problems.map((p) => [p.slug, p]));
+
+  function close() {
+    setOpen(false);
+    setExpandedId(null);
+  }
 
   return (
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="font-logo flex items-center gap-1 text-base text-[#FBF9FD] transition-opacity hover:opacity-70 sm:text-lg"
+        className="font-logo flex items-center gap-1 text-base transition-opacity hover:opacity-70 sm:text-lg"
+        style={{ color: textColor }}
       >
         Kategorier
-        <IconChevronDown
-          className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <IconChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
         <div
-          className={`hairline z-20 w-[min(90vw,520px)] overflow-hidden rounded-2xl bg-paper p-5 shadow-2xl ${
-            compact ? "fixed" : `absolute top-[calc(100%+8px)] ${align === "right" ? "right-0" : "left-0"}`
+          className={`hairline absolute top-[calc(100%+8px)] z-20 overflow-hidden rounded-2xl bg-paper shadow-xl ${
+            align === "right" ? "right-0" : "left-0"
           }`}
-          style={compact ? { position: "fixed", top: "76px", right: "var(--page-pad)" } : undefined}
+          style={{ minWidth: 220 }}
         >
-          <div className="flex items-center justify-between">
-            <span className="font-display text-sm font-bold text-ink">{helse?.name}</span>
-            <Link href="/alle" onClick={() => setOpen(false)} className="text-xs text-plum-700 hover:text-plum-800">
-              Se alle →
-            </Link>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-3">
-            {HEALTH_SUBCATEGORIES.map((sub) => (
+          {HEALTH_SUBCATEGORIES.map((sub) => {
+            const isExpanded = expandedId === sub.id;
+            const subProblems = sub.problemSlugs
+              .map((s) => bySlug.get(s))
+              .filter(Boolean) as Problem[];
+
+            return (
               <div key={sub.id}>
-                <p className="text-xs font-medium uppercase tracking-wide text-plum-700">{sub.name}</p>
-                <ul className="mt-2 flex flex-col gap-1.5">
-                  {sub.problemSlugs.map((slug) => {
-                    const p = problemBySlug.get(slug);
-                    if (!p) return null;
-                    const Icon = CATEGORY_ICON[slug];
-                    return (
-                      <li key={slug}>
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : sub.id)}
+                  className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
+                    isExpanded
+                      ? "bg-paper-deep font-semibold text-plum-700"
+                      : "text-ink hover:bg-paper-deep/60 hover:text-plum-700"
+                  }`}
+                >
+                  {sub.name}
+                  <IconChevronDown
+                    className={`ml-4 h-3 w-3 shrink-0 opacity-50 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {isExpanded && subProblems.length > 0 && (
+                  <div className="bg-paper-deep/40 pb-1 pt-0.5">
+                    {subProblems.map((p) => {
+                      const Icon = CATEGORY_ICON[p.slug];
+                      return (
                         <Link
+                          key={p.id}
                           href={`/problem/${p.id}`}
-                          onClick={() => setOpen(false)}
-                          className="flex items-center gap-1.5 text-sm text-ink hover:text-plum-700"
+                          onClick={close}
+                          className="flex items-center gap-2.5 px-5 py-2 text-sm text-ink/80 transition-colors hover:text-plum-700"
                         >
-                          {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
+                          {Icon && (
+                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-lilac-300/30">
+                              <Icon className="h-3 w-3 text-plum-700" />
+                            </span>
+                          )}
                           {p.name}
                         </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })}
 
-          <div className="mt-5 flex items-center justify-between border-t border-ink/10 pt-4">
-            <span className="text-sm font-medium text-ink-soft">{husholdning?.name}</span>
-            <span className="text-xs uppercase tracking-wide text-ink-soft/70">Kommer snart</span>
+          <div className="border-t border-ink/10 px-4 py-2.5">
+            <Link href="/alle" onClick={close} className="text-xs font-medium text-plum-700 hover:text-plum-800">
+              Se alle kategorier →
+            </Link>
           </div>
         </div>
       )}
