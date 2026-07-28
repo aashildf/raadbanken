@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Fraunces, Ibarra_Real_Nova, Inter, Kantumruy_Pro } from "next/font/google";
+import { Bricolage_Grotesque, Courier_Prime, Fraunces, Ibarra_Real_Nova, Inter, Kantumruy_Pro } from "next/font/google";
 import { DisclaimerGate } from "@/components/DisclaimerGate";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
@@ -27,6 +27,13 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const courierPrime = Courier_Prime({
+  variable: "--font-courier",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+});
+
 const kantumruy = Kantumruy_Pro({
   variable: "--font-kantumruy",
   subsets: ["latin"],
@@ -46,7 +53,7 @@ export default function RootLayout({
   return (
     <html
       lang="nb"
-      className={`${bricolage.variable} ${fraunces.variable} ${ibarra.variable} ${inter.variable} ${kantumruy.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${courierPrime.variable} ${fraunces.variable} ${ibarra.variable} ${inter.variable} ${kantumruy.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SiteHeader />

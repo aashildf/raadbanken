@@ -159,6 +159,29 @@ body {
   }
 }
 
+@keyframes seed-drift-a {
+  0%   { transform: translate(0, 0) rotate(0deg);       opacity: 0; }
+  10%  { opacity: 0.22; }
+  88%  { opacity: 0.18; }
+  100% { transform: translate(30px, -150px) rotate(50deg);  opacity: 0; }
+}
+@keyframes seed-drift-b {
+  0%   { transform: translate(0, 0) rotate(0deg);       opacity: 0; }
+  10%  { opacity: 0.17; }
+  88%  { opacity: 0.14; }
+  100% { transform: translate(-28px, -130px) rotate(-44deg); opacity: 0; }
+}
+@keyframes seed-drift-c {
+  0%   { transform: translate(0, 0) rotate(0deg);       opacity: 0; }
+  10%  { opacity: 0.24; }
+  88%  { opacity: 0.20; }
+  100% { transform: translate(14px, -140px) rotate(65deg);  opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-seed] { display: none; }
+}
+
 @keyframes thumb-pop {
   0%   { transform: scale(1); }
   35%  { transform: scale(1.5) rotate(-12deg); }

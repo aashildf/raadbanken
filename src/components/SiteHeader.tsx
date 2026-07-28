@@ -61,7 +61,7 @@ export function SiteHeader() {
       >
         <Link href="/" aria-label="Rådbanken" className="shrink-0">
           <Image
-            src="/logo/dandelionsircle.png"
+            src="/ikoner/heroicon2.png"
             alt="Rådbanken"
             width={842}
             height={968}
