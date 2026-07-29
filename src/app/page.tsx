@@ -411,8 +411,17 @@ export default function HomePage() {
             className="relative z-10 mx-auto max-w-5xl"
             style={{ paddingInline: "var(--page-pad)" }}
           >
-            {/* Glassfelt over herotekst */}
-            <div style={{ borderRadius: 60, background: "rgba(254,225,225,0.17)", padding: "40px 72px 36px" }}>
+            {/* Glassfelt over herotekst — bryter ut av max-w-5xl-containeren og skalerer flytende med skjermbredden */}
+            <div className="relative left-1/2 w-screen -translate-x-1/2">
+              <div
+                className="mx-auto"
+                style={{
+                  width: "min(94vw, 1400px)",
+                  borderRadius: 60,
+                  background: "rgba(254,225,225,0.17)",
+                  padding: "40px 72px 36px",
+                }}
+              >
             {/* Logo + sitat */}
             <div className="relative mb-5 flex flex-col items-center sm:mb-8">
               {/* Logo + eyebrow */}
@@ -459,6 +468,7 @@ export default function HomePage() {
                 </h1>
               </div>
             </div>
+              </div>
             </div>{/* slutt glassfelt */}
 
             <div className="relative mx-auto mt-14 max-w-2xl">
@@ -891,31 +901,58 @@ export default function HomePage() {
             <h2 className="font-display mt-2 text-2xl font-bold text-ink sm:text-3xl">Artikler</h2>
           </Reveal>
 
-          <Reveal delay={80} className="mt-5">
-            <Link
-              href="/artikkel/tyttebaer"
-              className="group flex flex-col gap-5 overflow-hidden rounded-[2.5rem] bg-[#FCFAF7] p-3 shadow-lg shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:p-4"
-            >
-              <div className="relative aspect-5/4 overflow-hidden rounded-4xl sm:aspect-square sm:w-2/5 sm:shrink-0">
-                <Image src="/pictures/tyttebaer.png" alt="Tyttebær" fill sizes="(max-width: 640px) 100vw, 40vw" className="object-cover" />
-              </div>
-              <div className="flex flex-col gap-3 px-3 pb-4 sm:px-2 sm:pb-2">
-                <span className="font-serif-display text-xl italic text-ink">
-                  Naturens egen hostesaft
-                </span>
-                <p className="text-ink-soft">
-                  Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du
-                  bruker det riktig.
-                </p>
-                <span className="flex items-center gap-2 text-sm font-medium text-plum-700">
-                  Les artikkelen
-                  <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                    →
+          <div className="mt-5 flex flex-col gap-4">
+            <Reveal delay={80}>
+              <Link
+                href="/artikkel/tyttebaer"
+                className="group flex flex-col gap-5 overflow-hidden rounded-[2.5rem] bg-[#FCFAF7] p-3 shadow-lg shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:p-4"
+              >
+                <div className="relative aspect-5/4 overflow-hidden rounded-4xl sm:aspect-square sm:w-2/5 sm:shrink-0">
+                  <Image src="/pictures/tyttebaer.png" alt="Tyttebær" fill sizes="(max-width: 640px) 100vw, 40vw" className="object-cover" />
+                </div>
+                <div className="flex flex-col gap-3 px-3 pb-4 sm:px-2 sm:pb-2">
+                  <span className="font-serif-display text-xl italic text-ink">
+                    Naturens egen hostesaft
                   </span>
-                </span>
-              </div>
-            </Link>
-          </Reveal>
+                  <p className="text-ink-soft">
+                    Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du
+                    bruker det riktig.
+                  </p>
+                  <span className="flex items-center gap-2 text-sm font-medium text-plum-700">
+                    Les artikkelen
+                    <span aria-hidden className="transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
+                  </span>
+                </div>
+              </Link>
+            </Reveal>
+
+            <Reveal delay={140}>
+              <Link
+                href="/artikkel/fiken"
+                className="group flex flex-col gap-5 overflow-hidden rounded-[2.5rem] bg-[#FCFAF7] p-3 shadow-lg shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:p-4"
+              >
+                <div className="relative aspect-5/4 overflow-hidden rounded-4xl sm:aspect-square sm:w-2/5 sm:shrink-0">
+                  <Image src="/pictures/fiken.png" alt="Fiken" fill sizes="(max-width: 640px) 100vw, 40vw" className="object-cover" />
+                </div>
+                <div className="flex flex-col gap-3 px-3 pb-4 sm:px-2 sm:pb-2">
+                  <span className="font-serif-display text-xl italic text-ink">
+                    Fikens mange helsefordeler
+                  </span>
+                  <p className="text-ink-soft">
+                    Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.
+                  </p>
+                  <span className="flex items-center gap-2 text-sm font-medium text-plum-700">
+                    Les artikkelen
+                    <span aria-hidden className="transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
+                  </span>
+                </div>
+              </Link>
+            </Reveal>
+          </div>
         </section>
       </main>
     </div>

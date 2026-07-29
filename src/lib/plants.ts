@@ -15,6 +15,62 @@ export type Plant = {
 
 export const MEDICINAL_PLANTS: Plant[] = [
   {
+    id: "lovetann",
+    name: "Løvetann",
+    latinName: "Taraxacum officinale",
+    description:
+      "Gul solblomst som vokser overalt. Blader, blomster og rot er alle brukt tradisjonelt, i te, salat og som mildt vanndrivende middel.",
+    shape: "flower",
+    bg: "var(--gold)",
+    image: { src: "/pictures/lovetann.png", fit: "cover" },
+    sections: [
+      {
+        heading: "Om planten",
+        body: "Løvetann (Taraxacum officinale) har en lang historie innen folkemedisinen og brukes primært for å støtte fordøyelsen, stimulere leveren og virke urindrivende. Mens tradisjonell bruk er utbredt, påpeker Norsk Helseinformatikk (NHI) at de fleste helseeffektene er basert på erfaring og laboratoriestudier, og i mindre grad på omfattende kliniske studier på mennesker. Her er de mest kjente medisinske og helsemessige egenskapene fordelt på plantens ulike deler:",
+      },
+      {
+        heading: "1. Urindrivende effekt (bladene)",
+        list: [
+          "Naturlig vanndrivende: Løvetannblad har en dokumentert kraftig urindrivende effekt som øker utskillelsen av væske fra kroppen.",
+          "Kaliumrik: I motsetning til mange konvensjonelle vanndrivende medisiner som tømmer kroppen for kalium, inneholder løvetann naturlig store mengder kalium. Dette veier opp for tapet gjennom urinen.",
+          "Bruk: Brukes tradisjonelt mot milde væskeansamlinger (hovne bein) og for å skylle gjennom urinveiene.",
+        ],
+      },
+      {
+        heading: "2. Fordøyelse og leverfunksjon (roten)",
+        list: [
+          "Galle- og leverstimulerende: Bitterstoffene i løvetannroten stimulerer magesyresekresjonen, fremmer appetitten og øker frigjøringen av galle fra leveren og galleblæren. Dette hjelper kroppen med å bryte ned fett.",
+          "Prebiotika (inulin): Røttene er spesielt rike på inulin, et prebiotisk fiber som gir næring til de gode tarmbakteriene og støtter en sunn tarmflora.",
+          "Bruk: Løvetann-te eller tinkturer av løvetannrot brukes ofte mot forstoppelse, treg fordøyelse og oppblåsthet.",
+        ],
+      },
+      {
+        heading: "3. Antiinflammatorisk og antioksidant effekt",
+        list: [
+          "Cellebeskyttelse: Planten er full av sterke antioksidanter som beta-karoten, polyfenoler og flavonoider. Disse bidrar til å nøytralisere frie radikaler og dempe milde betennelsestilstander i kroppen.",
+          "Blodsukker og kolesterol: Prekliniske studier (laboratorie- og dyrestudier) antyder at bioaktive forbindelser i løvetann kan bidra til å regulere blodsukkernivået og forbedre lipidprofilen (kolesterolet).",
+        ],
+      },
+      {
+        heading: "Oversikt: bruk av de ulike plantedelene",
+        list: [
+          "Blader — urindrivende, kaliumrik. Brukes som te, ferskpresset juice eller i salater, mot væskeansamlinger og lett høyt blodtrykk.",
+          "Rot — fordøyelses- og leverstimulerende, prebiotisk. Brukes som avkok, tinktur eller tørket pulver, mot forstoppelse, oppblåsthet og for å støtte leveren.",
+          "Blomst — antioksidantrik. Brukes i sirup, te eller oljeekstrakter, for generell immunstøtte og hudpleie.",
+        ],
+      },
+      {
+        heading: "Viktige forholdsregler og bivirkninger",
+        body: "Selv om løvetann regnes som trygt i vanlige matmengder, bør du være oppmerksom på følgende ved medisinsk bruk:",
+        list: [
+          "Allergier: Personer som er allergiske mot planter i kurvplantefamilien (som krysantemum, regnfann, kamille eller burot), kan også reagere på løvetann.",
+          "Galleveissykdommer: Siden løvetann stimulerer galleproduksjonen, skal den ikke brukes ved tette galleveier eller akutt galleblærebetennelse uten samråd med lege.",
+          "Medisininteraksjoner: Plantens vanndrivende effekt kan påvirke effekten av reseptbelagte medisiner som litium eller andre vanndrivende midler. Den kan også teoretisk påvirke blodsukkersenkende og blodfortynnende medisiner.",
+        ],
+      },
+    ],
+  },
+  {
     id: "ingefaer",
     name: "Ingefær",
     latinName: "Zingiber officinale",

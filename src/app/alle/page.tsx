@@ -62,8 +62,16 @@ export default function AllePage() {
         className="relative mx-auto w-full max-w-2xl flex-1 py-8 sm:py-12"
         style={{ paddingInline: "var(--page-pad)", zIndex: 2 }}
       >
+        <Link
+          href="/"
+          className="text-sm text-ink-soft hover:text-ink"
+          style={{ textShadow: "0 1px 6px rgba(238,223,196,0.9)" }}
+        >
+          &larr; Tilbake til Rådbanken
+        </Link>
+
         <p
-          className="font-display text-[10px] uppercase tracking-[0.3em] text-plum-800/70"
+          className="font-display mt-4 text-[10px] uppercase tracking-[0.3em] text-plum-800/70"
           style={{ textShadow: "0 1px 6px rgba(238,223,196,0.9)" }}
         >
           Rådbanken

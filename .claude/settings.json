@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(npx --yes playwright screenshot --viewport-size=1280,1000 --full-page http://localhost:3000/ 'C:\\\\Users\\\\ashil/AppData/Local/Temp/claude/c--prosjekter-kjerringrad-web/6831ae7f-b8a7-45ef-9a8b-014b04dba609/scratchpad/home_full3.png')",
+      "Bash(node 'C:\\\\Users\\\\ashil/AppData/Local/Temp/claude/c--prosjekter-kjerringrad-web/6831ae7f-b8a7-45ef-9a8b-014b04dba609/scratchpad/shot.mjs' 'C:\\\\Users\\\\ashil/AppData/Local/Temp/claude/c--prosjekter-kjerringrad-web/6831ae7f-b8a7-45ef-9a8b-014b04dba609/scratchpad/home_full4.png')",
+      "Bash(npm root *)",
+      "Read(//c/Users/ashil/AppData/Local/npm-cache/_npx/**)"
+    ]
+  }
+}
