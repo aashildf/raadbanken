@@ -43,3 +43,8 @@ service-account.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local AI-agent config/instructions (not meant to be public)
+.claude/
+AGENTS.md
+CLAUDE.md
