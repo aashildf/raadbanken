@@ -48,3 +48,7 @@ next-env.d.ts
 .claude/
 AGENTS.md
 CLAUDE.md
+
+# local AI-agent skill tooling (installed per-machine, not project code)
+.agents/
+skills-lock.json
