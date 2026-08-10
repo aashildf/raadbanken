@@ -43,6 +43,13 @@ function DelRadForm() {
     return unsub;
   }, []);
 
+  // Underkategoriene hører til én hovedkategori hver (topCategoryId), slik at valg av
+  // hovedkategori faktisk filtrerer hvilke underkategorier som vises under.
+  const subcategoriesForTopCategory = useMemo(
+    () => HEALTH_SUBCATEGORIES.filter((s) => s.topCategoryId === topCategory),
+    [topCategory]
+  );
+
   const subcategory = useMemo(
     () => HEALTH_SUBCATEGORIES.find((s) => s.id === subcategoryId),
     [subcategoryId]
@@ -135,7 +142,15 @@ function DelRadForm() {
             <span className="text-sm font-medium text-ink">Hovedkategori</span>
             <select
               value={topCategory}
-              onChange={(e) => setTopCategory(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value;
+                setTopCategory(next);
+                // Underkategorien må høre til den nye hovedkategorien — hopp til den første
+                // underkategorien der, ellers ville valget peke på feil kategoris plager.
+                const firstSub = HEALTH_SUBCATEGORIES.find((s) => s.topCategoryId === next);
+                setSubcategoryId(firstSub?.id ?? ANNET);
+                setSelectedProblemId("");
+              }}
               className="rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-plum-600"
             >
               {TOP_CATEGORIES.map((c) => (
@@ -155,7 +170,7 @@ function DelRadForm() {
                 onChange={(e) => setSubcategoryId(e.target.value)}
                 className="rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-plum-600"
               >
-                {HEALTH_SUBCATEGORIES.map((s) => (
+                {subcategoriesForTopCategory.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>

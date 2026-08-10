@@ -61,10 +61,10 @@ export function SiteHeader() {
       >
         <Link href="/" aria-label="Rådbanken" className="shrink-0">
           <Image
-            src="/ikoner/heroicon2.png"
+            src="/logo/r_nylogo.png"
             alt="Rådbanken"
-            width={842}
-            height={968}
+            width={624}
+            height={748}
             className="h-10 w-auto sm:h-12"
           />
         </Link>
@@ -106,7 +106,7 @@ export function SiteHeader() {
           <div className="sm:hidden">
             <CategoryMenu problems={problems} compact textColor="#3D2E3A" />
           </div>
-          <SiteMenu textColor="#3D2E3A" />
+          <SiteMenu />
         </div>
       </div>
     </header>

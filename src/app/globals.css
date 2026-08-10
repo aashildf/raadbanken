@@ -112,6 +112,12 @@ body {
   line-height: normal;
 }
 
+.font-metrophobic {
+  font-family: var(--font-metrophobic), sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+}
+
 .card-title {
   font-family: var(--font-fraunces), serif;
   font-optical-sizing: auto;

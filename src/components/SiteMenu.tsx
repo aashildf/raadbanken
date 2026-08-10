@@ -13,8 +13,8 @@ import {
   limit as fsLimit,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { HEALTH_SUBCATEGORIES } from "@/lib/categories";
-import { CATEGORY_ICON, IconChevronDown, IconMenu, IconSearch } from "@/components/icons";
+import { HEALTH_SUBCATEGORIES, TOP_CATEGORIES } from "@/lib/categories";
+import { IconChevronDown, IconMenu, IconSearch } from "@/components/icons";
 import type { Problem, Remedy } from "@/lib/types";
 
 const SEEDS: { left: string; top: string; rotate: string }[] = [
@@ -23,13 +23,13 @@ const SEEDS: { left: string; top: string; rotate: string }[] = [
   { left: "88%", top: "62%", rotate: "40deg"  },
 ];
 
-const NAV_LINKS = [
-  { href: "/del-rad",        label: "Send inn råd" },
-  { href: "/medisinplanter", label: "Medisinplanter" },
-  { href: "/historie",       label: "Plantemedisinens historie" },
+const MENU_CARDS = [
+  { href: "/#artikler",      label: "Artikler",                    image: "/pictures/artikler_hjerte.png" },
+  { href: "/medisinplanter", label: "Medisinplanter",               image: "/pictures/solhattmeny.png" },
+  { href: "/historie",       label: "Plantemedisinens historie",    image: "/pictures/blomsterdamen.png" },
 ];
 
-export function SiteMenu({ textColor = "#FBF9FD" }: { textColor?: string }) {
+export function SiteMenu() {
   const [open, setOpen]             = useState(false);
   const [visible, setVisible]       = useState(false);
   const [mounted, setMounted]       = useState(false);
@@ -86,12 +86,12 @@ export function SiteMenu({ textColor = "#FBF9FD" }: { textColor?: string }) {
               }}
             />
 
-            {/* Panel — max 60vh, no scroll */}
+            {/* Panel */}
             <div
-              className="fixed left-0 right-0 top-0 z-50 overflow-hidden"
+              className="fixed left-0 right-0 top-0 z-50 flex flex-col overflow-hidden"
               style={{
-                maxHeight: "60vh",
-                background: "#ECEBEE",
+                maxHeight: "88vh",
+                background: "#F9F7E8",
                 borderBottomLeftRadius: 28,
                 borderBottomRightRadius: 28,
                 boxShadow: "0 8px 40px rgba(50,22,72,0.11), 0 2px 6px rgba(50,22,72,0.05)",
@@ -99,6 +99,147 @@ export function SiteMenu({ textColor = "#FBF9FD" }: { textColor?: string }) {
                 transition: "transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
               }}
             >
+              {/* Topplinje: søk og send-inn-råd — tydelig og midtstilt */}
+              <div className="relative z-10 shrink-0" style={{ background: "#F9F7E8" }}>
+                <div className="pb-3 pt-3" style={{ paddingInline: "max(28px, 6vw)" }}>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={closeMenu}
+                      aria-label="Lukk meny"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl font-bold text-ink shadow-md transition-transform hover:scale-105"
+                      style={{ background: "#FFFFFF" }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Søk råd + Send inn råd — store og midtstilte */}
+                  <div className="mx-auto mt-2 flex w-full max-w-2xl flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
+                    <form onSubmit={handleSearch} className="flex-1">
+                      <div
+                        className="flex h-full items-center gap-3 px-4"
+                        style={{
+                          height: 52,
+                          background: "rgba(255,255,255,0.75)",
+                          borderRadius: 14,
+                          border: "1px solid rgba(50,22,72,0.10)",
+                        }}
+                      >
+                        <IconSearch className="h-5 w-5 shrink-0 text-ink/40" />
+                        <input
+                          value={searchQ}
+                          onChange={(e) => setSearchQ(e.target.value)}
+                          placeholder="Søk etter råd…"
+                          className="w-full bg-transparent text-base text-ink placeholder:text-ink/40 focus:outline-none"
+                        />
+                      </div>
+                    </form>
+                    <Link
+                      href="/del-rad"
+                      onClick={closeMenu}
+                      className="flex shrink-0 items-center justify-center gap-2 rounded-[14px] px-6 text-base font-semibold text-paper transition-opacity hover:opacity-90"
+                      style={{ height: 52, background: "#72874E" }}
+                    >
+                      Send inn råd
+                      <span aria-hidden>→</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hovedinnhold: kategorier (bredere) / nav-kort (smalere) */}
+              <div className="relative z-10 flex min-h-0 flex-1 flex-col sm:flex-row">
+                <div
+                  className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-4 pb-8 sm:flex-row sm:items-start sm:gap-4 sm:overflow-visible"
+                  style={{ paddingLeft: "max(28px, 6vw)", paddingRight: "max(48px, 7vw)" }}
+                >
+                  {/* Kategorier — bredere enn de tre kortene */}
+                  <div
+                    className="relative z-10 min-h-0 w-full shrink-0 pl-2 sm:w-0 sm:flex-[1.6] sm:overflow-y-auto sm:pl-4"
+                  >
+                    <p className="font-display mb-2 text-xl font-bold sm:text-2xl" style={{ color: "#576557" }}>
+                      Kategorier
+                    </p>
+                    {/* Bare de tre hovedkategoriene vises her — klikk (eller hover på desktop)
+                        åpner underkategoriene for den. Unngår at listen blir superlang, som den
+                        ble da den viste alle 20 underkategoriene flatt. */}
+                    <div className="overflow-hidden rounded-xl border border-ink/8 bg-white/40">
+                      {TOP_CATEGORIES.map((cat, i) => {
+                        const isExpanded = expandedId === cat.id;
+                        const subs = HEALTH_SUBCATEGORIES.filter((s) => s.topCategoryId === cat.id);
+                        return (
+                          <div
+                            key={cat.id}
+                            className={i > 0 ? "border-t border-ink/8" : ""}
+                            onMouseEnter={() => setExpandedId(cat.id)}
+                          >
+                            <button
+                              onClick={() => setExpandedId(isExpanded ? null : cat.id)}
+                              className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
+                                isExpanded
+                                  ? "bg-white/60 font-semibold text-plum-700"
+                                  : "text-ink/80 hover:bg-white/50 hover:text-ink"
+                              }`}
+                            >
+                              {cat.name}
+                              <IconChevronDown
+                                className={`ml-4 h-3 w-3 shrink-0 opacity-40 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                              />
+                            </button>
+                            {isExpanded && subs.length > 0 && (
+                              <div className="bg-white/25 pb-1 pt-0.5">
+                                {subs.map((sub) => {
+                                  const firstProblem = sub.problemSlugs
+                                    .map((s) => bySlug.get(s))
+                                    .find(Boolean);
+                                  return (
+                                    <Link
+                                      key={sub.id}
+                                      href={firstProblem ? `/problem/${firstProblem.id}` : "/alle"}
+                                      onClick={closeMenu}
+                                      className="block px-5 py-2 text-sm text-ink/70 transition-colors hover:text-plum-700"
+                                    >
+                                      {sub.name}
+                                    </Link>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Artikler / Medisinplanter / Plantemedisinens historie */}
+                  {MENU_CARDS.map((card) => (
+                    <Link
+                      key={card.href}
+                      href={card.href}
+                      onClick={closeMenu}
+                      className="group flex w-full shrink-0 flex-col overflow-hidden rounded-2xl shadow-sm shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:w-0 sm:flex-1"
+                      style={{ background: "rgba(255,255,255,0.55)" }}
+                    >
+                      {/* Fast aspect-ratio (ikke sm:flex-1 mot en strukket rad) — kortet skal ha
+                          egen, stabil høyde uavhengig av hvor mye Kategorier-listen ved siden av
+                          har ekspandert seg til. */}
+                      <div className="relative aspect-square w-full overflow-hidden">
+                        <Image
+                          src={card.image}
+                          alt=""
+                          fill
+                          sizes="(max-width: 640px) 100vw, 200px"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="px-3 py-2.5 text-center">
+                        <span className="text-sm font-semibold leading-snug text-ink">{card.label}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
               {/* Dandelion bg */}
               <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 <Image
@@ -107,7 +248,7 @@ export function SiteMenu({ textColor = "#FBF9FD" }: { textColor?: string }) {
                   width={320}
                   height={320}
                   className="absolute right-[-4%] top-[-10%] select-none"
-                  style={{ width: "38vw", maxWidth: 260, opacity: 0.2 }}
+                  style={{ width: "38vw", maxWidth: 260, opacity: 0.15 }}
                   aria-hidden="true"
                 />
                 {SEEDS.map((s, i) => (
@@ -118,135 +259,10 @@ export function SiteMenu({ textColor = "#FBF9FD" }: { textColor?: string }) {
                     width={36}
                     height={36}
                     className="absolute select-none"
-                    style={{ left: s.left, top: s.top, width: 30, opacity: 0.2, transform: `rotate(${s.rotate})` }}
+                    style={{ left: s.left, top: s.top, width: 30, opacity: 0.15, transform: `rotate(${s.rotate})` }}
                     aria-hidden="true"
                   />
                 ))}
-              </div>
-
-              {/* Content — responsiv sidemargin */}
-              <div className="relative z-10">
-
-                {/* Header — hvit overlay, full bredde */}
-                <div style={{ background: "rgba(255,255,255,0.25)" }}>
-                  <div className="pb-4 pt-6" style={{ paddingInline: "max(28px, 8vw)" }}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src="/logo/dandelionsircle.png"
-                          alt="Rådbanken"
-                          width={842}
-                          height={968}
-                          className="h-11 w-auto"
-                        />
-                        <p className="font-logo text-sm" style={{ color: "rgba(50,22,72,0.5)", fontStyle: "italic" }}>
-                          "Kunnskap samlet gjennom generasjoner"
-                        </p>
-                      </div>
-                      <button
-                        onClick={closeMenu}
-                        aria-label="Lukk meny"
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base font-medium text-ink/70 transition-colors hover:text-ink"
-                        style={{ background: "rgba(255,255,255,0.55)" }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    {/* Search */}
-                    <form onSubmit={handleSearch} className="mt-4">
-                      <div
-                        className="flex items-center gap-2.5 px-3.5"
-                        style={{
-                          height: 44,
-                          maxWidth: 340,
-                          background: "rgba(255,255,255,0.65)",
-                          borderRadius: 12,
-                          border: "1px solid rgba(50,22,72,0.08)",
-                        }}
-                      >
-                        <IconSearch className="h-4 w-4 shrink-0 text-ink/40" />
-                        <input
-                          value={searchQ}
-                          onChange={(e) => setSearchQ(e.target.value)}
-                          placeholder="Søk etter råd…"
-                          className="w-full bg-transparent text-sm text-ink placeholder:text-ink/40 focus:outline-none"
-                        />
-                      </div>
-                    </form>
-                  </div>
-                </div>
-
-                {/* Kategorier — accordion */}
-                <div className="pt-4" style={{ paddingInline: "max(28px, 8vw)" }}>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/35">Kategorier</p>
-                  <div className="overflow-hidden rounded-xl border border-ink/8 bg-white/30">
-                    {HEALTH_SUBCATEGORIES.map((sub, i) => {
-                      const isExpanded = expandedId === sub.id;
-                      const subProblems = sub.problemSlugs
-                        .map((s) => bySlug.get(s))
-                        .filter(Boolean) as Problem[];
-                      return (
-                        <div key={sub.id} className={i > 0 ? "border-t border-ink/8" : ""}>
-                          <button
-                            onClick={() => setExpandedId(isExpanded ? null : sub.id)}
-                            className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
-                              isExpanded
-                                ? "bg-white/50 font-semibold text-plum-700"
-                                : "text-ink/80 hover:bg-white/40 hover:text-ink"
-                            }`}
-                          >
-                            {sub.name}
-                            <IconChevronDown
-                              className={`ml-4 h-3 w-3 shrink-0 opacity-40 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                            />
-                          </button>
-                          {isExpanded && subProblems.length > 0 && (
-                            <div className="bg-white/20 pb-1 pt-0.5">
-                              {subProblems.map((p) => {
-                                const Icon = CATEGORY_ICON[p.slug];
-                                return (
-                                  <Link
-                                    key={p.id}
-                                    href={`/problem/${p.id}`}
-                                    onClick={closeMenu}
-                                    className="flex items-center gap-2.5 px-5 py-2 text-sm text-ink/70 transition-colors hover:text-plum-700"
-                                  >
-                                    {Icon && (
-                                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/60">
-                                        <Icon className="h-3 w-3 text-plum-700" />
-                                      </span>
-                                    )}
-                                    {p.name}
-                                  </Link>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Nav-lenker */}
-                <div className="pb-6 pt-4" style={{ paddingInline: "max(28px, 8vw)" }}>
-                  <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/35">Sider</p>
-                  <ul>
-                    {NAV_LINKS.map((l) => (
-                      <li key={l.href}>
-                        <Link
-                          href={l.href}
-                          onClick={closeMenu}
-                          className="block py-1.5 text-sm text-ink transition-colors hover:text-plum-700"
-                        >
-                          {l.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
               </div>
             </div>
           </>,
@@ -259,8 +275,8 @@ export function SiteMenu({ textColor = "#FBF9FD" }: { textColor?: string }) {
       <button
         onClick={openMenu}
         aria-label="Meny"
-        className="flex items-center justify-center transition-opacity hover:opacity-70"
-        style={{ color: textColor }}
+        className="mr-2 flex items-center justify-center transition-opacity hover:opacity-70 sm:mr-0"
+        style={{ color: "#3D2E3A" }}
       >
         <IconMenu className="h-6 w-6 sm:h-7 sm:w-7" />
       </button>

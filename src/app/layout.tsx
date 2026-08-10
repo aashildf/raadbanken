@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Courier_Prime, Fraunces, Ibarra_Real_Nova, Inter, Kantumruy_Pro } from "next/font/google";
+import { Bricolage_Grotesque, Courier_Prime, Fraunces, Ibarra_Real_Nova, Inter, Kantumruy_Pro, Metrophobic } from "next/font/google";
 import { DisclaimerGate } from "@/components/DisclaimerGate";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
@@ -40,6 +40,12 @@ const kantumruy = Kantumruy_Pro({
   weight: ["400"],
 });
 
+const metrophobic = Metrophobic({
+  variable: "--font-metrophobic",
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
 export const metadata: Metadata = {
   title: "Rådbanken",
   description: "Del og finn erfaringer med gamle husråd og hjemmeremedier",
@@ -53,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="nb"
-      className={`${bricolage.variable} ${courierPrime.variable} ${fraunces.variable} ${ibarra.variable} ${inter.variable} ${kantumruy.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${courierPrime.variable} ${fraunces.variable} ${ibarra.variable} ${inter.variable} ${kantumruy.variable} ${metrophobic.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SiteHeader />

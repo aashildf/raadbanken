@@ -1,23 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import Link from "next/link";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
-import { useAnonAuth } from "@/lib/useAnonAuth";
-import { castVote } from "@/lib/votes";
 import { wilsonScore } from "@/lib/wilson";
-import { synonymsForSlug } from "@/lib/categories";
+import { HEALTH_SUBCATEGORIES, TOP_CATEGORIES, synonymsForSlug } from "@/lib/categories";
 import { bestPartialSimilarity } from "@/lib/fuzzy";
 import { MEDICINAL_PLANTS, plantOfTheMonth } from "@/lib/plants";
-import { REMEDY_IMAGES } from "@/lib/remedyImages";
-import { CategoryMenu } from "@/components/CategoryMenu";
 import { SiteMenu } from "@/components/SiteMenu";
-import { LottieVote } from "@/components/LottieVote";
-import type { Problem, Remedy, Vote } from "@/lib/types";
+import type { Problem, Remedy } from "@/lib/types";
 import {
   CATEGORY_ICON,
+  IconChevronDown,
   IconSearch,
   IconSparkle,
   PLANT_ICON,
@@ -26,6 +22,8 @@ import {
 const PILL_HEIGHT = 68;
 const NAV_ICON_HEIGHT_MIN = 44;
 const NAV_ICON_HEIGHT_MAX = 62;
+// Bredden på kategori-kort-stabelen i heroens høyre kolonne.
+const HERO_CATEGORY_COL = "clamp(180px, 22%, 240px)";
 
 const LOGO_SEEDS = [
   { w: 28, left: "58%", top: "8%",  anim: "seed-drift-c", dur: "9s",  delay: "0s"   },
@@ -100,17 +98,15 @@ function Reveal({
 
 export default function HomePage() {
   const viewportWidth = useViewportWidth();
-  const uid = useAnonAuth();
 
   const [problems, setProblems] = useState<Problem[]>([]);
   const [remedies, setRemedies] = useState<Remedy[]>([]);
-  const [myVotes, setMyVotes] = useState<Vote[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchFocused, setSearchFocused] = useState(false);
   const [headerQuery, setHeaderQuery] = useState("");
   const [headerFocused, setHeaderFocused] = useState(false);
-  const [votingId, setVotingId] = useState<string | null>(null);
-  const heroSearchRef = useRef<HTMLInputElement>(null);
+  const [headerSearchOpen, setHeaderSearchOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [hoveredTopCategoryId, setHoveredTopCategoryId] = useState<string | null>(null);
+  const headerSearchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "problems"), (snap) => {
@@ -126,20 +122,7 @@ export default function HomePage() {
     return unsub;
   }, []);
 
-  useEffect(() => {
-    if (!uid) return;
-    const q = query(collection(db, "votes"), where("userId", "==", uid));
-    const unsub = onSnapshot(q, (snap) => {
-      setMyVotes(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Vote, "id">) })));
-    });
-    return unsub;
-  }, [uid]);
-
   const problemById = useMemo(() => new Map(problems.map((p) => [p.id, p])), [problems]);
-  const myVoteByRemedy = useMemo(
-    () => new Map(myVotes.map((v) => [v.remedyId, v.voteType])),
-    [myVotes]
-  );
 
   const rankedAll = useMemo(
     () =>
@@ -151,25 +134,17 @@ export default function HomePage() {
 
   const topTen = rankedAll.slice(0, 10);
 
-  const surprising = useMemo(() => {
-    const topIds = new Set(topTen.map((r) => r.id));
-    const eligible = [...remedies]
-      .filter((r) => !topIds.has(r.id) && r.totalVotes >= 3 && r.totalVotes <= 14 && r.successRate >= 70)
-      .sort((a, b) => b.successRate - a.successRate);
-    // Fremhev kålbladomslaget når det kvalifiserer, siden vi har eget bilde og utvidet tekst for det.
-    const pinnedIndex = eligible.findIndex((r) => r.title === "Kålblad-omslag");
-    if (pinnedIndex > 0) {
-      const [pinned] = eligible.splice(pinnedIndex, 1);
-      eligible.unshift(pinned);
-    }
-    return eligible.slice(0, 3);
-  }, [remedies, topTen]);
-
   const featuredPlant = useMemo(() => plantOfTheMonth(), []);
-  const otherPlants = useMemo(
-    () => MEDICINAL_PLANTS.filter((p) => p.id !== featuredPlant.id).slice(0, 4),
+  // Faste følgeplanter ved siden av månedens plante — hvis månedens plante selv skulle
+  // være en av disse (roterer månedlig), filtreres duplikatet bort.
+  const companionPlants = useMemo(
+    () =>
+      ["lavendel", "rosenrot"]
+        .map((id) => MEDICINAL_PLANTS.find((p) => p.id === id))
+        .filter((p): p is (typeof MEDICINAL_PLANTS)[number] => !!p && p.id !== featuredPlant.id),
     [featuredPlant]
   );
+  const spotlightPlants = useMemo(() => [featuredPlant, ...companionPlants], [featuredPlant, companionPlants]);
 
   const findMatches = useCallback(
     (query: string) => {
@@ -213,29 +188,11 @@ export default function HomePage() {
     [problems, remedies]
   );
 
-  const searchResults = useMemo(() => findMatches(searchQuery), [findMatches, searchQuery]);
-  const fuzzySuggestions = useMemo(
-    () => findFuzzySuggestions(searchQuery, searchResults),
-    [findFuzzySuggestions, searchQuery, searchResults]
-  );
-
   const headerSearchResults = useMemo(() => findMatches(headerQuery), [findMatches, headerQuery]);
   const headerFuzzySuggestions = useMemo(
     () => findFuzzySuggestions(headerQuery, headerSearchResults),
     [findFuzzySuggestions, headerQuery, headerSearchResults]
   );
-
-  async function handleVote(remedyId: string, voteType: "up" | "down") {
-    if (!uid) return;
-    setVotingId(remedyId);
-    try {
-      await castVote(remedyId, uid, voteType, "");
-    } catch {
-      // stemmen ble ikke registrert, knappen går tilbake til normal tilstand
-    } finally {
-      setVotingId(null);
-    }
-  }
 
   const navIconHeight = Math.min(
     NAV_ICON_HEIGHT_MAX,
@@ -285,20 +242,21 @@ export default function HomePage() {
             style={{ left: "var(--page-pad)", top: "50%", transform: "translateY(-50%)", zIndex: 1 }}
           >
             <Image
-              src="/ikoner/heroicon2.png"
+              src="/logo/r_nylogo.png"
               alt="Rådbanken"
-              width={842}
-              height={968}
+              width={624}
+              height={748}
               style={{ height: `${navIconHeight}px`, width: "auto" }}
             />
           </Link>
 
-          {/* CENTER: søkefelt (kun desktop) */}
+          {/* CENTER: søkefelt + Del råd-knapp. Desktop: alltid synlig. Mobil: togglet via søk-ikonet til høyre. */}
           <div
-            className="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block"
-            style={{ width: 300 }}
+            className={`absolute left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 ${
+              headerSearchOpen ? "top-full mt-2 flex w-[calc(100vw-40px)]" : "hidden"
+            } md:top-1/2 md:mt-0 md:flex md:w-[460px] md:-translate-y-1/2`}
           >
-            <div className="relative">
+            <div className="relative flex-1">
               <div
                 className="flex items-center gap-2 px-4"
                 style={{
@@ -310,10 +268,11 @@ export default function HomePage() {
               >
                 <IconSearch className="h-4 w-4 shrink-0 text-[#3D2E3A]" />
                 <input
+                  ref={headerSearchInputRef}
                   value={headerQuery}
                   onChange={(e) => setHeaderQuery(e.target.value)}
                   onFocus={() => setHeaderFocused(true)}
-                  onBlur={() => setHeaderFocused(false)}
+                  onBlur={() => { setHeaderFocused(false); if (!headerQuery) setHeaderSearchOpen(false); }}
                   placeholder="Søk råd"
                   className="w-full bg-transparent font-sans text-sm focus:outline-none"
                   style={{ color: "#3D2E3A" }}
@@ -357,6 +316,91 @@ export default function HomePage() {
                 </div>
               )}
             </div>
+            <Link
+              href="/del-rad"
+              className="flex shrink-0 items-center justify-center gap-2 px-5 text-sm font-semibold transition-opacity hover:opacity-90"
+              style={{ height: 38, borderRadius: 20, background: "#DBD1DC", color: "var(--logo-rad)" }}
+            >
+              Del råd
+              <span aria-hidden>→</span>
+            </Link>
+            {/* Kategorier — klikk åpner de tre hovedkategoriene, hover på en av dem åpner
+                en flyout til høyre med underkategoriene (samme mønster som en klassisk mega-meny). */}
+            <div className="relative hidden shrink-0 sm:block">
+              <button
+                onClick={() => {
+                  setCategoriesOpen((open) => !open);
+                  setHoveredTopCategoryId(null);
+                }}
+                className="flex items-center gap-1 text-sm font-semibold text-[#3D2E3A] transition-opacity hover:opacity-70"
+              >
+                Kategorier
+                <IconChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${categoriesOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {categoriesOpen && (
+                <div
+                  className="hairline absolute left-0 top-[calc(100%+10px)] z-30 overflow-visible rounded-2xl bg-paper shadow-xl"
+                  style={{ minWidth: 220 }}
+                >
+                  {TOP_CATEGORIES.map((cat, i) => {
+                    const subs = HEALTH_SUBCATEGORIES.filter((s) => s.topCategoryId === cat.id);
+                    const isHovered = hoveredTopCategoryId === cat.id;
+                    return (
+                      <div
+                        key={cat.id}
+                        className={`relative ${i > 0 ? "border-t border-ink/8" : ""}`}
+                        onMouseEnter={() => setHoveredTopCategoryId(cat.id)}
+                        onMouseLeave={() => setHoveredTopCategoryId(null)}
+                      >
+                        <Link
+                          href={`/kategori/${cat.id}`}
+                          onClick={() => setCategoriesOpen(false)}
+                          className={`flex items-center justify-between gap-4 px-4 py-2.5 text-sm font-semibold transition-colors ${
+                            isHovered ? "bg-paper-deep text-plum-700" : "text-ink hover:bg-paper-deep/60 hover:text-plum-700"
+                          }`}
+                        >
+                          {cat.name}
+                          <IconChevronDown className="h-3 w-3 shrink-0 -rotate-90 opacity-50" />
+                        </Link>
+                        {isHovered && subs.length > 0 && (
+                          <div
+                            className="hairline absolute left-full top-0 z-40 ml-1 overflow-hidden rounded-2xl bg-paper shadow-xl"
+                            style={{ minWidth: 220 }}
+                          >
+                            {subs.map((sub) => {
+                              const firstProblem = sub.problemSlugs
+                                .map((slug) => problems.find((p) => p.slug === slug))
+                                .find(Boolean);
+                              return (
+                                <Link
+                                  key={sub.id}
+                                  href={firstProblem ? `/problem/${firstProblem.id}` : "/alle"}
+                                  onClick={() => setCategoriesOpen(false)}
+                                  className="block px-4 py-2.5 text-sm text-ink transition-colors hover:bg-paper-deep/60 hover:text-plum-700"
+                                >
+                                  {sub.name}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <div className="border-t border-ink/10 px-4 py-2.5">
+                    <Link
+                      href="/alle"
+                      onClick={() => setCategoriesOpen(false)}
+                      className="text-xs font-medium text-plum-700 hover:text-plum-800"
+                    >
+                      Se alle kategorier →
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* RIGHT: aksjoner */}
@@ -364,190 +408,188 @@ export default function HomePage() {
             className="absolute inset-y-0 right-0 flex items-center gap-4 sm:gap-6"
             style={{ paddingRight: "var(--page-pad)" }}
           >
-            <div className="hidden sm:block">
-              <CategoryMenu problems={problems} compact align="right" textColor="#3D2E3A" />
-            </div>
-            <Link
-              href="/del-rad"
-              className="font-logo hidden text-base transition-opacity hover:opacity-70 sm:block sm:text-lg"
-              style={{ color: "#3D2E3A" }}
-            >
-              Del råd
-            </Link>
-            {/* Mobil søk-ikon */}
+            {/* Mobil søk-ikon — åpner/lukker søkefeltet over */}
             <button
               aria-label="Søk"
-              onClick={() => { heroSearchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); heroSearchRef.current?.focus(); }}
+              onClick={() => {
+                setHeaderSearchOpen((open) => {
+                  const next = !open;
+                  if (next) setTimeout(() => headerSearchInputRef.current?.focus(), 50);
+                  return next;
+                });
+              }}
               className="flex items-center justify-center transition-opacity hover:opacity-70 md:hidden"
               style={{ color: "#3D2E3A" }}
             >
               <IconSearch className="h-5 w-5" />
             </button>
-            <SiteMenu textColor="#3D2E3A" />
+            <SiteMenu />
           </div>
         </div>
       </header>
 
       <main>
-        {/* HERO */}
-        <section
-          className="relative overflow-hidden text-ink"
-          style={{
-            paddingTop: PILL_HEIGHT + 48,
-            paddingBottom: viewportWidth >= 640 ? 56 : 40,
-          }}
-        >
-          <Image
-            src="/bakgrunner/bg5.png"
-            alt=""
-            aria-hidden
-            fill
-            sizes="100vw"
-            className="pointer-events-none object-cover"
-            style={{ zIndex: 0 }}
-            priority
-          />
-          <div
-            className="relative z-10 mx-auto max-w-5xl"
-            style={{ paddingInline: "var(--page-pad)" }}
-          >
-            {/* Glassfelt over herotekst — bryter ut av max-w-5xl-containeren og skalerer flytende med skjermbredden */}
-            <div className="relative left-1/2 w-screen -translate-x-1/2">
-              <div
-                className="mx-auto"
-                style={{
-                  width: "min(94vw, 1400px)",
-                  borderRadius: 60,
-                  background: "rgba(254,225,225,0.17)",
-                  padding: "40px 72px 36px",
-                }}
-              >
-            {/* Logo + sitat */}
-            <div className="relative mb-5 flex flex-col items-center sm:mb-8">
-              {/* Logo + eyebrow */}
-              <div className="relative z-10">
-                {/* Frø som blåser av løvetannen i logoen */}
-                {LOGO_SEEDS.map((s, i) => (
-                  <Image
-                    key={i}
-                    src="/logo/dandelionseed.png"
-                    alt=""
-                    width={60}
-                    height={60}
-                    aria-hidden="true"
-                    data-seed=""
+                  {/* HERO — CSS Grid koordinerer hovedinnhold (logo) og kategori-kortene i samme
+                      kolonne-system. Bakgrunn er et dekorativt full-bleed lag som bevisst IKKE er et
+                      grid-item: en absolutt-posisjonert grid-item sin "containing block" er grid-arealet
+                      innenfor content-boksen (ekskludert section sin egen padding), mens vanlig
+                      position:absolute mot en position:relative-forelder regner fra padding-boksen —
+                      derfor plain fill. */}
+                  <section
+                    className="relative overflow-hidden text-ink"
                     style={{
-                      position: "absolute",
-                      left: s.left,
-                      top: s.top,
-                      width: s.w,
-                      height: "auto",
-                      animation: `${s.anim} ${s.dur} ${s.delay} infinite linear`,
-                      zIndex: 20,
+                      // Ingen felt over hero lenger gir klaring for den faste navbaren,
+                      // så hero må selv dekke PILL_HEIGHT på alle skjermbredder.
+                      paddingTop: PILL_HEIGHT + 48,
+                      paddingBottom: viewportWidth >= 640 ? 56 : 40,
+                      minHeight: viewportWidth >= 640 ? "min(680px, 78vh)" : undefined,
+                      display: "grid",
+                      // Kolonne 2 (kun sm+) holder kategori-kort-stabelen; kolonne 1 tar resten
+                      // og sentrerer hovedinnholdet i det som er igjen.
+                      gridTemplateColumns: viewportWidth >= 640 ? `1fr ${HERO_CATEGORY_COL}` : "1fr",
                     }}
-                  />
-                ))}
-                <Image
-                  src="/logo/herologo2.png"
-                  alt="Rådbanken"
-                  width={499}
-                  height={455}
-                  className="h-auto w-72 sm:w-96 lg:w-[26rem]"
-                  priority
-                  style={{  }}
-                />
-                <p className="mt-2 text-center text-xs uppercase tracking-[0.12em]" style={{ fontFamily: "var(--font-kantumruy)", color: "var(--logo-banken)" }}>
-                  Et oppslagsverk for gamle husråd
-                </p>
-              </div>
-              {/* Sitat under logo */}
-              <div className="mt-5 rounded-2xl" style={{ background: "#E5D5B0", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px 28px 22px 28px" }}>
-                <h1 style={{ fontFamily: "var(--font-courier)", fontStyle: "italic", fontWeight: 400, fontSize: "17px", lineHeight: 1.4, color: "#36131D", textAlign: "center" }}>
-                  «Det som funket for bestemor,<br />
-                  samlet og stemt fram av deg.»
-                </h1>
-              </div>
-            </div>
-              </div>
-            </div>{/* slutt glassfelt */}
+                  >
+                    {/* Bakgrunn — dekker hele seksjonen (padding inkludert), derfor utenfor grid-plasseringen */}
+                    <Image
+                      src="/bakgrunner/bg5.png"
+                      alt=""
+                      aria-hidden
+                      fill
+                      sizes="100vw"
+                      className="pointer-events-none object-cover object-center"
+                      style={{ zIndex: 0 }}
+                      priority
+                    />
 
-            <div className="relative mx-auto mt-14 max-w-2xl">
-              <div
-                className="bg-white/80 shadow-sm shadow-plum-950/8"
-                style={{ borderRadius: 9999, border: "1px solid rgba(50,22,72,0.13)" }}
-              >
-                <div className="flex items-center gap-3 px-5 py-3">
-                  <IconSearch className="h-4 w-4 shrink-0 text-ink/40" />
-                  <input
-                    ref={heroSearchRef}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => setSearchFocused(true)}
-                    onBlur={() => setSearchFocused(false)}
-                    placeholder="Søk på en plage eller et råd, f.eks. «hoste»"
-                    className="w-full bg-transparent font-sans text-base text-ink placeholder:text-ink-soft/60 focus:outline-none sm:text-lg"
-                  />
-                </div>
-              </div>
-
-              {searchFocused && searchQuery.trim() && (
-                <div className="hairline absolute inset-x-0 top-[calc(100%+8px)] z-10 overflow-hidden rounded-2xl bg-paper shadow-2xl">
-                  {searchResults.length > 0 ? (
-                    <ul className="divide-y divide-ink/10">
-                      {searchResults.map((r) => (
-                        <li key={`${r.type}-${r.id}`}>
-                          <Link
-                            href={r.type === "problem" ? `/problem/${r.id}` : `/remedy/${r.id}`}
-                            className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-paper-deep"
-                          >
-                            <span className="font-sans text-sm font-medium text-ink">{r.label}</span>
-                            <span className="text-xs uppercase tracking-wide text-ink-soft">{r.sub}</span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="px-5 py-4">
-                      <p className="text-sm text-ink-soft">Fant ingen treff på «{searchQuery.trim()}».</p>
-
-                      {fuzzySuggestions.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs uppercase tracking-wide text-ink-soft/70">
-                            Mente du
+                    {/* Hovedinnhold: logo + eyebrow — sentrert i kolonne 1 */}
+                    <div
+                      className="relative z-10 mx-auto w-full max-w-7xl"
+                      style={{ gridColumn: "1", alignSelf: "center", paddingInline: "var(--page-pad)" }}
+                    >
+                      <div className="relative flex flex-col items-center">
+                        <div className="relative z-10">
+                          {/* Frø som blåser av løvetannen i logoen */}
+                          {LOGO_SEEDS.map((s, i) => (
+                            <Image
+                              key={i}
+                              src="/logo/dandelionseed.png"
+                              alt=""
+                              width={60}
+                              height={60}
+                              aria-hidden="true"
+                              data-seed=""
+                              style={{
+                                position: "absolute",
+                                left: s.left,
+                                top: s.top,
+                                width: s.w,
+                                height: "auto",
+                                animation: `${s.anim} ${s.dur} ${s.delay} infinite linear`,
+                                zIndex: 20,
+                              }}
+                            />
+                          ))}
+                          <Image
+                            src="/logo/herologo2.png"
+                            alt="Rådbanken"
+                            width={499}
+                            height={455}
+                            className="h-auto w-72 sm:w-96 lg:w-[26rem]"
+                            priority
+                            style={{  }}
+                          />
+                          <p className="mt-2 text-center text-xs uppercase tracking-[0.12em]" style={{ fontFamily: "var(--font-kantumruy)", color: "var(--logo-banken)" }}>
+                            Et oppslagsverk for gamle husråd
                           </p>
-                          <ul className="mt-1.5 flex flex-wrap gap-2">
-                            {fuzzySuggestions.map((s) => (
-                              <li key={`${s.type}-${s.id}`}>
-                                <Link
-                                  href={s.type === "problem" ? `/problem/${s.id}` : `/remedy/${s.id}`}
-                                  className="hairline rounded-full px-3 py-1 text-sm text-ink hover:bg-paper-deep"
-                                >
-                                  {s.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
                         </div>
-                      )}
-
-                      <Link
-                        href={`/del-rad?q=${encodeURIComponent(searchQuery.trim())}`}
-                        className="mt-4 flex items-center justify-between rounded-xl bg-plum-800 px-4 py-3 text-sm font-medium text-paper transition-colors hover:bg-plum-700"
-                      >
-                        Fant du ikke noen gode råd? Legg til ditt eget
-                        <span aria-hidden>→</span>
-                      </Link>
+                      </div>
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
+
+                    {/* Kategori-kort — stablet i kolonne 2, kun sm+. Hvert kort lenker til sin
+                        egen kategoriside, med bildet fra TOP_CATEGORIES som eneste kilde til bilde. */}
+                    <div
+                      className="relative z-10 hidden flex-col gap-3 sm:flex"
+                      style={{ gridColumn: "2", alignSelf: "center", justifySelf: "end", width: HERO_CATEGORY_COL, paddingRight: "var(--page-pad)" }}
+                    >
+                      {TOP_CATEGORIES.map((cat) => (
+                        <Link
+                          key={cat.id}
+                          href={`/kategori/${cat.id}`}
+                          className="group relative block overflow-hidden rounded-2xl shadow-lg shadow-plum-950/20"
+                          style={{ aspectRatio: "4 / 3" }}
+                        >
+                          <Image
+                            src={cat.image}
+                            alt=""
+                            fill
+                            sizes="220px"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            aria-hidden="true"
+                          />
+                          <div
+                            className="absolute inset-0"
+                            style={{ background: "linear-gradient(to top, rgba(25,12,45,0.65) 0%, rgba(25,12,45,0.05) 55%)" }}
+                          />
+                          <span className="absolute bottom-2 left-2.5 right-2.5 text-[11px] font-semibold leading-tight text-white">
+                            {cat.name}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+
+        {/* FIKEN — fremhevet artikkel, fullbredde felt rett under hero */}
+        <section className="relative">
+          <div className="relative left-1/2 w-screen -translate-x-1/2" style={{ background: "#F9E1C1" }}>
+            <Reveal
+              className="mx-auto flex flex-col items-stretch py-8 sm:flex-row sm:py-12"
+              style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
+            >
+              {/* Bildet — 2/3 av bredden, fast aspect-ratio (ingen stretch-avhengig prosenthøyde) */}
+              <div className="w-full shrink-0 sm:w-2/3">
+                <Link
+                  href="/artikkel/fiken"
+                  className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
+                >
+                  <Image
+                    src="/pictures/fiken.png"
+                    alt="Ferske fiken, hele og oppskåret"
+                    fill
+                    className="object-cover"
+                  />
+                </Link>
+              </div>
+
+              {/* Tekstboks — 1/3 av bredden, flush mot bildet, ingen mellomrom */}
+              <div
+                className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8"
+                style={{ background: "#FBEED4" }}
+              >
+                <p className="font-metrophobic text-xs uppercase tracking-[0.3em]" style={{ color: "#535E3D" }}>
+                  Frukt med lange tradisjoner
+                </p>
+                <h2 className="font-metrophobic text-2xl sm:text-3xl" style={{ color: "#535E3D" }}>
+                  Fiken – en liten frukt med store helsefordeler
+                </h2>
+                <p className="font-metrophobic" style={{ color: "#535E3D" }}>
+                  Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.
+                </p>
+                <Link
+                  href="/artikkel/fiken"
+                  className="mt-2 inline-flex items-center gap-2 rounded-[14px] px-6 py-2.5 text-sm font-semibold text-paper transition-opacity hover:opacity-90"
+                  style={{ background: "#72874E" }}
+                >
+                  Les artikkel
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
+            </Reveal>
           </div>
         </section>
 
         {/* FOLKETS FAVORITTER, topp 3 som store kort, 4-10 som kompakt liste */}
         <section className="relative z-10" style={{ paddingInline: 0 }}>
-        <div className="mx-auto max-w-5xl px-5 pb-10 pt-10 sm:py-12" style={{ paddingInline: "var(--page-pad)" }}>
+        <div className="mx-auto max-w-7xl px-5 pb-10 pt-10 sm:py-12" style={{ paddingInline: "var(--page-pad)" }}>
           <Reveal>
             <h2 className="font-display text-xl font-bold text-ink sm:text-2xl">Folkets favoritter</h2>
             <p className="mt-1 text-sm text-ink-soft">De 10 mest pålitelige kjerringrådene.</p>
@@ -669,288 +711,162 @@ export default function HomePage() {
         </div>
         </section>
 
-        {/* MEST OVERRASKENDE RÅD, én boks, ett fremhevet råd */}
-        {surprising.length > 0 &&
-          (() => {
-            const r = surprising[0];
-            const problem = problemById.get(r.problemId);
-            const Icon = problem ? CATEGORY_ICON[problem.slug] : undefined;
-            const myVote = myVoteByRemedy.get(r.id);
-            const image = REMEDY_IMAGES[r.title];
-            return (
-              <section className="mx-auto max-w-5xl px-5 py-10 sm:py-12" style={{ paddingInline: "var(--page-pad)" }}>
-                <Reveal>
-                  <div className="flex items-center gap-2">
-                    <IconSparkle className="h-5 w-5 text-gold" />
-                    <h2 className="font-display text-xl font-bold text-ink sm:text-2xl">
-                      Mest overraskende råd
-                    </h2>
-                  </div>
-                  <p className="mt-1 text-sm text-ink-soft">
-                    Lite kjent, men overgår forventningene - verdt å prøve.
-                  </p>
-                </Reveal>
+        {/* I FOKUS: MEDISINPLANTER — månedens plante + to faste følgeplanter, som tre jevnstore kort */}
+        <section className="mx-auto max-w-7xl px-5 pb-16 sm:pb-20" style={{ paddingInline: "var(--page-pad)" }}>
+          <Reveal>
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">I fokus</p>
+            <h2 className="font-display mt-2 text-2xl font-bold text-ink sm:text-3xl">
+              <Link href="/medisinplanter" className="hover:text-plum-700">
+                Medisinplanter
+              </Link>
+            </h2>
+          </Reveal>
 
-                <Reveal
-                  delay={80}
-                  className="group relative mt-5 flex flex-col gap-5 rounded-2xl p-6 shadow-lg shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:justify-between sm:p-8"
-                  style={{ background: "#FCFAF7" }}
-                >
-                  <Link
-                    href={`/remedy/${r.id}`}
-                    className="absolute inset-0 z-10 rounded-2xl"
-                    aria-label={`${r.title} mot ${problem?.name ?? ""}`}
-                  />
-                  <div className="flex items-start gap-4">
-                    {image ? (
-                      <div className="hairline relative hidden h-20 w-20 shrink-0 overflow-hidden rounded-2xl sm:block sm:h-24 sm:w-24">
-                        <Image src={image.src} alt={r.title} fill sizes="96px" className="object-cover" />
-                      </div>
-                    ) : (
-                      Icon && (
-                        <span className="hairline hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-paper-deep text-plum-700 sm:flex">
-                          <Icon className="h-5 w-5" />
-                        </span>
-                      )
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {spotlightPlants.map((p, i) => {
+              const Icon = PLANT_ICON[p.shape];
+              const href = p.sections ? `/plante/${p.id}` : null;
+              return (
+                <Reveal key={p.id} delay={i * 60} className="flex">
+                  <div
+                    className={`group relative flex w-full flex-col overflow-hidden rounded-[2rem] bg-[#FCFAF7] shadow-lg shadow-plum-950/10 ${href ? "transition-transform hover:-translate-y-0.5" : ""}`}
+                  >
+                    {href && (
+                      <Link href={href} className="absolute inset-0 z-10" aria-label={`Les mer om ${p.name}`} />
                     )}
-                    <div>
-                      <p className="card-title text-ink transition-colors group-hover:text-plum-700">
-                        {r.title} <span className="text-ink-soft">mot {problem?.name.toLowerCase()}</span>
-                      </p>
-                      <p className="mt-2 max-w-md text-ink-soft">{r.description}</p>
-                      <span className="mt-2 inline-block text-sm font-medium text-gold">
-                        {r.successRate}% positiv · {r.totalVotes} stemmer
-                      </span>
-                    </div>
-                  </div>
-                  <div className="relative z-20 flex shrink-0 items-center gap-2">
-                    <LottieVote
-                      direction="up"
-                      count={r.votesUp}
-                      active={myVote === "up"}
-                      disabled={!uid || votingId !== null}
-                      onClick={() => handleVote(r.id, "up")}
-                    />
-                    <LottieVote
-                      direction="down"
-                      count={r.votesDown}
-                      active={myVote === "down"}
-                      disabled={!uid || votingId !== null}
-                      onClick={() => handleVote(r.id, "down")}
-                    />
-                  </div>
-                </Reveal>
-              </section>
-            );
-          })()}
-
-        {/* I FOKUS: MEDISINPLANTER + HISTORIE */}
-        <section className="mx-auto max-w-5xl px-5 pb-20 sm:pb-28" style={{ paddingInline: "var(--page-pad)" }}>
-          <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-2">
-            {/* Venstre: I fokus: medisinplanter */}
-            <div className="flex h-full flex-col">
-              <Reveal>
-                <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
-                  I fokus
-                </p>
-                <h2 className="font-display mt-2 text-2xl font-bold text-ink sm:text-3xl">
-                  <Link href="/medisinplanter" className="hover:text-plum-700">
-                    Medisinplanter
-                  </Link>
-                </h2>
-              </Reveal>
-
-              <Reveal delay={80} className="mt-5 flex flex-1">
-                {(() => {
-                  const FeaturedIcon = PLANT_ICON[featuredPlant.shape];
-                  const featuredHref = featuredPlant.sections ? `/plante/${featuredPlant.id}` : null;
-                  return (
-                    <div
-                      className={`group relative flex w-full flex-col overflow-hidden rounded-[2.5rem] bg-[#FCFAF7] shadow-lg shadow-plum-950/10 ${featuredHref ? "transition-transform hover:-translate-y-0.5" : ""}`}
-                    >
-                      {featuredHref && (
-                        <Link
-                          href={featuredHref}
-                          className="absolute inset-0 z-10"
-                          aria-label={`Les mer om ${featuredPlant.name}`}
+                    <div className="relative aspect-[4/3] w-full" style={{ background: p.bg }}>
+                      {p.image ? (
+                        <Image
+                          src={p.image.src}
+                          alt={p.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                          className={p.image.fit === "contain" ? "object-contain p-8" : "object-cover"}
                         />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <Icon className="h-16 w-16 text-paper/85" />
+                        </div>
                       )}
-                      <div className="flex flex-col gap-2 px-8 pb-3 pt-7 sm:px-10 sm:pt-9">
-                        <p className="text-xs uppercase tracking-[0.25em] text-ink-soft">
-                          {featuredPlant.latinName}
-                        </p>
-                        <h3 className="card-title text-ink">{featuredPlant.name}</h3>
-                        <p className="max-w-md text-ink-soft">{featuredPlant.description}</p>
-                      </div>
-
-                      <div className="relative mt-5 aspect-[4/3] w-full" style={{ background: featuredPlant.bg }}>
-                        {featuredPlant.image ? (
-                          <Image
-                            src={featuredPlant.image.src}
-                            alt={featuredPlant.name}
-                            fill
-                            sizes="(max-width: 1024px) 100vw, 50vw"
-                            className={
-                              featuredPlant.image.fit === "contain" ? "object-contain p-10" : "object-cover"
-                            }
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center">
-                            <FeaturedIcon className="h-24 w-24 text-paper/85 sm:h-28 sm:w-28" />
-                          </div>
-                        )}
-                        <span className="hairline absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-paper/90 text-[10px] font-semibold uppercase text-plum-800">
+                      {i === 0 && (
+                        <span className="hairline absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-paper/90 text-[10px] font-semibold uppercase text-plum-800">
                           {new Date().toLocaleDateString("nb-NO", { month: "short" }).replace(".", "")}
                         </span>
-                        {featuredPlant.image?.credit ? (
-                          <a
-                            href={featuredPlant.image.creditHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="absolute bottom-2 left-3 z-20 text-[10px] text-paper/80 hover:text-paper"
-                          >
-                            Foto: {featuredPlant.image.credit}
-                          </a>
-                        ) : !featuredPlant.image ? (
-                          <span className="absolute bottom-6 left-6 text-paper/60">
-                            <IconSparkle className="h-5 w-5" />
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="flex items-center justify-between gap-3 px-8 py-5 sm:px-10">
-                        {featuredHref ? (
-                          <span className="text-sm font-medium text-plum-700 transition-colors group-hover:text-plum-800">
-                            Les mer om urten →
-                          </span>
-                        ) : (
-                          <span className="text-sm text-ink-soft">Les mer om urten kommer snart</span>
-                        )}
-                        <div className="flex shrink-0 -space-x-2">
-                          {otherPlants.map((p) => {
-                            const Icon = PLANT_ICON[p.shape];
-                            return (
-                              <span
-                                key={p.id}
-                                title={p.name}
-                                className="flex h-7 w-7 items-center justify-center rounded-full text-paper ring-2 ring-paper-deep/60"
-                                style={{ background: p.bg }}
-                              >
-                                <Icon className="h-3.5 w-3.5" />
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </div>
+                      )}
+                      {p.image?.credit && (
+                        <a
+                          href={p.image.creditHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute bottom-2 left-3 z-20 text-[10px] text-paper/80 hover:text-paper"
+                        >
+                          Foto: {p.image.credit}
+                        </a>
+                      )}
                     </div>
-                  );
-                })()}
-              </Reveal>
-            </div>
-
-            {/* Høyre: Plantemedisinens historie */}
-            <div className="flex h-full flex-col">
-              <Reveal delay={40}>
-                <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
-                  Fra fortiden
-                </p>
-                <h2 className="font-display mt-2 text-2xl font-bold text-ink sm:text-3xl">
-                  Plantemedisinens historie
-                </h2>
-              </Reveal>
-
-              <Reveal delay={120} className="mt-5 flex flex-1">
-                <Link
-                  href="/historie"
-                  className="group flex w-full flex-col overflow-hidden rounded-[2.5rem] bg-[#FCFAF7] shadow-lg shadow-plum-950/10 transition-transform hover:-translate-y-0.5"
-                >
-                  <div className="relative aspect-square w-full overflow-hidden">
-                    <Image
-                      src="/pictures/urter_historie.png"
-                      alt="En gammel tinkturflaske, merket for hånd, omgitt av blomster"
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                    <div className="flex flex-col gap-1.5 px-6 py-5">
+                      <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">{p.latinName}</p>
+                      <h3 className="card-title text-ink">{p.name}</h3>
+                      <p className="text-sm text-ink-soft">{p.description}</p>
+                      {href && (
+                        <span className="mt-2 text-sm font-medium text-plum-700 transition-colors group-hover:text-plum-800">
+                          Les mer om urten →
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-3 px-8 py-5 sm:px-10">
-                    <span className="font-serif-display text-xl italic text-ink">
-                      Fra mormor til barnebarn
-                    </span>
-                    <p className="text-ink-soft">
-                      Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler
-                      den igjen.
-                    </p>
-                    <span className="flex items-center gap-2 text-sm font-medium text-plum-700">
-                      Les historien
-                      <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                        →
-                      </span>
-                    </span>
-                  </div>
-                </Link>
-              </Reveal>
-            </div>
+                </Reveal>
+              );
+            })}
           </div>
         </section>
 
-        {/* ARTIKLER */}
-        <section className="mx-auto max-w-5xl px-5 pb-20 sm:pb-28" style={{ paddingInline: "var(--page-pad)" }}>
+        {/* PLANTEMEDISINENS HISTORIE — mørk, horisontal banner-kort under medisinplantene,
+            bevisst mørk/liggende i motsetning til medisinplantenes lyse, stående kort. */}
+        <section className="mx-auto max-w-7xl px-5 pb-20 sm:pb-28" style={{ paddingInline: "var(--page-pad)" }}>
           <Reveal>
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Lesestoff</p>
-            <h2 className="font-display mt-2 text-2xl font-bold text-ink sm:text-3xl">Artikler</h2>
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Fra fortiden</p>
+            <h2 className="font-display mt-2 text-2xl font-bold text-ink sm:text-3xl">
+              Plantemedisinens historie
+            </h2>
           </Reveal>
 
-          <div className="mt-5 flex flex-col gap-4">
-            <Reveal delay={80}>
-              <Link
-                href="/artikkel/tyttebaer"
-                className="group flex flex-col gap-5 overflow-hidden rounded-[2.5rem] bg-[#FCFAF7] p-3 shadow-lg shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:p-4"
-              >
-                <div className="relative aspect-5/4 overflow-hidden rounded-4xl sm:aspect-square sm:w-2/5 sm:shrink-0">
-                  <Image src="/pictures/tyttebaer.png" alt="Tyttebær" fill sizes="(max-width: 640px) 100vw, 40vw" className="object-cover" />
-                </div>
-                <div className="flex flex-col gap-3 px-3 pb-4 sm:px-2 sm:pb-2">
-                  <span className="font-serif-display text-xl italic text-ink">
-                    Naturens egen hostesaft
+          <Reveal delay={80} className="mt-6">
+            <Link
+              href="/historie"
+              className="group flex flex-col overflow-hidden rounded-[2.5rem] shadow-lg shadow-plum-950/20 sm:flex-row-reverse"
+              style={{ background: "var(--plum-900)" }}
+            >
+              {/* aspect-[3/2] matcher bildets faktiske proporsjoner (1073×716), slik at object-cover
+                  ikke beskjærer noe — boksen får nøyaktig samme fasong som bildet selv. */}
+              <div className="relative aspect-[3/2] w-full sm:w-2/5 sm:shrink-0">
+                <Image
+                  src="/pictures/urter_historie.png"
+                  alt="En gammel tinkturflaske, merket for hånd, omgitt av blomster"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 40vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="flex flex-1 flex-col justify-center gap-3 px-8 py-10 sm:px-12">
+                <span className="font-serif-display text-2xl italic text-paper sm:text-3xl">
+                  Fra mormor til barnebarn
+                </span>
+                <p className="max-w-md text-paper">
+                  Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen.
+                </p>
+                <span className="flex items-center gap-2 text-sm font-medium text-paper">
+                  Les historien
+                  <span aria-hidden className="transition-transform group-hover:translate-x-1">
+                    →
                   </span>
-                  <p className="text-ink-soft">
-                    Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du
-                    bruker det riktig.
-                  </p>
-                  <span className="flex items-center gap-2 text-sm font-medium text-plum-700">
-                    Les artikkelen
-                    <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                      →
-                    </span>
-                  </span>
-                </div>
-              </Link>
-            </Reveal>
+                </span>
+              </div>
+            </Link>
+          </Reveal>
+        </section>
 
-            <Reveal delay={140}>
-              <Link
-                href="/artikkel/fiken"
-                className="group flex flex-col gap-5 overflow-hidden rounded-[2.5rem] bg-[#FCFAF7] p-3 shadow-lg shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:p-4"
+        {/* ARTIKLER — Tyttebær i samme fullbredde bånd-stil som Fiken-artikkelen */}
+        <section id="artikler" className="relative">
+          <div className="relative left-1/2 w-screen -translate-x-1/2" style={{ background: "#F9E1C1" }}>
+            <Reveal
+              className="mx-auto flex flex-col items-stretch py-8 sm:flex-row sm:py-12"
+              style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
+            >
+              {/* Bildet — 2/3 av bredden, fast aspect-ratio, samme oppsett som Fiken */}
+              <div className="w-full shrink-0 sm:w-2/3">
+                <Link
+                  href="/artikkel/tyttebaer"
+                  className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
+                >
+                  <Image src="/pictures/tyttebaer.png" alt="Tyttebær" fill className="object-cover" />
+                </Link>
+              </div>
+
+              {/* Tekstboks — 1/3 av bredden, flush mot bildet */}
+              <div
+                className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8"
+                style={{ background: "#FBEED4" }}
               >
-                <div className="relative aspect-5/4 overflow-hidden rounded-4xl sm:aspect-square sm:w-2/5 sm:shrink-0">
-                  <Image src="/pictures/fiken.png" alt="Fiken" fill sizes="(max-width: 640px) 100vw, 40vw" className="object-cover" />
-                </div>
-                <div className="flex flex-col gap-3 px-3 pb-4 sm:px-2 sm:pb-2">
-                  <span className="font-serif-display text-xl italic text-ink">
-                    Fikens mange helsefordeler
-                  </span>
-                  <p className="text-ink-soft">
-                    Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.
-                  </p>
-                  <span className="flex items-center gap-2 text-sm font-medium text-plum-700">
-                    Les artikkelen
-                    <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                      →
-                    </span>
-                  </span>
-                </div>
-              </Link>
+                <p className="font-metrophobic text-xs uppercase tracking-[0.3em]" style={{ color: "#535E3D" }}>
+                  Gammelt husråd mot hoste
+                </p>
+                <h2 className="font-metrophobic text-2xl sm:text-3xl" style={{ color: "#535E3D" }}>
+                  Tyttebær – naturens egen hostesaft
+                </h2>
+                <p className="font-metrophobic" style={{ color: "#535E3D" }}>
+                  Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du
+                  bruker det riktig.
+                </p>
+                <Link
+                  href="/artikkel/tyttebaer"
+                  className="mt-2 inline-flex items-center gap-2 rounded-[14px] px-6 py-2.5 text-sm font-semibold text-paper transition-opacity hover:opacity-90"
+                  style={{ background: "#72874E" }}
+                >
+                  Les artikkel
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
             </Reveal>
           </div>
         </section>
