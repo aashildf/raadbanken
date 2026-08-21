@@ -99,10 +99,16 @@ export function SiteMenu() {
                 transition: "transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
               }}
             >
-              {/* Topplinje: søk og send-inn-råd — tydelig og midtstilt */}
-              <div className="relative z-10 shrink-0" style={{ background: "#F9F7E8" }}>
+              {/* Topplinje: søk og send-inn-råd — tydelig og midtstilt. Ingen egen
+                  bakgrunnsfarge her (panelet har allerede samme farge) — det lar
+                  løvetann-pynten fra bunnen av panelet vises helt opp til krysset
+                  i stedet for å bli maskert bort av en ugjennomsiktig stripe. */}
+              <div className="relative z-10 shrink-0">
                 <div className="pb-3 pt-3" style={{ paddingInline: "max(28px, 6vw)" }}>
-                  <div className="flex justify-end">
+                  {/* Krysset er bevisst justert til å lande rett over Meny-ikonet i headeren
+                      (ikke rad-paddingen for øvrig), slik at museren ikke må flyttes for å
+                      lukke igjen. */}
+                  <div className="flex justify-end" style={{ marginRight: "calc(var(--page-pad) - var(--menu-close-adjust) - max(28px, 6vw))" }}>
                     <button
                       onClick={closeMenu}
                       aria-label="Lukk meny"
@@ -173,19 +179,31 @@ export function SiteMenu() {
                             className={i > 0 ? "border-t border-ink/8" : ""}
                             onMouseEnter={() => setExpandedId(cat.id)}
                           >
-                            <button
-                              onClick={() => setExpandedId(isExpanded ? null : cat.id)}
-                              className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
-                                isExpanded
-                                  ? "bg-white/60 font-semibold text-plum-700"
-                                  : "text-ink/80 hover:bg-white/50 hover:text-ink"
+                            <div
+                              className={`flex w-full items-center justify-between text-sm transition-colors ${
+                                isExpanded ? "bg-white/60 font-semibold text-plum-700" : "text-ink/80 hover:bg-white/50 hover:text-ink"
                               }`}
                             >
-                              {cat.name}
-                              <IconChevronDown
-                                className={`ml-4 h-3 w-3 shrink-0 opacity-40 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                              />
-                            </button>
+                              <Link
+                                href={`/kategori/${cat.id}`}
+                                onClick={closeMenu}
+                                className="flex flex-1 items-center gap-3 px-4 py-2.5 text-left"
+                              >
+                                <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg">
+                                  <Image src={cat.image} alt="" fill sizes="36px" className="object-cover" />
+                                </span>
+                                {cat.name}
+                              </Link>
+                              <button
+                                onClick={() => setExpandedId(isExpanded ? null : cat.id)}
+                                aria-label={isExpanded ? `Skjul underkategorier for ${cat.name}` : `Vis underkategorier for ${cat.name}`}
+                                className="px-3 py-2.5"
+                              >
+                                <IconChevronDown
+                                  className={`h-3 w-3 shrink-0 opacity-40 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                                />
+                              </button>
+                            </div>
                             {isExpanded && subs.length > 0 && (
                               <div className="bg-white/25 pb-1 pt-0.5">
                                 {subs.map((sub) => {
@@ -208,16 +226,44 @@ export function SiteMenu() {
                           </div>
                         );
                       })}
+                      <div className="border-t border-ink/8">
+                        <Link
+                          href="/alle"
+                          onClick={closeMenu}
+                          className="block px-4 py-2.5 text-sm font-semibold text-plum-700 transition-colors hover:bg-white/50"
+                        >
+                          Se alle kategorier →
+                        </Link>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Artikler / Medisinplanter / Plantemedisinens historie */}
+                  {/* Artikler / Medisinplanter / Plantemedisinens historie.
+                      Mobil: kompakt liste med små thumbnails (menyen skal være rask å skanne,
+                      ikke browses som forsidens editorial-kort). sm+: uendrede store bildekort. */}
+                  <div className="w-full shrink-0 overflow-hidden rounded-xl border border-ink/8 bg-white/40 sm:hidden">
+                    {MENU_CARDS.map((card, i) => (
+                      <Link
+                        key={card.href}
+                        href={card.href}
+                        onClick={closeMenu}
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-white/50 ${
+                          i > 0 ? "border-t border-ink/8" : ""
+                        }`}
+                      >
+                        <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg">
+                          <Image src={card.image} alt="" fill sizes="44px" className="object-cover" />
+                        </span>
+                        {card.label}
+                      </Link>
+                    ))}
+                  </div>
                   {MENU_CARDS.map((card) => (
                     <Link
                       key={card.href}
                       href={card.href}
                       onClick={closeMenu}
-                      className="group flex w-full shrink-0 flex-col overflow-hidden rounded-2xl shadow-sm shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:w-0 sm:flex-1"
+                      className="group hidden w-full shrink-0 flex-col overflow-hidden rounded-2xl shadow-sm shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:flex sm:w-0 sm:flex-1"
                       style={{ background: "rgba(255,255,255,0.55)" }}
                     >
                       {/* Fast aspect-ratio (ikke sm:flex-1 mot en strukket rad) — kortet skal ha
@@ -228,7 +274,7 @@ export function SiteMenu() {
                           src={card.image}
                           alt=""
                           fill
-                          sizes="(max-width: 640px) 100vw, 200px"
+                          sizes="200px"
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       </div>

@@ -1,0 +1,229 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - banner [ref=f3e3]:
+      - generic [ref=f3e5]:
+        - link "Rådbanken" [ref=f3e6] [cursor=pointer]:
+          - /url: /
+          - img "Rådbanken" [ref=f3e7]
+        - generic [ref=f3e8]:
+          - button "Søk" [ref=f3e9]
+          - button "Meny" [active] [ref=f3e13]
+    - main [ref=f3e16]:
+      - generic [ref=f3e20]:
+        - img "Rådbanken" [ref=f3e25]
+        - paragraph [ref=f3e26]: Et oppslagsverk for gamle husråd
+      - generic [ref=f3e29]:
+        - link [ref=f3e31] [cursor=pointer]:
+          - /url: /artikkel/fiken
+          - img "Ferske fiken, hele og oppskåret" [ref=f3e32]
+        - generic [ref=f3e33]:
+          - paragraph [ref=f3e34]: Frukt med lange tradisjoner
+          - heading "Fiken – en liten frukt med store helsefordeler" [level=2] [ref=f3e35]
+          - paragraph [ref=f3e36]: Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.
+          - link "Les artikkel" [ref=f3e37] [cursor=pointer]:
+            - /url: /artikkel/fiken
+            - text: Les artikkel
+            - generic [ref=f3e38]: →
+      - generic [ref=f3e40]:
+        - generic [ref=f3e41]:
+          - heading "Folkets favoritter" [level=2] [ref=f3e42]
+          - paragraph [ref=f3e43]: De 10 mest pålitelige kjerringrådene.
+        - generic [ref=f3e113]:
+          - link "1 Forkjølelse Ingefær og honning mot forkjølelse og sår hals Les mer →" [ref=f3e115] [cursor=pointer]:
+            - /url: /remedy/dX9Kt2P40dVoR5VUC3iB
+            - generic [ref=f3e116]: "1"
+            - generic [ref=f3e118]:
+              - paragraph [ref=f3e119]: Forkjølelse
+              - paragraph [ref=f3e120]: Ingefær og honning mot forkjølelse og sår hals
+              - paragraph [ref=f3e121]: Les mer →
+          - link "2 Forstoppelse Svisker eller sviskesaft Les mer →" [ref=f3e123] [cursor=pointer]:
+            - /url: /remedy/VYGc8XavJXt048pci2q9
+            - generic [ref=f3e124]: "2"
+            - generic [ref=f3e126]:
+              - paragraph [ref=f3e127]: Forstoppelse
+              - paragraph [ref=f3e128]: Svisker eller sviskesaft
+              - paragraph [ref=f3e129]: Les mer →
+          - link "3 Kvalme Ingefær Les mer →" [ref=f3e131] [cursor=pointer]:
+            - /url: /remedy/n7o3oTRkoGW7BUg9OgW4
+            - generic [ref=f3e132]: "3"
+            - generic [ref=f3e134]:
+              - paragraph [ref=f3e135]: Kvalme
+              - paragraph [ref=f3e136]: Ingefær
+              - paragraph [ref=f3e137]: Les mer →
+        - generic [ref=f3e138]:
+          - generic [ref=f3e139]:
+            - generic [ref=f3e140]:
+              - generic [ref=f3e141]: "4"
+              - link [ref=f3e142] [cursor=pointer]:
+                - /url: /remedy/Aw2gsCSkExq9RnpxKZNa
+                - paragraph [ref=f3e143]: Natron (bakepulver) mot kløe fra insektstikk og brennesle
+                - paragraph [ref=f3e144]: Myggstikk
+            - generic [ref=f3e145]:
+              - button "Fungerte" [ref=f3e146]:
+                - generic [ref=f3e147]: "11"
+              - button "Fungerte ikke" [ref=f3e148]:
+                - generic [ref=f3e149]: "1"
+          - generic [ref=f3e150]:
+            - generic [ref=f3e151]:
+              - generic [ref=f3e152]: "5"
+              - link [ref=f3e153] [cursor=pointer]:
+                - /url: /remedy/Jb9pw6K9e1pijXIRUeCL
+                - paragraph [ref=f3e154]: Mikrobølgeovn med sitron
+                - paragraph [ref=f3e155]: Skitten mikrobølgeovn
+            - generic [ref=f3e156]:
+              - button "Fungerte" [ref=f3e157]:
+                - generic [ref=f3e158]: "7"
+              - button "Fungerte ikke" [ref=f3e159]:
+                - generic [ref=f3e160]: "0"
+          - generic [ref=f3e161]:
+            - generic [ref=f3e162]:
+              - generic [ref=f3e163]: "6"
+              - link [ref=f3e164] [cursor=pointer]:
+                - /url: /remedy/MHG13owMGI4VeJTt7eOc
+                - paragraph [ref=f3e165]: Varmeflaske eller rispose på kronisk stivhet
+                - paragraph [ref=f3e166]: Muskel- og leddsmerter
+            - generic [ref=f3e167]:
+              - button "Fungerte" [ref=f3e168]:
+                - generic [ref=f3e169]: "10"
+              - button "Fungerte ikke" [ref=f3e170]:
+                - generic [ref=f3e171]: "1"
+          - generic [ref=f3e172]:
+            - generic [ref=f3e173]:
+              - generic [ref=f3e174]: "7"
+              - link [ref=f3e175] [cursor=pointer]:
+                - /url: /remedy/q4Iku2hq1ZWOYCfbAKKu
+                - paragraph [ref=f3e176]: Avokado-hårkur
+                - paragraph [ref=f3e177]: Tørt og matt hår
+            - generic [ref=f3e178]:
+              - button "Fungerte" [ref=f3e179]:
+                - generic [ref=f3e180]: "12"
+              - button "Fungerte ikke" [ref=f3e181]:
+                - generic [ref=f3e182]: "2"
+          - generic [ref=f3e183]:
+            - generic [ref=f3e184]:
+              - generic [ref=f3e185]: "8"
+              - link [ref=f3e186] [cursor=pointer]:
+                - /url: /remedy/C5HF8Hoit6ujzwBXN5fW
+                - paragraph [ref=f3e187]: Natron i joggesko
+                - paragraph [ref=f3e188]: Vond lukt i hjemmet
+            - generic [ref=f3e189]:
+              - button "Fungerte" [ref=f3e190]:
+                - generic [ref=f3e191]: "9"
+              - button "Fungerte ikke" [ref=f3e192]:
+                - generic [ref=f3e193]: "1"
+          - generic [ref=f3e194]:
+            - generic [ref=f3e195]:
+              - generic [ref=f3e196]: "9"
+              - link [ref=f3e197] [cursor=pointer]:
+                - /url: /remedy/DtsZFbHkdyHQ0h7IwU7O
+                - paragraph [ref=f3e198]: Natron + eddik til sluk
+                - paragraph [ref=f3e199]: Tett sluk
+            - generic [ref=f3e200]:
+              - button "Fungerte" [ref=f3e201]:
+                - generic [ref=f3e202]: "9"
+              - button "Fungerte ikke" [ref=f3e203]:
+                - generic [ref=f3e204]: "1"
+          - generic [ref=f3e205]:
+            - generic [ref=f3e206]:
+              - generic [ref=f3e207]: "10"
+              - link [ref=f3e208] [cursor=pointer]:
+                - /url: /remedy/K95r0ycpKwugWGue6qsI
+                - paragraph [ref=f3e209]: Hvitløk og honning
+                - paragraph [ref=f3e210]: Forkjølelse
+            - generic [ref=f3e211]:
+              - button "Fungerte" [ref=f3e212]:
+                - generic [ref=f3e213]: "5"
+              - button "Fungerte ikke" [ref=f3e214]:
+                - generic [ref=f3e215]: "0"
+      - generic [ref=f3e45]:
+        - generic [ref=f3e46]:
+          - paragraph [ref=f3e47]: I fokus
+          - heading [level=2] [ref=f3e48]:
+            - link "Medisinplanter" [ref=f3e49] [cursor=pointer]:
+              - /url: /medisinplanter
+        - generic [ref=f3e50]:
+          - generic [ref=f3e52]:
+            - link "Les mer om Rosenrot" [ref=f3e53] [cursor=pointer]:
+              - /url: /plante/rosenrot
+            - generic [ref=f3e54]:
+              - img "Rosenrot" [ref=f3e55]
+              - generic [ref=f3e56]: aug
+            - generic [ref=f3e57]:
+              - paragraph [ref=f3e58]: Rhodiola rosea
+              - heading "Rosenrot" [level=3] [ref=f3e59]
+              - paragraph [ref=f3e60]: Flerårig fjellplante hvis rotstokk lukter av roser når den deles. Kalt «Nordens ginseng» i folkemedisinen, og brukt i norsk tradisjon på torvtak som vern mot lynnedslag og brann.
+              - generic [ref=f3e61]: Les mer om urten →
+          - generic [ref=f3e63]:
+            - generic [ref=f3e64]:
+              - img "Lavendel" [ref=f3e65]
+              - 'link "Foto: Janine Joles / Unsplash" [ref=f3e66] [cursor=pointer]':
+                - /url: https://unsplash.com/@joyful_janine
+            - generic [ref=f3e67]:
+              - paragraph [ref=f3e68]: Lavandula angustifolia
+              - heading "Lavendel" [level=3] [ref=f3e69]
+              - paragraph [ref=f3e70]: Duftende blomsterspiker i lilla. Oljen brukes tradisjonelt for å roe sinnet og lindre lett hodepine.
+          - generic [ref=f3e72]:
+            - img "Kamille" [ref=f3e74]
+            - generic [ref=f3e75]:
+              - paragraph [ref=f3e76]: Matricaria chamomilla
+              - heading "Kamille" [level=3] [ref=f3e77]
+              - paragraph [ref=f3e78]: Liten daisy-aktig blomst. De tørkede blomstene trekkes som te og brukes tradisjonelt for å roe ned før søvn.
+      - generic [ref=f3e79]:
+        - generic [ref=f3e80]:
+          - paragraph [ref=f3e81]: Fra fortiden
+          - heading "Plantemedisinens historie" [level=2] [ref=f3e82]
+        - link "En gammel tinkturflaske, merket for hånd, omgitt av blomster Fra mormor til barnebarn Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen. Les historien" [ref=f3e84] [cursor=pointer]:
+          - /url: /historie
+          - img "En gammel tinkturflaske, merket for hånd, omgitt av blomster" [ref=f3e86]
+          - generic [ref=f3e87]:
+            - generic [ref=f3e88]: Fra mormor til barnebarn
+            - paragraph [ref=f3e89]: Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen.
+            - generic [ref=f3e90]:
+              - text: Les historien
+              - generic [ref=f3e91]: →
+      - generic [ref=f3e94]:
+        - link [ref=f3e96] [cursor=pointer]:
+          - /url: /artikkel/tyttebaer
+          - img "Tyttebær" [ref=f3e97]
+        - generic [ref=f3e98]:
+          - paragraph [ref=f3e99]: Gammelt husråd mot hoste
+          - heading "Tyttebær – naturens egen hostesaft" [level=2] [ref=f3e100]
+          - paragraph [ref=f3e101]: Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du bruker det riktig.
+          - link "Les artikkel" [ref=f3e102] [cursor=pointer]:
+            - /url: /artikkel/tyttebaer
+            - text: Les artikkel
+            - generic [ref=f3e103]: →
+  - button "Open Next.js Dev Tools" [ref=f3e109] [cursor=pointer]
+  - alert [ref=f3e216]
+  - generic [ref=f3e218]:
+    - generic [ref=f3e220]:
+      - button "Lukk meny" [ref=f3e222]: ✕
+      - generic [ref=f3e223]:
+        - textbox "Søk etter råd…" [ref=f3e229]
+        - link "Send inn råd" [ref=f3e230] [cursor=pointer]:
+          - /url: /del-rad
+          - text: Send inn råd
+          - generic [ref=f3e231]: →
+    - generic [ref=f3e233]:
+      - generic [ref=f3e234]:
+        - paragraph [ref=f3e235]: Kategorier
+        - generic [ref=f3e236]:
+          - generic [ref=f3e238]:
+            - link "Helse" [ref=f3e239] [cursor=pointer]:
+              - /url: /kategori/helse
+            - button "Vis underkategorier for Helse" [ref=f3e240]
+          - generic [ref=f3e244]:
+            - link "Hud, hår & skjønnhet" [ref=f3e245] [cursor=pointer]:
+              - /url: /kategori/hudharskjonnhet
+            - button "Vis underkategorier for Hud, hår & skjønnhet" [ref=f3e246]
+          - generic [ref=f3e250]:
+            - link "Hus & hjem" [ref=f3e251] [cursor=pointer]:
+              - /url: /kategori/husoghjem
+            - button "Vis underkategorier for Hus & hjem" [ref=f3e252]
+      - generic [ref=f3e255]:
+        - link "Artikler" [ref=f3e256] [cursor=pointer]:
+          - /url: /#artikler
+        - link "Medisinplanter" [ref=f3e258] [cursor=pointer]:
+          - /url: /medisinplanter
+        - link "Plantemedisinens historie" [ref=f3e260] [cursor=pointer]:
+          - /url: /historie

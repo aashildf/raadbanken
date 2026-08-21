@@ -1,0 +1,47 @@
+- generic [active] [ref=f28e1]:
+  - banner [ref=f28e2]:
+    - generic [ref=f28e4]:
+      - link "Rådbanken" [ref=f28e5] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f28e6]
+      - generic [ref=f28e7]:
+        - textbox "Søk råd" [ref=f28e13]
+        - link "Del råd" [ref=f28e14] [cursor=pointer]:
+          - /url: /del-rad
+          - text: Del råd
+          - generic [ref=f28e15]: →
+      - button "Meny" [ref=f28e17]
+    - generic [ref=f28e20]:
+      - link "Helse" [ref=f28e21] [cursor=pointer]:
+        - /url: /kategori/helse
+      - link "Hud, hår & skjønnhet" [ref=f28e22] [cursor=pointer]:
+        - /url: /kategori/hudharskjonnhet
+      - link "Hus & hjem" [ref=f28e23] [cursor=pointer]:
+        - /url: /kategori/husoghjem
+  - main [ref=f28e24]:
+    - link "← Alle kategorier" [ref=f28e26] [cursor=pointer]:
+      - /url: /alle
+    - generic [ref=f28e30]:
+      - paragraph [ref=f28e31]: Kategori
+      - heading "Hus & hjem" [level=1] [ref=f28e32]
+      - paragraph [ref=f28e33]: Praktiske triks for et rent og ryddig hjem.
+      - generic [ref=f28e34]:
+        - link "Helse" [ref=f28e35] [cursor=pointer]:
+          - /url: /kategori/helse
+        - link "Hud, hår & skjønnhet" [ref=f28e36] [cursor=pointer]:
+          - /url: /kategori/hudharskjonnhet
+        - link "Hus & hjem" [ref=f28e37] [cursor=pointer]:
+          - /url: /kategori/husoghjem
+    - generic [ref=f28e38]:
+      - paragraph [ref=f28e43]: Her har vi samlet kjerringråd for hus og hjem – små løsninger på store og små hverdagsproblemer. Før spesialmidler og produkter fantes for enhver oppgave, måtte man være kreativ med det man hadde tilgjengelig. Eddik, sitron, salt, potetmel og grønnsåpe kunne brukes til langt mer enn man kanskje skulle tro. Kunnskapen ble delt, prøvd ut og gitt videre, og mange av de gamle knepene lever fortsatt i beste velgående.
+      - generic [ref=f28e45]:
+        - heading "Tett sluk" [level=2] [ref=f28e47]
+        - heading "Oppvaskmaskin" [level=2] [ref=f28e49]
+        - heading "Kjøkkenskap" [level=2] [ref=f28e51]
+        - heading "Klesvask" [level=2] [ref=f28e53]
+        - heading "Vindusvask" [level=2] [ref=f28e55]
+        - heading "Vond lukt i hjemmet" [level=2] [ref=f28e57]
+        - heading "Rustflekker" [level=2] [ref=f28e59]
+        - heading "Riper i treverk" [level=2] [ref=f28e61]
+        - heading "Rengjøring av mikrobølgeovn" [level=2] [ref=f28e63]
+  - button "Open Next.js Dev Tools" [ref=f28e69] [cursor=pointer]

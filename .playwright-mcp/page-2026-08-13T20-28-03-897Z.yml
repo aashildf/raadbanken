@@ -1,0 +1,45 @@
+- generic [active] [ref=f22e1]:
+  - banner [ref=f22e2]:
+    - generic [ref=f22e4]:
+      - link "Rådbanken" [ref=f22e5] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f22e6]
+      - generic [ref=f22e7]:
+        - textbox "Søk råd" [ref=f22e13]
+        - link "Del råd" [ref=f22e14] [cursor=pointer]:
+          - /url: /del-rad
+          - text: Del råd
+          - generic [ref=f22e15]: →
+      - button "Meny" [ref=f22e17]
+    - generic [ref=f22e20]:
+      - link "Helse" [ref=f22e21] [cursor=pointer]:
+        - /url: /kategori/helse
+      - link "Hud, hår & skjønnhet" [ref=f22e22] [cursor=pointer]:
+        - /url: /kategori/hudharskjonnhet
+      - link "Hus & hjem" [ref=f22e23] [cursor=pointer]:
+        - /url: /kategori/husoghjem
+  - main [ref=f22e24]:
+    - link "← Alle kategorier" [ref=f22e26] [cursor=pointer]:
+      - /url: /alle
+    - generic [ref=f22e30]:
+      - paragraph [ref=f22e31]: Kategori
+      - heading "Helse" [level=1] [ref=f22e32]
+      - paragraph [ref=f22e33]: Gamle husråd mot vanlige plager, fra forkjølelse til hodepine.
+      - generic [ref=f22e34]:
+        - link "Helse" [ref=f22e35] [cursor=pointer]:
+          - /url: /kategori/helse
+        - link "Hud, hår & skjønnhet" [ref=f22e36] [cursor=pointer]:
+          - /url: /kategori/hudharskjonnhet
+        - link "Hus & hjem" [ref=f22e37] [cursor=pointer]:
+          - /url: /kategori/husoghjem
+    - generic [ref=f22e38]:
+      - paragraph [ref=f22e43]: Her har vi samlet kjerringråd knyttet til helse, velvære og det å ta vare på kroppen. Før moderne medisiner og apotek fantes på hvert hjørne, ble planter, urter og andre naturlige råvarer sanket, dyrket og brukt som en del av hverdagen. Mange råd gikk i arv fra generasjon til generasjon – enkle løsninger basert på det man hadde for hånden. Noen har glemt dem, andre brukes fortsatt.
+      - generic [ref=f22e45]:
+        - heading "Hals" [level=2] [ref=f22e47]
+        - heading "Forkjølelse" [level=2] [ref=f22e49]
+        - heading "Hode" [level=2] [ref=f22e51]
+        - heading "Søvn" [level=2] [ref=f22e53]
+        - heading "Hud & insekter" [level=2] [ref=f22e55]
+        - heading "Muskel & ledd" [level=2] [ref=f22e57]
+        - heading "Mage & fordøyelse" [level=2] [ref=f22e59]
+  - button "Open Next.js Dev Tools" [ref=f22e65] [cursor=pointer]

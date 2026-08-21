@@ -1,0 +1,27 @@
+- generic [active] [ref=f21e1]:
+  - button "Open Next.js Dev Tools" [ref=f21e117] [cursor=pointer]
+  - alert [ref=f21e242]
+  - banner [ref=f21e243]:
+    - generic [ref=f21e244]:
+      - link "Rådbanken" [ref=f21e245] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f21e246]
+      - textbox "Søk råd" [ref=f21e252]
+      - generic [ref=f21e253]:
+        - button "Kategorier" [ref=f21e256]
+        - button "Meny" [ref=f21e259]
+  - main [ref=f21e262]:
+    - generic [ref=f21e264]:
+      - link "← Alle kategorier" [ref=f21e265] [cursor=pointer]:
+        - /url: /alle
+      - generic [ref=f21e269]:
+        - paragraph [ref=f21e270]: Rådbanken
+        - heading "Helse" [level=1] [ref=f21e271]
+      - generic [ref=f21e272]:
+        - button "Hals" [ref=f21e274]
+        - button "Forkjølelse" [ref=f21e278]
+        - button "Hode" [ref=f21e282]
+        - button "Søvn" [ref=f21e286]
+        - button "Hud & insekter" [ref=f21e290]
+        - button "Muskel & ledd" [ref=f21e294]
+        - button "Mage & fordøyelse" [ref=f21e298]

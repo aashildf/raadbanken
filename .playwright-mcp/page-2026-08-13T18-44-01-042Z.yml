@@ -1,0 +1,72 @@
+- generic [active] [ref=f7e1]:
+  - banner [ref=f7e2]:
+    - generic [ref=f7e4]:
+      - link "Rådbanken" [ref=f7e5] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f7e6]
+      - generic [ref=f7e7]:
+        - textbox "Søk råd" [ref=f7e13]
+        - link "Del råd" [ref=f7e14] [cursor=pointer]:
+          - /url: /del-rad
+          - text: Del råd
+          - generic [ref=f7e15]: →
+      - button "Meny" [ref=f7e17]
+    - generic [ref=f7e20]:
+      - link "Helse" [ref=f7e21] [cursor=pointer]:
+        - /url: /kategori/helse
+      - link "Hud, hår & skjønnhet" [ref=f7e22] [cursor=pointer]:
+        - /url: /kategori/hudharskjonnhet
+      - link "Hus & hjem" [ref=f7e23] [cursor=pointer]:
+        - /url: /kategori/husoghjem
+  - main [ref=f7e24]:
+    - generic [ref=f7e25]:
+      - link "← Tilbake til Rådbanken" [ref=f7e26] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f7e27]:
+        - paragraph [ref=f7e28]: Rådbanken
+        - heading "Alle kategorier" [level=1] [ref=f7e29]
+        - paragraph [ref=f7e30]: Alle plager, samlet ett sted. Hopp rett til en kategori, eller bla gjennom alle tre.
+        - navigation [ref=f7e31]:
+          - link "Helse" [ref=f7e32] [cursor=pointer]:
+            - /url: "#helse"
+          - link "Hud, hår & skjønnhet" [ref=f7e33] [cursor=pointer]:
+            - /url: "#hudharskjonnhet"
+          - link "Hus & hjem" [ref=f7e34] [cursor=pointer]:
+            - /url: "#husoghjem"
+      - generic [ref=f7e35]:
+        - generic [ref=f7e36]:
+          - heading [level=2] [ref=f7e39]:
+            - link "Helse" [ref=f7e40] [cursor=pointer]:
+              - /url: /kategori/helse
+          - generic [ref=f7e41]:
+            - heading "Hals" [level=3] [ref=f7e43]
+            - heading "Forkjølelse" [level=3] [ref=f7e45]
+            - heading "Hode" [level=3] [ref=f7e47]
+            - heading "Søvn" [level=3] [ref=f7e49]
+            - heading "Hud & insekter" [level=3] [ref=f7e51]
+            - heading "Muskel & ledd" [level=3] [ref=f7e53]
+            - heading "Mage & fordøyelse" [level=3] [ref=f7e55]
+        - generic [ref=f7e56]:
+          - heading [level=2] [ref=f7e59]:
+            - link "Hud, hår & skjønnhet" [ref=f7e60] [cursor=pointer]:
+              - /url: /kategori/hudharskjonnhet
+          - generic [ref=f7e61]:
+            - heading "Håret" [level=3] [ref=f7e63]
+            - heading "Ansiktet" [level=3] [ref=f7e65]
+            - heading "Poser under øynene" [level=3] [ref=f7e67]
+            - heading "Avslapning & velvære" [level=3] [ref=f7e69]
+        - generic [ref=f7e70]:
+          - heading [level=2] [ref=f7e73]:
+            - link "Hus & hjem" [ref=f7e74] [cursor=pointer]:
+              - /url: /kategori/husoghjem
+          - generic [ref=f7e75]:
+            - heading "Tett sluk" [level=3] [ref=f7e77]
+            - heading "Oppvaskmaskin" [level=3] [ref=f7e79]
+            - heading "Kjøkkenskap" [level=3] [ref=f7e81]
+            - heading "Klesvask" [level=3] [ref=f7e83]
+            - heading "Vindusvask" [level=3] [ref=f7e85]
+            - heading "Vond lukt i hjemmet" [level=3] [ref=f7e87]
+            - heading "Rustflekker" [level=3] [ref=f7e89]
+            - heading "Riper i treverk" [level=3] [ref=f7e91]
+            - heading "Rengjøring av mikrobølgeovn" [level=3] [ref=f7e93]
+  - button "Open Next.js Dev Tools" [ref=f7e99] [cursor=pointer]

@@ -29,8 +29,8 @@ export default function TyttebaerArticlePage() {
           </p>
         </header>
 
-        <div className="relative mt-10 aspect-5/3 overflow-hidden rounded-3xl">
-          <Image src="/pictures/tyttebaer.png" alt="Tyttebær på busk" fill className="object-cover" />
+        <div className="relative mt-10 aspect-[4/3] overflow-hidden rounded-3xl">
+          <Image src="/pictures/tyttebar.png" alt="Tyttebær på busk" fill className="object-cover" />
         </div>
 
         <div className="mt-10 flex flex-col gap-6 text-ink-soft">

@@ -1,0 +1,33 @@
+- generic [active] [ref=f16e1]:
+  - banner [ref=f16e2]:
+    - generic [ref=f16e4]:
+      - link "Rådbanken" [ref=f16e5] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f16e6]
+      - generic [ref=f16e7]:
+        - button "Søk" [ref=f16e8]
+        - button "Meny" [ref=f16e12]
+  - main [ref=f16e15]:
+    - generic [ref=f16e21]:
+      - link "← Alle kategorier" [ref=f16e22] [cursor=pointer]:
+        - /url: /alle
+      - paragraph [ref=f16e23]: Kategori
+      - heading "Helse" [level=1] [ref=f16e24]
+      - paragraph [ref=f16e25]: Gamle husråd mot vanlige plager, fra forkjølelse til hodepine.
+      - generic [ref=f16e26]:
+        - link "Helse" [ref=f16e27] [cursor=pointer]:
+          - /url: /kategori/helse
+        - link "Hud, hår & skjønnhet" [ref=f16e28] [cursor=pointer]:
+          - /url: /kategori/hudharskjonnhet
+        - link "Hus & hjem" [ref=f16e29] [cursor=pointer]:
+          - /url: /kategori/husoghjem
+    - paragraph [ref=f16e31]: Her har vi samlet kjerringråd knyttet til helse, velvære og det å ta vare på kroppen. Før moderne medisiner og apotek fantes på hvert hjørne, ble planter, urter og andre naturlige råvarer sanket, dyrket og brukt som en del av hverdagen. Mange råd gikk i arv fra generasjon til generasjon – enkle løsninger basert på det man hadde for hånden. Noen har glemt dem, andre brukes fortsatt.
+    - generic [ref=f16e33]:
+      - heading "Hals" [level=2] [ref=f16e35]
+      - heading "Forkjølelse" [level=2] [ref=f16e37]
+      - heading "Hode" [level=2] [ref=f16e39]
+      - heading "Søvn" [level=2] [ref=f16e41]
+      - heading "Hud & insekter" [level=2] [ref=f16e43]
+      - heading "Muskel & ledd" [level=2] [ref=f16e45]
+      - heading "Mage & fordøyelse" [level=2] [ref=f16e47]
+  - button "Open Next.js Dev Tools" [ref=f16e53] [cursor=pointer]

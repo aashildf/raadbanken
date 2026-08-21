@@ -1,0 +1,29 @@
+- generic [active] [ref=f9e1]:
+  - banner [ref=f9e2]:
+    - generic [ref=f9e4]:
+      - link "Rådbanken" [ref=f9e5] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f9e6]
+      - generic [ref=f9e7]:
+        - button "Søk" [ref=f9e8]
+        - button "Meny" [ref=f9e12]
+  - main [ref=f9e15]:
+    - generic [ref=f9e21]:
+      - link "← Alle kategorier" [ref=f9e22] [cursor=pointer]:
+        - /url: /alle
+      - paragraph [ref=f9e23]: Kategori
+      - heading "Hud, hår & skjønnhet" [level=1] [ref=f9e24]
+      - paragraph [ref=f9e25]: Naturlig pleie for hår, hud og velvære.
+      - generic [ref=f9e26]:
+        - link "Helse" [ref=f9e27] [cursor=pointer]:
+          - /url: /kategori/helse
+        - link "Hud, hår & skjønnhet" [ref=f9e28] [cursor=pointer]:
+          - /url: /kategori/hudharskjonnhet
+        - link "Hus & hjem" [ref=f9e29] [cursor=pointer]:
+          - /url: /kategori/husoghjem
+    - generic [ref=f9e31]:
+      - heading "Håret" [level=2] [ref=f9e33]
+      - heading "Ansiktet" [level=2] [ref=f9e35]
+      - heading "Poser under øynene" [level=2] [ref=f9e37]
+      - heading "Avslapning & velvære" [level=2] [ref=f9e39]
+  - button "Open Next.js Dev Tools" [ref=f9e45] [cursor=pointer]

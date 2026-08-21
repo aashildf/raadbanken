@@ -1,0 +1,43 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e2]:
+    - generic [ref=f3e4]:
+      - link "Rådbanken" [ref=f3e5] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f3e6]
+      - generic [ref=f3e7]:
+        - textbox "Søk råd" [ref=f3e13]
+        - link "Del råd" [ref=f3e14] [cursor=pointer]:
+          - /url: /del-rad
+          - text: Del råd
+          - generic [ref=f3e15]: →
+      - button "Meny" [ref=f3e17]
+    - generic [ref=f3e20]:
+      - link "Helse" [ref=f3e21] [cursor=pointer]:
+        - /url: /kategori/helse
+      - link "Hud, hår & skjønnhet" [ref=f3e22] [cursor=pointer]:
+        - /url: /kategori/hudharskjonnhet
+      - link "Hus & hjem" [ref=f3e23] [cursor=pointer]:
+        - /url: /kategori/husoghjem
+  - main [ref=f3e24]:
+    - generic [ref=f3e30]:
+      - link "← Alle kategorier" [ref=f3e31] [cursor=pointer]:
+        - /url: /alle
+      - paragraph [ref=f3e32]: Kategori
+      - heading "Helse" [level=1] [ref=f3e33]
+      - paragraph [ref=f3e34]: Gamle husråd mot vanlige plager, fra forkjølelse til hodepine.
+      - generic [ref=f3e35]:
+        - link "Helse" [ref=f3e36] [cursor=pointer]:
+          - /url: /kategori/helse
+        - link "Hud, hår & skjønnhet" [ref=f3e37] [cursor=pointer]:
+          - /url: /kategori/hudharskjonnhet
+        - link "Hus & hjem" [ref=f3e38] [cursor=pointer]:
+          - /url: /kategori/husoghjem
+    - generic [ref=f3e40]:
+      - heading "Hals" [level=2] [ref=f3e42]
+      - heading "Forkjølelse" [level=2] [ref=f3e44]
+      - heading "Hode" [level=2] [ref=f3e46]
+      - heading "Søvn" [level=2] [ref=f3e48]
+      - heading "Hud & insekter" [level=2] [ref=f3e50]
+      - heading "Muskel & ledd" [level=2] [ref=f3e52]
+      - heading "Mage & fordøyelse" [level=2] [ref=f3e54]
+  - button "Open Next.js Dev Tools" [ref=f3e60] [cursor=pointer]

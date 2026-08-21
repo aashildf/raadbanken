@@ -1,0 +1,192 @@
+- generic [active] [ref=f7e1]:
+  - banner [ref=f7e2]:
+    - generic [ref=f7e4]:
+      - link "Rådbanken" [ref=f7e5] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f7e6]
+      - generic [ref=f7e7]:
+        - textbox "Søk råd" [ref=f7e13]
+        - link "Del råd" [ref=f7e14] [cursor=pointer]:
+          - /url: /del-rad
+          - text: Del råd
+          - generic [ref=f7e15]: →
+      - button "Meny" [ref=f7e17]
+    - generic [ref=f7e20]:
+      - link "Helse" [ref=f7e21] [cursor=pointer]:
+        - /url: /kategori/helse
+      - link "Hud, hår & skjønnhet" [ref=f7e22] [cursor=pointer]:
+        - /url: /kategori/hudharskjonnhet
+      - link "Hus & hjem" [ref=f7e23] [cursor=pointer]:
+        - /url: /kategori/husoghjem
+  - main [ref=f7e24]:
+    - generic [ref=f7e25]:
+      - link "← Tilbake til Rådbanken" [ref=f7e26] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f7e27]:
+        - paragraph [ref=f7e28]: Rådbanken
+        - heading "Alle kategorier" [level=1] [ref=f7e29]
+        - paragraph [ref=f7e30]: Alle plager, samlet ett sted. Hopp rett til en kategori, eller bla gjennom alle tre.
+        - navigation [ref=f7e31]:
+          - link "Helse" [ref=f7e32] [cursor=pointer]:
+            - /url: "#helse"
+          - link "Hud, hår & skjønnhet" [ref=f7e33] [cursor=pointer]:
+            - /url: "#hudharskjonnhet"
+          - link "Hus & hjem" [ref=f7e34] [cursor=pointer]:
+            - /url: "#husoghjem"
+      - generic [ref=f7e35]:
+        - generic [ref=f7e36]:
+          - heading [level=2] [ref=f7e39]:
+            - link "Helse" [ref=f7e40] [cursor=pointer]:
+              - /url: /kategori/helse
+          - generic [ref=f7e41]:
+            - generic [ref=f7e42]:
+              - heading "Hals" [level=3] [ref=f7e43]
+              - generic [ref=f7e103]:
+                - link "Hoste →" [ref=f7e104] [cursor=pointer]:
+                  - /url: /problem/vdpeg0x3Rm9UA1GGxEAW
+                  - generic [ref=f7e109]: Hoste
+                  - generic [ref=f7e110]: →
+                - link "Vond hals →" [ref=f7e111] [cursor=pointer]:
+                  - /url: /problem/bu0BFQA6yxJuEXzMBaZV
+                  - generic [ref=f7e116]: Vond hals
+                  - generic [ref=f7e117]: →
+            - generic [ref=f7e44]:
+              - heading "Forkjølelse" [level=3] [ref=f7e45]
+              - link "Forkjølelse →" [ref=f7e119] [cursor=pointer]:
+                - /url: /problem/bQFULJfyjTZSgkfm9sDd
+                - generic [ref=f7e123]: Forkjølelse
+                - generic [ref=f7e124]: →
+            - generic [ref=f7e46]:
+              - heading "Hode" [level=3] [ref=f7e47]
+              - link "Hodepine →" [ref=f7e126] [cursor=pointer]:
+                - /url: /problem/GMfnNReM0ekDRbjynnxf
+                - generic [ref=f7e129]: Hodepine
+                - generic [ref=f7e130]: →
+            - generic [ref=f7e48]:
+              - heading "Søvn" [level=3] [ref=f7e49]
+              - link "Søvnproblemer →" [ref=f7e132] [cursor=pointer]:
+                - /url: /problem/SytG9jE1NcfsTREXq2de
+                - generic [ref=f7e135]: Søvnproblemer
+                - generic [ref=f7e136]: →
+            - generic [ref=f7e50]:
+              - heading "Hud & insekter" [level=3] [ref=f7e51]
+              - generic [ref=f7e137]:
+                - link "Myggstikk →" [ref=f7e138] [cursor=pointer]:
+                  - /url: /problem/MsNtERMw7CaFCz35Mn59
+                  - generic [ref=f7e142]: Myggstikk
+                  - generic [ref=f7e143]: →
+                - link "Solbrenthet og eksem →" [ref=f7e144] [cursor=pointer]:
+                  - /url: /problem/RoshCk8d2KawvXX8yQnI
+                  - generic [ref=f7e148]: Solbrenthet og eksem
+                  - generic [ref=f7e149]: →
+            - generic [ref=f7e52]:
+              - heading "Muskel & ledd" [level=3] [ref=f7e53]
+              - link "Muskel- og leddsmerter →" [ref=f7e151] [cursor=pointer]:
+                - /url: /problem/PyczFEfXFDWbFAvUf94Q
+                - generic [ref=f7e156]: Muskel- og leddsmerter
+                - generic [ref=f7e157]: →
+            - generic [ref=f7e54]:
+              - heading "Mage & fordøyelse" [level=3] [ref=f7e55]
+              - generic [ref=f7e158]:
+                - link "Kvalme →" [ref=f7e159] [cursor=pointer]:
+                  - /url: /problem/RhOZgN7IieCTCObWQerd
+                  - generic [ref=f7e163]: Kvalme
+                  - generic [ref=f7e164]: →
+                - link "Forstoppelse →" [ref=f7e165] [cursor=pointer]:
+                  - /url: /problem/FY8jiz9Cjo1SgD4UKBQp
+                  - generic [ref=f7e169]: Forstoppelse
+                  - generic [ref=f7e170]: →
+                - link "Halsbrann →" [ref=f7e171] [cursor=pointer]:
+                  - /url: /problem/guhgDZurwa2xS6zRJn6D
+                  - generic [ref=f7e174]: Halsbrann
+                  - generic [ref=f7e175]: →
+        - generic [ref=f7e56]:
+          - heading [level=2] [ref=f7e59]:
+            - link "Hud, hår & skjønnhet" [ref=f7e60] [cursor=pointer]:
+              - /url: /kategori/hudharskjonnhet
+          - generic [ref=f7e61]:
+            - generic [ref=f7e62]:
+              - heading "Håret" [level=3] [ref=f7e63]
+              - link "Tørt og matt hår →" [ref=f7e177] [cursor=pointer]:
+                - /url: /problem/Aa8NTuAPBddVEOqVbJez
+                - generic [ref=f7e178]: Tørt og matt hår
+                - generic [ref=f7e179]: →
+            - generic [ref=f7e64]:
+              - heading "Ansiktet" [level=3] [ref=f7e65]
+              - link "Tørr og uren hud →" [ref=f7e181] [cursor=pointer]:
+                - /url: /problem/zQtFJjgR6vK8Ot4YtpED
+                - generic [ref=f7e182]: Tørr og uren hud
+                - generic [ref=f7e183]: →
+            - generic [ref=f7e66]:
+              - heading "Poser under øynene" [level=3] [ref=f7e67]
+              - link "Poser under øynene →" [ref=f7e185] [cursor=pointer]:
+                - /url: /problem/BsmNKlIRK4FXDB7s5wIl
+                - generic [ref=f7e186]: Poser under øynene
+                - generic [ref=f7e187]: →
+            - generic [ref=f7e68]:
+              - heading "Avslapning & velvære" [level=3] [ref=f7e69]
+              - link "Stress og uro →" [ref=f7e189] [cursor=pointer]:
+                - /url: /problem/pvFbRBxkFqGl9dbZbprj
+                - generic [ref=f7e190]: Stress og uro
+                - generic [ref=f7e191]: →
+        - generic [ref=f7e70]:
+          - heading [level=2] [ref=f7e73]:
+            - link "Hus & hjem" [ref=f7e74] [cursor=pointer]:
+              - /url: /kategori/husoghjem
+          - generic [ref=f7e75]:
+            - generic [ref=f7e76]:
+              - heading "Tett sluk" [level=3] [ref=f7e77]
+              - link "Tett sluk →" [ref=f7e193] [cursor=pointer]:
+                - /url: /problem/0OXjEcRYGdeg6wr14Cr0
+                - generic [ref=f7e194]: Tett sluk
+                - generic [ref=f7e195]: →
+            - generic [ref=f7e78]:
+              - heading "Oppvaskmaskin" [level=3] [ref=f7e79]
+              - link "Lukt i oppvaskmaskinen →" [ref=f7e197] [cursor=pointer]:
+                - /url: /problem/AdclhU60oo3nTXlOTUjP
+                - generic [ref=f7e198]: Lukt i oppvaskmaskinen
+                - generic [ref=f7e199]: →
+            - generic [ref=f7e80]:
+              - heading "Kjøkkenskap" [level=3] [ref=f7e81]
+              - link "Fett på kjøkkenskap →" [ref=f7e201] [cursor=pointer]:
+                - /url: /problem/QJA8CQITfKs9T8CNjEzq
+                - generic [ref=f7e202]: Fett på kjøkkenskap
+                - generic [ref=f7e203]: →
+            - generic [ref=f7e82]:
+              - heading "Klesvask" [level=3] [ref=f7e83]
+              - link "Stive og illeluktende klær →" [ref=f7e205] [cursor=pointer]:
+                - /url: /problem/ndnVa6wGLgh2QV4I15Pe
+                - generic [ref=f7e206]: Stive og illeluktende klær
+                - generic [ref=f7e207]: →
+            - generic [ref=f7e84]:
+              - heading "Vindusvask" [level=3] [ref=f7e85]
+              - link "Skjoldete vinduer →" [ref=f7e209] [cursor=pointer]:
+                - /url: /problem/ToyX5T1XAGG15XXScIKW
+                - generic [ref=f7e210]: Skjoldete vinduer
+                - generic [ref=f7e211]: →
+            - generic [ref=f7e86]:
+              - heading "Vond lukt i hjemmet" [level=3] [ref=f7e87]
+              - link "Vond lukt i hjemmet →" [ref=f7e213] [cursor=pointer]:
+                - /url: /problem/Fvmiepa81BAjXn2IjYPI
+                - generic [ref=f7e214]: Vond lukt i hjemmet
+                - generic [ref=f7e215]: →
+            - generic [ref=f7e88]:
+              - heading "Rustflekker" [level=3] [ref=f7e89]
+              - link "Rustflekker →" [ref=f7e217] [cursor=pointer]:
+                - /url: /problem/AOlbIKp99kUjA4YfVZIq
+                - generic [ref=f7e218]: Rustflekker
+                - generic [ref=f7e219]: →
+            - generic [ref=f7e90]:
+              - heading "Riper i treverk" [level=3] [ref=f7e91]
+              - link "Riper i treverk →" [ref=f7e221] [cursor=pointer]:
+                - /url: /problem/sYgN7Y2uSpZXCTcF2RzI
+                - generic [ref=f7e222]: Riper i treverk
+                - generic [ref=f7e223]: →
+            - generic [ref=f7e92]:
+              - heading "Rengjøring av mikrobølgeovn" [level=3] [ref=f7e93]
+              - link "Skitten mikrobølgeovn →" [ref=f7e225] [cursor=pointer]:
+                - /url: /problem/PnMHAAIFq4gpraQK4i5B
+                - generic [ref=f7e226]: Skitten mikrobølgeovn
+                - generic [ref=f7e227]: →
+  - button "Open Next.js Dev Tools" [ref=f7e99] [cursor=pointer]
+  - alert [ref=f7e228]

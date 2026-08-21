@@ -1,0 +1,90 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - banner [ref=f5e3]:
+      - generic [ref=f5e5]:
+        - link "Rådbanken" [ref=f5e6] [cursor=pointer]:
+          - /url: /
+          - img "Rådbanken" [ref=f5e7]
+        - generic [ref=f5e8]:
+          - button "Søk" [ref=f5e9]
+          - button "Meny" [ref=f5e13]
+    - main [ref=f5e16]:
+      - generic [ref=f5e20]:
+        - img "Rådbanken" [ref=f5e25]
+        - paragraph [ref=f5e26]: Et oppslagsverk for gamle husråd
+      - generic [ref=f5e29]:
+        - link [ref=f5e31] [cursor=pointer]:
+          - /url: /artikkel/fiken
+          - img "Ferske fiken, hele og oppskåret" [ref=f5e32]
+        - generic [ref=f5e33]:
+          - paragraph [ref=f5e34]: Frukt med lange tradisjoner
+          - heading "Fiken – en liten frukt med store helsefordeler" [level=2] [ref=f5e35]
+          - paragraph [ref=f5e36]: Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.
+          - link "Les artikkel" [ref=f5e37] [cursor=pointer]:
+            - /url: /artikkel/fiken
+            - text: Les artikkel
+            - generic [ref=f5e38]: →
+      - generic [ref=f5e40]:
+        - generic [ref=f5e41]:
+          - heading "Folkets favoritter" [level=2] [ref=f5e42]
+          - paragraph [ref=f5e43]: De 10 mest pålitelige kjerringrådene.
+        - paragraph [ref=f5e44]: Ingen råd med stemmer ennå.
+      - generic [ref=f5e45]:
+        - generic [ref=f5e46]:
+          - paragraph [ref=f5e47]: I fokus
+          - heading [level=2] [ref=f5e48]:
+            - link "Medisinplanter" [ref=f5e49] [cursor=pointer]:
+              - /url: /medisinplanter
+        - generic [ref=f5e50]:
+          - generic [ref=f5e52]:
+            - link "Les mer om Rosenrot" [ref=f5e53] [cursor=pointer]:
+              - /url: /plante/rosenrot
+            - generic [ref=f5e54]:
+              - img "Rosenrot" [ref=f5e55]
+              - generic [ref=f5e56]: aug
+            - generic [ref=f5e57]:
+              - paragraph [ref=f5e58]: Rhodiola rosea
+              - heading "Rosenrot" [level=3] [ref=f5e59]
+              - paragraph [ref=f5e60]: Flerårig fjellplante hvis rotstokk lukter av roser når den deles. Kalt «Nordens ginseng» i folkemedisinen, og brukt i norsk tradisjon på torvtak som vern mot lynnedslag og brann.
+              - generic [ref=f5e61]: Les mer om urten →
+          - generic [ref=f5e63]:
+            - generic [ref=f5e64]:
+              - img "Lavendel" [ref=f5e65]
+              - 'link "Foto: Janine Joles / Unsplash" [ref=f5e66] [cursor=pointer]':
+                - /url: https://unsplash.com/@joyful_janine
+            - generic [ref=f5e67]:
+              - paragraph [ref=f5e68]: Lavandula angustifolia
+              - heading "Lavendel" [level=3] [ref=f5e69]
+              - paragraph [ref=f5e70]: Duftende blomsterspiker i lilla. Oljen brukes tradisjonelt for å roe sinnet og lindre lett hodepine.
+          - generic [ref=f5e72]:
+            - img "Kamille" [ref=f5e74]
+            - generic [ref=f5e75]:
+              - paragraph [ref=f5e76]: Matricaria chamomilla
+              - heading "Kamille" [level=3] [ref=f5e77]
+              - paragraph [ref=f5e78]: Liten daisy-aktig blomst. De tørkede blomstene trekkes som te og brukes tradisjonelt for å roe ned før søvn.
+      - generic [ref=f5e79]:
+        - generic [ref=f5e80]:
+          - paragraph [ref=f5e81]: Fra fortiden
+          - heading "Plantemedisinens historie" [level=2] [ref=f5e82]
+        - link "En gammel tinkturflaske, merket for hånd, omgitt av blomster Fra mormor til barnebarn Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen. Les historien" [ref=f5e84] [cursor=pointer]:
+          - /url: /historie
+          - img "En gammel tinkturflaske, merket for hånd, omgitt av blomster" [ref=f5e86]
+          - generic [ref=f5e87]:
+            - generic [ref=f5e88]: Fra mormor til barnebarn
+            - paragraph [ref=f5e89]: Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen.
+            - generic [ref=f5e90]:
+              - text: Les historien
+              - generic [ref=f5e91]: →
+      - generic [ref=f5e94]:
+        - link [ref=f5e96] [cursor=pointer]:
+          - /url: /artikkel/tyttebaer
+          - img "Tyttebær" [ref=f5e97]
+        - generic [ref=f5e98]:
+          - paragraph [ref=f5e99]: Gammelt husråd mot hoste
+          - heading "Tyttebær – naturens egen hostesaft" [level=2] [ref=f5e100]
+          - paragraph [ref=f5e101]: Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du bruker det riktig.
+          - link "Les artikkel" [ref=f5e102] [cursor=pointer]:
+            - /url: /artikkel/tyttebaer
+            - text: Les artikkel
+            - generic [ref=f5e103]: →
+  - button "Open Next.js Dev Tools" [ref=f5e109] [cursor=pointer]

@@ -2,6 +2,11 @@
 
 :root {
   --page-pad: 20px;
+  /* Finjustering for SiteMenu sitt lukkekryss, som skal lande nøyaktig over
+     Meny-ikonet i headeren. Ikonet bytter størrelse ved Tailwinds sm-brytpunkt
+     (640px), som ikke er det samme brytpunktet som --page-pad bruker, så de to
+     trenger litt ulik korreksjon for å møtes presist på begge sider. */
+  --menu-close-adjust: 2px;
 
   --page-bg: #f5f5f5;
   --paper: #f6f0e3;
@@ -34,6 +39,11 @@
   --foreground: var(--ink);
 }
 
+@media (min-width: 640px) {
+  :root {
+    --menu-close-adjust: 8px;
+  }
+}
 @media (min-width: 768px) {
   :root {
     --page-pad: 48px;
@@ -84,6 +94,16 @@
   --font-serif: var(--font-fraunces);
   --font-logo: var(--font-ibarra);
   --font-sans: var(--font-inter);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {

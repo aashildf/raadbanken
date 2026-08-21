@@ -1,0 +1,79 @@
+- generic [active] [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - generic [ref=f2e4]:
+      - link "Rådbanken" [ref=f2e5] [cursor=pointer]:
+        - /url: /
+        - img "Rådbanken" [ref=f2e6]
+      - generic [ref=f2e7]:
+        - button "Søk" [ref=f2e8]
+        - button "Meny" [ref=f2e12]
+  - main [ref=f2e15]:
+    - generic [ref=f2e16]:
+      - link "← Tilbake til Rådbanken" [ref=f2e17] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f2e18]:
+        - paragraph [ref=f2e19]: Urter og planter
+        - heading "Medisinplanter" [level=1] [ref=f2e20]
+        - paragraph [ref=f2e21]: En samling artikler om planter og urter som tradisjonelt har blitt brukt i folkemedisin og kjerringråd, med litt mer bakgrunn om hver av dem.
+      - generic [ref=f2e22]:
+        - link [ref=f2e23] [cursor=pointer]:
+          - /url: /plante/lovetann
+          - img "Løvetann" [ref=f2e25]
+          - generic [ref=f2e31]:
+            - paragraph [ref=f2e32]: Taraxacum officinale
+            - paragraph [ref=f2e33]: Løvetann
+        - link [ref=f2e34] [cursor=pointer]:
+          - /url: /plante/ingefaer
+          - img "Ingefær" [ref=f2e36]
+          - generic [ref=f2e42]:
+            - paragraph [ref=f2e43]: Zingiber officinale
+            - paragraph [ref=f2e44]: Ingefær
+        - link [ref=f2e45] [cursor=pointer]:
+          - /url: /plante/kamille
+          - img "Kamille" [ref=f2e47]
+          - generic [ref=f2e53]:
+            - paragraph [ref=f2e54]: Matricaria chamomilla
+            - paragraph [ref=f2e55]: Kamille
+        - link [ref=f2e56] [cursor=pointer]:
+          - /url: /plante/lavendel
+          - img "Lavendel" [ref=f2e58]
+          - generic [ref=f2e64]:
+            - paragraph [ref=f2e65]: Lavandula angustifolia
+            - paragraph [ref=f2e66]: Lavendel
+        - link [ref=f2e67] [cursor=pointer]:
+          - /url: /plante/hvitloek
+          - img "Hvitløk" [ref=f2e69]
+          - generic [ref=f2e75]:
+            - paragraph [ref=f2e76]: Allium sativum
+            - paragraph [ref=f2e77]: Hvitløk
+        - link [ref=f2e78] [cursor=pointer]:
+          - /url: /plante/tymian
+          - img "Tymian" [ref=f2e80]
+          - generic [ref=f2e85]:
+            - paragraph [ref=f2e86]: Thymus vulgaris
+            - paragraph [ref=f2e87]: Tymian
+        - link [ref=f2e88] [cursor=pointer]:
+          - /url: /plante/fennikel
+          - img "Fennikel" [ref=f2e90]
+          - generic [ref=f2e96]:
+            - paragraph [ref=f2e97]: Foeniculum vulgare
+            - paragraph [ref=f2e98]: Fennikel
+        - link [ref=f2e99] [cursor=pointer]:
+          - /url: /plante/salvie
+          - img "Salvie" [ref=f2e101]
+          - generic [ref=f2e106]:
+            - paragraph [ref=f2e107]: Salvia officinalis
+            - paragraph [ref=f2e108]: Salvie
+        - link [ref=f2e109] [cursor=pointer]:
+          - /url: /plante/aloe-vera
+          - img "Aloe vera" [ref=f2e111]
+          - generic [ref=f2e116]:
+            - paragraph [ref=f2e117]: Aloe vera
+            - paragraph [ref=f2e118]: Aloe vera
+        - link [ref=f2e119] [cursor=pointer]:
+          - /url: /plante/rosenrot
+          - img "Rosenrot" [ref=f2e121]
+          - generic [ref=f2e126]:
+            - paragraph [ref=f2e127]: Rhodiola rosea
+            - paragraph [ref=f2e128]: Rosenrot
+  - button "Open Next.js Dev Tools" [ref=f2e134] [cursor=pointer]
