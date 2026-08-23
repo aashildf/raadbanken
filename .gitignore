@@ -52,3 +52,7 @@ CLAUDE.md
 # local AI-agent skill tooling (installed per-machine, not project code)
 .agents/
 skills-lock.json
+
+# Playwright MCP debug output (console/network logs, screenshots) — can contain
+# request URLs with API keys/tokens, never meant to be committed
+.playwright-mcp/
