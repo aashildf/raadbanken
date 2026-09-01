@@ -56,3 +56,6 @@ skills-lock.json
 # Playwright MCP debug output (console/network logs, screenshots) — can contain
 # request URLs with API keys/tokens, never meant to be committed
 .playwright-mcp/
+
+# local design-hook tooling config/cache (per-machine, not project code)
+.impeccable/

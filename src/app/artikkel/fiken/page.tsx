@@ -31,8 +31,14 @@ export default function FikenArticlePage() {
         </header>
 
         <div className="relative mt-10 aspect-5/3 overflow-hidden rounded-3xl">
-          <Image src="/pictures/fiken.png" alt="Ferske fiken, hele og oppskåret" fill className="object-cover" />
+          <Image
+            src="/pictures/menupictures/fiken_pexels-adriannacalvo-23384641.jpg"
+            alt="Ferske fiken, hele og oppskåret"
+            fill
+            className="object-cover"
+          />
         </div>
+        <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: Adrianna CA / Pexels</p>
 
         <div className="mt-10 flex flex-col gap-6 text-ink-soft">
           <p>Her er de viktigste medisinske fordelene og bruksområdene til fiken:</p>

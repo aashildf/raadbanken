@@ -7,6 +7,11 @@
      (640px), som ikke er det samme brytpunktet som --page-pad bruker, så de to
      trenger litt ulik korreksjon for å møtes presist på begge sider. */
   --menu-close-adjust: 2px;
+  /* Høyden på SiteHeader (PILL_HEIGHT), slik at SiteMenu-panelet kan starte
+     rett under navbaren i stedet for å dekke den. Kategori-tag-raden
+     (CATEGORY_TAG_ROW_HEIGHT = 44px) legges til fra samme sm-brytpunkt som
+     den selv vises fra. Hold i sync med konstantene i SiteHeader.tsx. */
+  --header-height: 68px;
 
   --page-bg: #f5f5f5;
   --paper: #f6f0e3;
@@ -42,6 +47,7 @@
 @media (min-width: 640px) {
   :root {
     --menu-close-adjust: 8px;
+    --header-height: 112px;
   }
 }
 @media (min-width: 768px) {
@@ -124,6 +130,13 @@ body {
 .font-serif-display {
   font-family: var(--font-fraunces), serif;
   font-optical-sizing: auto;
+  /* Skrur opp Fraunces sin SOFT-akse for en litt mykere, kurvete display-
+     følelse (inspirert av Dahlia/VJ Type) på store overskrifter. WONK er
+     bevisst avslått — den gir mye mer eksentriske bokstavformer i kursiv
+     stil enn i rett stil, og gikk ut over lesbarheten på kursive
+     overskrifter (f.eks. historie-siden). Målgruppen inkluderer eldre
+     brukere, så lesbarhet prioriteres over dekorasjon her. */
+  font-variation-settings: "SOFT" 70, "WONK" 0;
 }
 
 .font-logo {

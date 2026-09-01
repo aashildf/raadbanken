@@ -251,18 +251,26 @@ export default function HomePage() {
               style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
             >
               {/* Bildet — 2/3 av bredden, fast aspect-ratio (ingen stretch-avhengig prosenthøyde) */}
-              <div className="w-full shrink-0 sm:w-2/3">
+              <div className="relative w-full shrink-0 sm:w-2/3">
                 <Link
                   href="/artikkel/fiken"
                   className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
                 >
                   <Image
-                    src="/pictures/fiken.png"
+                    src="/pictures/menupictures/fiken_pexels-adriannacalvo-23384641.jpg"
                     alt="Ferske fiken, hele og oppskåret"
                     fill
                     className="object-cover"
                   />
                 </Link>
+                <a
+                  href="https://www.pexels.com/photo/figs-in-white-bowl-23384641/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
+                >
+                  Foto: Adrianna CA / Pexels
+                </a>
               </div>
 
               {/* Tekstboks — 1/3 av bredden, flush mot bildet, ingen mellomrom */}
@@ -587,15 +595,27 @@ export default function HomePage() {
               className="mx-auto flex flex-col items-stretch py-8 sm:flex-row sm:py-12"
               style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
             >
-              {/* Bildet — 2/3 av bredden, samme oppsett som Fiken. tyttebar.png (1259×1006,
-                  ~5:4) passer godt i denne boksen med bare mild beskjæring. */}
-              <div className="w-full shrink-0 sm:w-2/3">
+              {/* Bildet — 2/3 av bredden, samme oppsett som Fiken. */}
+              <div className="relative w-full shrink-0 sm:w-2/3">
                 <Link
                   href="/artikkel/tyttebaer"
                   className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
                 >
-                  <Image src="/pictures/tyttebar.png" alt="Tyttebær" fill className="object-cover" />
+                  <Image
+                    src="/pictures/menupictures/tyytebaer_pexels-sandra-seitamaa-89384773-9669197.jpg"
+                    alt="Tyttebær"
+                    fill
+                    className="object-cover"
+                  />
                 </Link>
+                <a
+                  href="https://www.pexels.com/photo/close-up-of-plants-and-berries-9669197/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
+                >
+                  Foto: Sandra Seitamaa / Pexels
+                </a>
               </div>
 
               {/* Tekstboks — 1/3 av bredden, flush mot bildet */}
@@ -615,6 +635,63 @@ export default function HomePage() {
                 </p>
                 <Link
                   href="/artikkel/tyttebaer"
+                  className="mt-2 inline-flex items-center gap-2 rounded-[14px] px-6 py-2.5 text-sm font-semibold text-paper transition-opacity hover:opacity-90"
+                  style={{ background: "#72874E" }}
+                >
+                  Les artikkel
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* SYRIN — tredje artikkel i samme fullbredde bånd-stil, bildet speilvendt (til høyre)
+            for å bryte opp rytmen fra Fiken/Tyttebær rett over. */}
+        <section className="relative">
+          <div className="relative left-1/2 w-screen -translate-x-1/2" style={{ background: "#F9E1C1" }}>
+            <Reveal
+              className="mx-auto flex flex-col items-stretch py-8 sm:flex-row-reverse sm:py-12"
+              style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
+            >
+              <div className="relative w-full shrink-0 sm:w-2/3">
+                <Link
+                  href="/artikkel/syrin"
+                  className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
+                >
+                  <Image
+                    src="/pictures/syrin_pexels-iriser-1431192.jpg"
+                    alt="Syrinklase i nærbilde"
+                    fill
+                    className="object-cover"
+                  />
+                </Link>
+                <a
+                  href="https://www.pexels.com/photo/close-up-photography-of-orchid-flowers-1431192/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
+                >
+                  Foto: Irina Iriser / Pexels
+                </a>
+              </div>
+
+              <div
+                className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8"
+                style={{ background: "#FBEED4" }}
+              >
+                <p className="font-metrophobic text-xs uppercase tracking-[0.3em]" style={{ color: "#535E3D" }}>
+                  Duftende prydbusk med gamle røtter
+                </p>
+                <h2 className="font-metrophobic text-2xl sm:text-3xl" style={{ color: "#535E3D" }}>
+                  Syrin – mer enn en vakker vårduft
+                </h2>
+                <p className="font-metrophobic" style={{ color: "#535E3D" }}>
+                  Blomstene er spiselige og fulle av virkestoffer som tradisjonelt er brukt mot
+                  uro, urolig mage og irritert hud.
+                </p>
+                <Link
+                  href="/artikkel/syrin"
                   className="mt-2 inline-flex items-center gap-2 rounded-[14px] px-6 py-2.5 text-sm font-semibold text-paper transition-opacity hover:opacity-90"
                   style={{ background: "#72874E" }}
                 >

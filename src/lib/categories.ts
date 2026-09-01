@@ -7,6 +7,9 @@ export type Subcategory = {
   problemSlugs: string[];
   synonyms: string[];
   topCategoryId: string;
+  // Valgfritt bilde til undergruppe-kort (f.eks. i mega-menyen). Faller tilbake
+  // til hovedkategoriens bilde når det ikke er satt.
+  image?: string;
 };
 
 export const HEALTH_SUBCATEGORIES: Subcategory[] = [
@@ -16,6 +19,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["hoste", "vond-hals"],
     synonyms: ["slim", "heshet", "sår hals", "tett hals", "harke"],
     topCategoryId: "helse",
+    image: "/pictures/menupictures/hals_pexels-cottonbro-5712690.jpg",
   },
   {
     id: "luftveier",
@@ -30,6 +34,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["hodepine"],
     synonyms: ["migrene", "vondt i hodet"],
     topCategoryId: "helse",
+    image: "/pictures/menupictures/hodepine.jpg",
   },
   {
     id: "sovn",
@@ -37,6 +42,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["sovnproblemer"],
     synonyms: ["innsovning", "urolig natt", "insomni"],
     topCategoryId: "helse",
+    image: "/pictures/menupictures/goodsleep_pexels-olly-3807626.jpg",
   },
   {
     id: "hud",
@@ -66,6 +72,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["haret"],
     synonyms: ["hårpleie", "hårkur", "hårvekst", "tørt hår"],
     topCategoryId: "hudharskjonnhet",
+    image: "/pictures/menupictures/hair_pexels-pixabay-255339.jpg",
   },
   {
     id: "ansiktet",
@@ -73,6 +80,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["ansiktet"],
     synonyms: ["ansiktsmaske", "hudpleie", "tørr hud", "uren hud"],
     topCategoryId: "hudharskjonnhet",
+    image: "/pictures/menupictures/hud_pexels-boom-12585771.jpg",
   },
   {
     id: "oyne",
@@ -87,6 +95,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["avslapning-og-velvaere"],
     synonyms: ["stress", "uro", "slappe av", "spa"],
     topCategoryId: "hudharskjonnhet",
+    image: "/pictures/menupictures/stress_pexels-taryn-elliott-8096934.jpg",
   },
   // --- Hus & hjem ---
   {
@@ -116,6 +125,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["klesvask"],
     synonyms: ["skyllemiddel", "vaskemaskin", "stive håndklær"],
     topCategoryId: "husoghjem",
+    image: "/pictures/menupictures/vaskemaskin_pexels-towfiqu-barbhuiya-3440682-11316620.jpg",
   },
   {
     id: "vinduer",
@@ -123,6 +133,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["vindusvask"],
     synonyms: ["skjoldete vinduer", "vaske vinduer"],
     topCategoryId: "husoghjem",
+    image: "/pictures/menupictures/speil_pexels-gustavo-fring-3867615.jpg",
   },
   {
     id: "hjemmelukt",
@@ -144,6 +155,7 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
     problemSlugs: ["riper-i-treverk"],
     synonyms: ["riper", "riper i møbler"],
     topCategoryId: "husoghjem",
+    image: "/pictures/menupictures/gulv_pexels-karola-g-5706430.jpg",
   },
   {
     id: "mikro",
@@ -155,9 +167,27 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
 ];
 
 export const TOP_CATEGORIES = [
-  { id: "helse", name: "Helse", enabled: true, image: "/pictures/helse.png" },
-  { id: "hudharskjonnhet", name: "Hud, hår & skjønnhet", enabled: true, image: "/pictures/beauty.png" },
-  { id: "husoghjem", name: "Hus & hjem", enabled: true, image: "/pictures/husoghjem.png" },
+  {
+    id: "helse",
+    name: "Helse",
+    enabled: true,
+    image: "/pictures/helse.png",
+    tagline: "Gamle husråd mot vanlige plager, fra forkjølelse til hodepine.",
+  },
+  {
+    id: "hudharskjonnhet",
+    name: "Hud, hår & skjønnhet",
+    enabled: true,
+    image: "/pictures/beauty.png",
+    tagline: "Naturlig pleie for hår, hud og velvære.",
+  },
+  {
+    id: "husoghjem",
+    name: "Hus & hjem",
+    enabled: true,
+    image: "/pictures/husoghjem.png",
+    tagline: "Praktiske triks for et rent og ryddig hjem.",
+  },
 ];
 
 // Plager der smerter/symptomer kan være tegn på noe mer alvorlig, viser en liten

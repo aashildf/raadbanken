@@ -2,7 +2,6 @@
 
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -14,7 +13,8 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { HEALTH_SUBCATEGORIES, TOP_CATEGORIES } from "@/lib/categories";
-import { IconChevronDown, IconMenu, IconSearch } from "@/components/icons";
+import { MEDICINAL_PLANTS } from "@/lib/plants";
+import { IconChevronDown, IconMenu} from "@/components/icons";
 import type { Problem, Remedy } from "@/lib/types";
 
 const SEEDS: { left: string; top: string; rotate: string }[] = [
@@ -23,20 +23,19 @@ const SEEDS: { left: string; top: string; rotate: string }[] = [
   { left: "88%", top: "62%", rotate: "40deg"  },
 ];
 
-const MENU_CARDS = [
-  { href: "/#artikler",      label: "Artikler",                    image: "/pictures/artikler_hjerte.png" },
-  { href: "/medisinplanter", label: "Medisinplanter",               image: "/pictures/solhattmeny.png" },
-  { href: "/historie",       label: "Plantemedisinens historie",    image: "/pictures/blomsterdamen.png" },
-];
+// "Artikler", "Medisinplanter" og "Historie" er ikke ekte kategorier i
+// TOP_CATEGORIES (de har ingen undergrupper/kategori-side), men vises i samme
+// liste og med samme forhåndsvisning-med-bilder som Helse/Skjønnhet/Hus&hjem.
+type MenuCard = { key: string; href: string; image: string; label: string };
+type MenuEntry = { id: string; name: string; tagline: string; href: string; cards: MenuCard[] };
 
 export function SiteMenu() {
   const [open, setOpen]             = useState(false);
   const [visible, setVisible]       = useState(false);
   const [mounted, setMounted]       = useState(false);
-  const [searchQ, setSearchQ]       = useState("");
   const [problems, setProblems]     = useState<Problem[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const router = useRouter();
+  const [activeCategoryId, setActiveCategoryId] = useState<string>(TOP_CATEGORIES[0].id);
 
   useEffect(() => setMounted(true), []);
 
@@ -49,6 +48,85 @@ export function SiteMenu() {
 
   const bySlug = useMemo(() => new Map(problems.map((p) => [p.slug, p])), [problems]);
 
+  const menuEntries = useMemo<MenuEntry[]>(() => {
+    const categoryEntries: MenuEntry[] = TOP_CATEGORIES.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      tagline: cat.tagline,
+      href: `/kategori/${cat.id}`,
+      cards: (() => {
+        const subs = HEALTH_SUBCATEGORIES.filter((s) => s.topCategoryId === cat.id);
+        // Undergrupper med eget bilde vises først i forhåndsvisningen — resten
+        // fyller opp til 3 kort i original rekkefølge, med kategoriens eget
+        // bilde som fallback.
+        const withImage = subs.filter((s) => s.image);
+        const withoutImage = subs.filter((s) => !s.image);
+        return [...withImage, ...withoutImage].slice(0, 3);
+      })()
+        .map((sub) => {
+          const firstProblem = sub.problemSlugs.map((s) => bySlug.get(s)).find(Boolean);
+          return {
+            key: sub.id,
+            href: firstProblem ? `/problem/${firstProblem.id}` : `/kategori/${cat.id}`,
+            image: sub.image ?? cat.image,
+            label: sub.name,
+          };
+        }),
+    }));
+
+    const extraEntries: MenuEntry[] = [
+      {
+        id: "artikler",
+        name: "Artikler",
+        tagline: "Lengre lesestoff om husråd, mat og tradisjoner.",
+        href: "/#artikler",
+        cards: [
+          {
+            key: "fiken",
+            href: "/artikkel/fiken",
+            image: "/pictures/menupictures/fiken_pexels-adriannacalvo-23384641.jpg",
+            label: "Fiken",
+          },
+          {
+            key: "tyttebaer",
+            href: "/artikkel/tyttebaer",
+            image: "/pictures/menupictures/tyytebaer_pexels-sandra-seitamaa-89384773-9669197.jpg",
+            label: "Tyttebær",
+          },
+          {
+            key: "syrin",
+            href: "/artikkel/syrin",
+            image: "/pictures/syrin_pexels-iriser-1431192.jpg",
+            label: "Syrin",
+          },
+        ],
+      },
+      {
+        id: "medisinplanter",
+        name: "Medisinplanter",
+        tagline: "Urter og planter fra norsk folkemedisin-tradisjon.",
+        href: "/medisinplanter",
+        cards: MEDICINAL_PLANTS.slice(0, 3).map((p) => ({
+          key: p.id,
+          href: p.sections ? `/plante/${p.id}` : "/medisinplanter",
+          image: p.image?.src ?? "/pictures/solhattmeny.png",
+          label: p.name,
+        })),
+      },
+      {
+        id: "historie",
+        name: "Historie",
+        tagline: "Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen.",
+        href: "/historie",
+        cards: [
+          { key: "historie", href: "/historie", image: "/pictures/urter_historie.png", label: "Plantemedisinens historie" },
+        ],
+      },
+    ];
+
+    return [...categoryEntries, ...extraEntries];
+  }, [bySlug]);
+
   function openMenu() {
     setOpen(true);
     setTimeout(() => setVisible(true), 12);
@@ -60,25 +138,18 @@ export function SiteMenu() {
     setTimeout(() => setOpen(false), 300);
   }
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    const q = searchQ.trim();
-    if (q) {
-      router.push(`/?q=${encodeURIComponent(q)}`);
-      closeMenu();
-      setSearchQ("");
-    }
-  }
-
   const panel =
     open && mounted
       ? createPortal(
           <>
-            {/* Backdrop */}
+            {/* Backdrop — starter under headeren (ikke fra toppen av viewporten), slik at
+                navbaren forblir synlig og klikkbar mens menyen er åpen, i stedet for å bli
+                dekket av en mørk overlay. */}
             <div
               onClick={closeMenu}
-              className="fixed inset-0 z-40"
+              className="fixed inset-x-0 bottom-0 z-40"
               style={{
+                top: "var(--header-height)",
                 background: "rgba(20,10,35,0.22)",
                 opacity: visible ? 1 : 0,
                 transition: "opacity 260ms ease-out",
@@ -86,11 +157,12 @@ export function SiteMenu() {
               }}
             />
 
-            {/* Panel */}
+            {/* Panel — samme grunn: starter rett under headeren, ikke over den. */}
             <div
-              className="fixed left-0 right-0 top-0 z-50 flex flex-col overflow-hidden"
+              className="fixed left-0 right-0 z-40 flex flex-col overflow-hidden"
               style={{
-                maxHeight: "88vh",
+                top: "var(--header-height)",
+                maxHeight: "calc(88vh - var(--header-height))",
                 background: "#F9F7E8",
                 borderBottomLeftRadius: 28,
                 borderBottomRightRadius: 28,
@@ -99,7 +171,7 @@ export function SiteMenu() {
                 transition: "transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
               }}
             >
-              {/* Topplinje: søk og send-inn-råd — tydelig og midtstilt. Ingen egen
+              {/* Ingen egen
                   bakgrunnsfarge her (panelet har allerede samme farge) — det lar
                   løvetann-pynten fra bunnen av panelet vises helt opp til krysset
                   i stedet for å bli maskert bort av en ugjennomsiktig stripe. */}
@@ -118,171 +190,153 @@ export function SiteMenu() {
                       ✕
                     </button>
                   </div>
-
-                  {/* Søk råd + Send inn råd — store og midtstilte */}
-                  <div className="mx-auto mt-2 flex w-full max-w-2xl flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
-                    <form onSubmit={handleSearch} className="flex-1">
-                      <div
-                        className="flex h-full items-center gap-3 px-4"
-                        style={{
-                          height: 52,
-                          background: "rgba(255,255,255,0.75)",
-                          borderRadius: 14,
-                          border: "1px solid rgba(50,22,72,0.10)",
-                        }}
-                      >
-                        <IconSearch className="h-5 w-5 shrink-0 text-ink/40" />
-                        <input
-                          value={searchQ}
-                          onChange={(e) => setSearchQ(e.target.value)}
-                          placeholder="Søk etter råd…"
-                          className="w-full bg-transparent text-base text-ink placeholder:text-ink/40 focus:outline-none"
-                        />
-                      </div>
-                    </form>
-                    <Link
-                      href="/del-rad"
-                      onClick={closeMenu}
-                      className="flex shrink-0 items-center justify-center gap-2 rounded-[14px] px-6 text-base font-semibold text-paper transition-opacity hover:opacity-90"
-                      style={{ height: 52, background: "#72874E" }}
-                    >
-                      Send inn råd
-                      <span aria-hidden>→</span>
-                    </Link>
-                  </div>
                 </div>
               </div>
 
-              {/* Hovedinnhold: kategorier (bredere) / nav-kort (smalere) */}
-              <div className="relative z-10 flex min-h-0 flex-1 flex-col sm:flex-row">
-                <div
-                  className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-4 pb-8 sm:flex-row sm:items-start sm:gap-4 sm:overflow-visible"
-                  style={{ paddingLeft: "max(28px, 6vw)", paddingRight: "max(48px, 7vw)" }}
-                >
-                  {/* Kategorier — bredere enn de tre kortene */}
-                  <div
-                    className="relative z-10 min-h-0 w-full shrink-0 pl-2 sm:w-0 sm:flex-[1.6] sm:overflow-y-auto sm:pl-4"
-                  >
-                    <p className="font-display mb-2 text-xl font-bold sm:text-2xl" style={{ color: "#576557" }}>
-                      Kategorier
-                    </p>
-                    {/* Bare de tre hovedkategoriene vises her — klikk (eller hover på desktop)
-                        åpner underkategoriene for den. Unngår at listen blir superlang, som den
-                        ble da den viste alle 20 underkategoriene flatt. */}
-                    <div className="overflow-hidden rounded-xl border border-ink/8 bg-white/40">
-                      {TOP_CATEGORIES.map((cat, i) => {
-                        const isExpanded = expandedId === cat.id;
-                        const subs = HEALTH_SUBCATEGORIES.filter((s) => s.topCategoryId === cat.id);
-                        return (
-                          <div
-                            key={cat.id}
-                            className={i > 0 ? "border-t border-ink/8" : ""}
-                            onMouseEnter={() => setExpandedId(cat.id)}
-                          >
-                            <div
-                              className={`flex w-full items-center justify-between text-sm transition-colors ${
-                                isExpanded ? "bg-white/60 font-semibold text-plum-700" : "text-ink/80 hover:bg-white/50 hover:text-ink"
-                              }`}
+              {/* Hovedinnhold: kategorier øverst, nav-kort under — én kolonne i stedet for
+                  side om side. overflow-y-auto uansett skjermbredde: greit om innholdet blir
+                  høyere enn panelet når en rad er åpen, det skal bare være nåbart via scroll. */}
+              <div
+                className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto py-4 pb-8"
+                style={{ paddingLeft: "max(28px, 6vw)", paddingRight: "max(48px, 7vw)" }}
+              >
+                {/* Kategorier — Helse/Skjønnhet/Hus&hjem OG Artikler/Medisinplanter/Historie i
+                    samme liste. Dropdown-liste på mobil/nettbrett (klikk, ikke hover — det var
+                    det som gjorde en tidligere versjon urolig). Fra lg og opp erstattes den av
+                    en to-kolonne meny: aktiv rad + beskrivelse til venstre, forhåndsvisning som
+                    bilde-kort til høyre, koblet sammen med en liten pil. */}
+                <div>
+                  <p className="font-display mb-2 text-xl font-bold sm:text-2xl" style={{ color: "#576557" }}>
+                    Kategorier
+                  </p>
+                  <div className="overflow-hidden rounded-xl border border-ink/8 bg-white/40 lg:hidden">
+                    {menuEntries.map((entry, i) => {
+                      const isExpanded = expandedId === entry.id;
+                      return (
+                        <div key={entry.id} className={i > 0 ? "border-t border-ink/8" : ""}>
+                          <div className="flex items-center">
+                            {/* Navnet er en egen lenke til hele siden — pilen ved siden av er en
+                                separat knapp som bare styrer utvidelsen, slik at man kan klikke
+                                seg inn på f.eks. Helse direkte. */}
+                            <Link
+                              href={entry.href}
+                              onClick={closeMenu}
+                              className="flex flex-1 items-center gap-3 px-3 py-2.5 transition-colors hover:bg-white/50"
                             >
-                              <Link
-                                href={`/kategori/${cat.id}`}
-                                onClick={closeMenu}
-                                className="flex flex-1 items-center gap-3 px-4 py-2.5 text-left"
-                              >
-                                <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg">
-                                  <Image src={cat.image} alt="" fill sizes="36px" className="object-cover" />
+                              {entry.cards[0] && (
+                                <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
+                                  <Image src={entry.cards[0].image} alt="" fill sizes="44px" className="object-cover" />
                                 </span>
-                                {cat.name}
-                              </Link>
+                              )}
+                              <span className="text-base font-semibold text-ink sm:text-lg">{entry.name}</span>
+                            </Link>
+                            {entry.cards.length > 0 && (
                               <button
-                                onClick={() => setExpandedId(isExpanded ? null : cat.id)}
-                                aria-label={isExpanded ? `Skjul underkategorier for ${cat.name}` : `Vis underkategorier for ${cat.name}`}
-                                className="px-3 py-2.5"
+                                onClick={() => setExpandedId(isExpanded ? null : entry.id)}
+                                aria-label={isExpanded ? `Skjul underpunkter for ${entry.name}` : `Vis underpunkter for ${entry.name}`}
+                                className="flex items-center self-stretch px-3 opacity-50 transition-opacity hover:opacity-80"
                               >
-                                <IconChevronDown
-                                  className={`h-3 w-3 shrink-0 opacity-40 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                                />
+                                <IconChevronDown className={`h-4 w-4 shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                               </button>
-                            </div>
-                            {isExpanded && subs.length > 0 && (
-                              <div className="bg-white/25 pb-1 pt-0.5">
-                                {subs.map((sub) => {
-                                  const firstProblem = sub.problemSlugs
-                                    .map((s) => bySlug.get(s))
-                                    .find(Boolean);
-                                  return (
-                                    <Link
-                                      key={sub.id}
-                                      href={firstProblem ? `/problem/${firstProblem.id}` : "/alle"}
-                                      onClick={closeMenu}
-                                      className="block px-5 py-2 text-sm text-ink/70 transition-colors hover:text-plum-700"
-                                    >
-                                      {sub.name}
-                                    </Link>
-                                  );
-                                })}
-                              </div>
                             )}
                           </div>
-                        );
-                      })}
-                      <div className="border-t border-ink/8">
-                        <Link
-                          href="/alle"
-                          onClick={closeMenu}
-                          className="block px-4 py-2.5 text-sm font-semibold text-plum-700 transition-colors hover:bg-white/50"
-                        >
-                          Se alle kategorier →
-                        </Link>
-                      </div>
-                    </div>
+
+                          {isExpanded && entry.cards.length > 0 && (
+                            <div className="flex flex-col bg-white/40 pb-2 pl-[4.25rem] pr-3">
+                              {entry.cards.map((card) => (
+                                <Link
+                                  key={card.key}
+                                  href={card.href}
+                                  onClick={closeMenu}
+                                  className="py-1.5 text-sm text-ink/70 transition-colors hover:text-plum-700"
+                                >
+                                  {card.label}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
 
-                  {/* Artikler / Medisinplanter / Plantemedisinens historie.
-                      Mobil: kompakt liste med små thumbnails (menyen skal være rask å skanne,
-                      ikke browses som forsidens editorial-kort). sm+: uendrede store bildekort. */}
-                  <div className="w-full shrink-0 overflow-hidden rounded-xl border border-ink/8 bg-white/40 sm:hidden">
-                    {MENU_CARDS.map((card, i) => (
-                      <Link
-                        key={card.href}
-                        href={card.href}
-                        onClick={closeMenu}
-                        className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-white/50 ${
-                          i > 0 ? "border-t border-ink/8" : ""
-                        }`}
-                      >
-                        <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg">
-                          <Image src={card.image} alt="" fill sizes="44px" className="object-cover" />
-                        </span>
-                        {card.label}
-                      </Link>
-                    ))}
-                  </div>
-                  {MENU_CARDS.map((card) => (
-                    <Link
-                      key={card.href}
-                      href={card.href}
-                      onClick={closeMenu}
-                      className="group hidden w-full shrink-0 flex-col overflow-hidden rounded-2xl shadow-sm shadow-plum-950/10 transition-transform hover:-translate-y-0.5 sm:flex sm:w-0 sm:flex-1"
-                      style={{ background: "rgba(255,255,255,0.55)" }}
-                    >
-                      {/* Fast aspect-ratio (ikke sm:flex-1 mot en strukket rad) — kortet skal ha
-                          egen, stabil høyde uavhengig av hvor mye Kategorier-listen ved siden av
-                          har ekspandert seg til. */}
-                      <div className="relative aspect-square w-full overflow-hidden">
-                        <Image
-                          src={card.image}
-                          alt=""
-                          fill
-                          sizes="200px"
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
+                  <Link
+                    href="/alle"
+                    onClick={closeMenu}
+                    className="mt-3 inline-block text-sm font-semibold text-plum-700 transition-opacity hover:opacity-80 lg:hidden"
+                  >
+                    Se alle kategorier →
+                  </Link>
+
+                  {/* Desktop mega-meny (lg+). */}
+                  {(() => {
+                    const active = menuEntries.find((e) => e.id === activeCategoryId) ?? menuEntries[0];
+                    const others = menuEntries.filter((e) => e.id !== active.id);
+                    return (
+                      <div className="hidden lg:grid lg:grid-cols-[240px_28px_1fr] lg:gap-6 lg:rounded-xl lg:border lg:border-ink/8 lg:bg-white/40 lg:p-6">
+                        <div>
+                          <Link
+                            href={active.href}
+                            onClick={closeMenu}
+                            className="font-display text-sm font-bold uppercase tracking-wide transition-opacity hover:opacity-80"
+                            style={{ color: "#C9A14A" }}
+                          >
+                            {active.name}
+                          </Link>
+                          <p className="mt-3 text-sm leading-relaxed text-ink-soft">{active.tagline}</p>
+                          <div className="mt-5 flex flex-col gap-3 border-t border-ink/10 pt-4">
+                            {others.map((entry) => (
+                              <button
+                                key={entry.id}
+                                onClick={() => setActiveCategoryId(entry.id)}
+                                className="text-left text-base font-bold text-ink transition-colors hover:text-plum-700"
+                              >
+                                {entry.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Koblingen mellom venstre og høyre kolonne — en loddrett strek med en
+                            liten pil, for å vise at bildene hører til raden som er åpen til venstre. */}
+                        <div className="relative" aria-hidden="true">
+                          <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-ink/10" />
+                          <div
+                            className="absolute left-1/2 flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border border-ink/10"
+                            style={{ top: 6, background: "#F9F7E8" }}
+                          >
+                            <IconChevronDown className="h-3.5 w-3.5 -rotate-90 text-plum-700" />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="grid grid-cols-3 gap-6">
+                            {active.cards.map((card) => (
+                              <Link key={card.key} href={card.href} onClick={closeMenu} className="group">
+                                <span className="relative block aspect-4/3 overflow-hidden">
+                                  <Image
+                                    src={card.image}
+                                    alt=""
+                                    fill
+                                    sizes="220px"
+                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                  />
+                                </span>
+                                <span className="mt-3 block text-base font-semibold text-ink">{card.label}</span>
+                              </Link>
+                            ))}
+                          </div>
+                          <Link
+                            href={active.href}
+                            onClick={closeMenu}
+                            className="mt-6 inline-block text-sm font-semibold text-plum-700 transition-opacity hover:opacity-80"
+                          >
+                            Se alle →
+                          </Link>
+                        </div>
                       </div>
-                      <div className="px-3 py-2.5 text-center">
-                        <span className="text-sm font-semibold leading-snug text-ink">{card.label}</span>
-                      </div>
-                    </Link>
-                  ))}
+                    );
+                  })()}
                 </div>
               </div>
 

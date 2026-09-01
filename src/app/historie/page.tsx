@@ -22,7 +22,7 @@ export default function HistoriePage() {
           <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
             Tradisjon &middot; Kunnskap &middot; Fellesskap
           </p>
-          <h1 className="font-serif-display mt-4 text-4xl italic text-ink sm:text-5xl">
+          <h1 className="font-serif-display mt-4 text-4xl text-ink sm:text-5xl">
             Plantemedisinens historie, og hvorfor den fortsatt brukes
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-ink-soft">

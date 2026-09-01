@@ -30,8 +30,14 @@ export default function TyttebaerArticlePage() {
         </header>
 
         <div className="relative mt-10 aspect-[4/3] overflow-hidden rounded-3xl">
-          <Image src="/pictures/tyttebar.png" alt="Tyttebær på busk" fill className="object-cover" />
+          <Image
+            src="/pictures/menupictures/tyytebaer_pexels-sandra-seitamaa-89384773-9669197.jpg"
+            alt="Tyttebær på busk"
+            fill
+            className="object-cover"
+          />
         </div>
+        <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: Sandra Seitamaa / Pexels</p>
 
         <div className="mt-10 flex flex-col gap-6 text-ink-soft">
           <p>

@@ -13,6 +13,10 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
   style: ["normal", "italic"],
+  // SOFT/WONK er Fraunces sine skjulte variable akser — gir de runde
+  // ball-terminalene og den litt "wonky" Art Nouveau-følelsen i display-
+  // overskrifter (se .font-serif-display i globals.css).
+  axes: ["opsz", "SOFT", "WONK"],
 });
 
 const ibarra = Ibarra_Real_Nova({
