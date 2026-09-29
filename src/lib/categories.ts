@@ -168,25 +168,39 @@ export const HEALTH_SUBCATEGORIES: Subcategory[] = [
 
 export const TOP_CATEGORIES = [
   {
-    id: "helse",
-    name: "Helse",
+    id: "godegamle",
+    name: "Gode gamle",
     enabled: true,
-    image: "/pictures/helse.png",
-    tagline: "Gamle husråd mot vanlige plager, fra forkjølelse til hodepine.",
+    image: "/pictures/tinktur.jpg",
+    tagline: "De klassiske husrådene — godt utprøvde triks gitt videre fra generasjon til generasjon.",
   },
   {
     id: "hudharskjonnhet",
-    name: "Hud, hår & skjønnhet",
+    name: "Skjønnhet",
     enabled: true,
-    image: "/pictures/beauty.png",
+    image: "/pictures/beauty.jpg",
     tagline: "Naturlig pleie for hår, hud og velvære.",
+  },
+  {
+    id: "helse",
+    name: "Helse",
+    enabled: true,
+    image: "/pictures/helse.jpg",
+    tagline: "Gamle husråd mot vanlige plager, fra forkjølelse til hodepine.",
   },
   {
     id: "husoghjem",
     name: "Hus & hjem",
     enabled: true,
-    image: "/pictures/husoghjem.png",
+    image: "/pictures/husoghjem.jpg",
     tagline: "Praktiske triks for et rent og ryddig hjem.",
+  },
+  {
+    id: "sankingbevaring",
+    name: "Sanking & bevaring",
+    enabled: true,
+    image: "/pictures/tyttebaer2.png",
+    tagline: "Å sanke fra naturen og ta vare på det du finner — bær, urter og frukt gjennom sesongen.",
   },
 ];
 

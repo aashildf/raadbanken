@@ -89,11 +89,61 @@ export function IconMenu({ className }: IconProps) {
   );
 }
 
+export function IconX({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
+}
+
 export function IconSearch({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
       <circle cx="11" cy="11" r="7" />
       <path d="m20.5 20.5-4.3-4.3" />
+    </svg>
+  );
+}
+
+export function IconUser({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="8.2" r="3.4" />
+      <path d="M4.5 20c1.3-3.8 4.2-5.8 7.5-5.8s6.2 2 7.5 5.8" />
+    </svg>
+  );
+}
+
+export function IconArrowUp({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className}>
+      <path d="M12 5.5 18.5 14h-4.2v4.5h-4.6V14H5.5L12 5.5Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function IconArrowDown({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className}>
+      <path d="M12 18.5 5.5 10h4.2V5.5h4.6V10h4.2L12 18.5Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function IconHeart({ className, filled }: IconProps & { filled?: boolean }) {
+  return (
+    <svg {...base} className={className} fill={filled ? "currentColor" : "none"}>
+      <path d="M12 20.5S3.5 15.4 3.5 9.3C3.5 6.4 5.7 4 8.6 4c1.5 0 3 .8 3.4 2 .4-1.2 1.9-2 3.4-2 2.9 0 5.1 2.4 5.1 5.3 0 6.1-8.5 11.2-8.5 11.2Z" />
+    </svg>
+  );
+}
+
+export function IconShare({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 14.5V4M8 8l4-4 4 4" />
+      <path d="M5 12.5v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
     </svg>
   );
 }
@@ -224,6 +274,72 @@ export function IconSun({ className }: IconProps) {
     <svg {...base} className={className}>
       <circle cx="12" cy="12" r="4" />
       <path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6" />
+    </svg>
+  );
+}
+
+export function IconPlus({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+export function IconBulb({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8.3 14.8c-1.4-1.1-2.3-2.8-2.3-4.8a6 6 0 0 1 12 0c0 2-.9 3.7-2.3 4.8-.8.6-1.2 1.3-1.2 2.2v.5H9.5v-.5c0-.9-.4-1.6-1.2-2.2Z" />
+      <path d="M9.5 20h5M10.2 17.5h3.6" />
+    </svg>
+  );
+}
+
+export function IconClover({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 12c0-2.4-1.8-4.2-4.2-4.2S3.6 9.6 3.6 12s1.8 4.2 4.2 4.2S12 14.4 12 12Z" />
+      <path d="M12 12c0-2.4 1.8-4.2 4.2-4.2s4.2 1.8 4.2 4.2-1.8 4.2-4.2 4.2S12 14.4 12 12Z" />
+      <path d="M12 12c-2.4 0-4.2 1.8-4.2 4.2s1.8 4.2 4.2 4.2 4.2-1.8 4.2-4.2S14.4 12 12 12Z" />
+      <path d="M12 12c-2.4 0-4.2-1.8-4.2-4.2S9.6 3.6 12 3.6s4.2 1.8 4.2 4.2S14.4 12 12 12Z" />
+      <path d="M12 12v8.4" />
+    </svg>
+  );
+}
+
+export function IconPot({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M5.5 11h13l-1 6.3a2.4 2.4 0 0 1-2.4 2H8.9a2.4 2.4 0 0 1-2.4-2L5.5 11Z" />
+      <path d="M4 11h16M8 11c0-2.8 1.8-4.5 4-4.5s4 1.7 4 4.5" />
+    </svg>
+  );
+}
+
+export function IconWrench({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M14.5 9.5 18 6a4 4 0 0 1-5.3 5.3L6 18l-2-2 6.7-6.7A4 4 0 0 1 16 4l-3.5 3.5 2 2Z" />
+    </svg>
+  );
+}
+
+export function IconHouse({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4.5 11.5 12 4.8l7.5 6.7" />
+      <path d="M6.5 10v9h11v-9" />
+      <path d="M10 19v-5h4v5" />
+    </svg>
+  );
+}
+
+export function IconMore({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} fill="currentColor" stroke="none">
+      <circle cx="5.5" cy="12" r="1.6" />
+      <circle cx="12" cy="12" r="1.6" />
+      <circle cx="18.5" cy="12" r="1.6" />
     </svg>
   );
 }

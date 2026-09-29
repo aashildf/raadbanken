@@ -11,7 +11,7 @@ export const metadata = {
 export default function MedisinplanterPage() {
   return (
     <main className="min-h-full bg-paper">
-      <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
+      <div className="mx-auto w-full max-w-[var(--content-max)] px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
           &larr; Tilbake til Rådbanken
         </Link>
@@ -25,14 +25,14 @@ export default function MedisinplanterPage() {
           </p>
         </header>
 
-        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {MEDICINAL_PLANTS.map((plant) => {
             const Icon = PLANT_ICON[plant.shape];
             return (
               <Link
                 key={plant.id}
                 href={`/plante/${plant.id}`}
-                className="hairline group flex flex-col gap-3 overflow-hidden rounded-3xl bg-paper-deep/50 p-3 transition-transform hover:-translate-y-0.5"
+                className="hairline card-shadow group flex flex-col gap-3 overflow-hidden rounded-3xl bg-paper-deep/50 p-3 transition-transform hover:-translate-y-0.5"
               >
                 <div className="relative aspect-4/3 overflow-hidden rounded-2xl" style={{ background: plant.bg }}>
                   {plant.image ? (

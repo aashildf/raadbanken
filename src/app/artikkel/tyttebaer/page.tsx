@@ -10,36 +10,45 @@ export const metadata = {
 export default function TyttebaerArticlePage() {
   return (
     <main className="min-h-full bg-paper">
-      <div className="mx-auto w-full max-w-2xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
+      <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
           &larr; Tilbake til Rådbanken
         </Link>
 
-        <header className="mt-8">
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
-            Naturens egen hostesaft
-          </p>
-          <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl">
-            Derfor virker det gamle tyttebærtrikset
-          </h1>
-          <p className="mt-4 text-ink-soft">
-            Har du en gjenstridig hoste eller en sår hals som ikke vil gi seg? Før du løper til
-            apoteket, kan det være verdt en tur i matboden eller fryseren. Et av våre eldste husråd
-            gjemmer seg nemlig i det røde skogsgullet: tyttebæret.
-          </p>
-        </header>
+        {/* Bilde til venstre / kicker, tittel og ingress til høyre — samme
+            bredde-mønster som syrin-artikkelen, i stedet for en smal
+            tekstblokk midtstilt på en ellers tom, bred side. */}
+        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[420px_1fr] lg:items-center lg:gap-16">
+          <div className="mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
+            <div className="relative aspect-4/3 overflow-hidden rounded-3xl">
+              <Image
+                src="/pictures/menupictures/tyytebaer_pexels-sandra-seitamaa-89384773-9669197.jpg"
+                alt="Tyttebær på busk"
+                fill
+                sizes="(max-width: 1024px) 448px, 420px"
+                className="object-cover"
+                priority
+              />
+            </div>
+            <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: Sandra Seitamaa / Pexels</p>
+          </div>
 
-        <div className="relative mt-10 aspect-[4/3] overflow-hidden rounded-3xl">
-          <Image
-            src="/pictures/menupictures/tyytebaer_pexels-sandra-seitamaa-89384773-9669197.jpg"
-            alt="Tyttebær på busk"
-            fill
-            className="object-cover"
-          />
+          <header>
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+              Naturens egen hostesaft
+            </p>
+            <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl lg:text-5xl">
+              Derfor virker det gamle tyttebærtrikset
+            </h1>
+            <p className="mt-4 max-w-xl text-ink-soft">
+              Har du en gjenstridig hoste eller en sår hals som ikke vil gi seg? Før du løper til
+              apoteket, kan det være verdt en tur i matboden eller fryseren. Et av våre eldste husråd
+              gjemmer seg nemlig i det røde skogsgullet: tyttebæret.
+            </p>
+          </header>
         </div>
-        <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: Sandra Seitamaa / Pexels</p>
 
-        <div className="mt-10 flex flex-col gap-6 text-ink-soft">
+        <div className="mx-auto mt-16 flex w-full max-w-2xl flex-col gap-6 text-ink-soft">
           <p>
             Gjennom generasjoner har lunken, ublandet tyttebærsaft vært flittig brukt i norsk
             folkemedisin mot både hoste og forkjølelse. Men er dette bare gammel overtro, eller er
@@ -106,7 +115,7 @@ export default function TyttebaerArticlePage() {
           </section>
         </div>
 
-        <div className="mt-10">
+        <div className="mx-auto mt-10 w-full max-w-2xl">
           <RemedyDisclaimer text="tyttebær hoste sår hals" />
         </div>
       </div>

@@ -7,10 +7,12 @@ import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { useAnonAuth } from "@/lib/useAnonAuth";
 import { castVote } from "@/lib/votes";
+import { setSaved } from "@/lib/saves";
 import { wilsonScore } from "@/lib/wilson";
 import { ACUTE_RISK_SLUGS } from "@/lib/categories";
 import { EmergencyButton } from "@/components/EmergencyButton";
-import { ThumbIcon } from "@/components/ThumbIcon";
+import { RemedyPreviewModal } from "@/components/RemedyPreviewModal";
+import { IconArrowDown, IconArrowUp, IconHeart } from "@/components/icons";
 import type { Problem, Remedy, Vote } from "@/lib/types";
 
 export default function RemediesPage({
@@ -26,6 +28,9 @@ export default function RemediesPage({
   const [myVotes, setMyVotes] = useState<Vote[]>([]);
   const [loading, setLoading] = useState(true);
   const [votingId, setVotingId] = useState<string | null>(null);
+  const [openRemedyId, setOpenRemedyId] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "problems", problemId), (snap) => {
@@ -67,6 +72,24 @@ export default function RemediesPage({
     [myVotes]
   );
 
+  useEffect(() => {
+    if (!uid) return;
+    const q = query(collection(db, "saves"), where("userId", "==", uid));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setSavedIds(new Set(snap.docs.map((d) => d.data().remedyId as string)));
+      },
+      () => {
+        // Stille feil, på linje med stemmegivning.
+      }
+    );
+    return unsub;
+  }, [uid]);
+
+  const openIndex = openRemedyId ? rankedRemedies.findIndex((r) => r.id === openRemedyId) : -1;
+  const openRemedy = openIndex >= 0 ? rankedRemedies[openIndex] : null;
+
   async function handleVote(remedyId: string, voteType: "up" | "down") {
     if (!uid) return;
     setVotingId(remedyId);
@@ -79,11 +102,23 @@ export default function RemediesPage({
     }
   }
 
+  async function handleToggleSaved(remedyId: string) {
+    if (!uid) return;
+    setSavingId(remedyId);
+    try {
+      await setSaved(remedyId, uid, !savedIds.has(remedyId));
+    } catch {
+      // ignored
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   return (
     <main className="relative flex min-h-screen flex-col">
       {/* Bakgrunn */}
       <Image
-        src="/bakgrunner/beige_bg.png"
+        src="/bakgrunner/beige_bg.jpg"
         alt=""
         fill
         style={{ objectFit: "cover" }}
@@ -103,7 +138,7 @@ export default function RemediesPage({
       />
 
       <div
-        className="relative mx-auto w-full max-w-2xl flex-1 py-8 sm:py-12"
+        className="relative mx-auto w-full max-w-4xl flex-1 py-8 sm:py-12"
         style={{ paddingInline: "var(--page-pad)", zIndex: 2 }}
       >
         {/* Toppraden */}
@@ -136,74 +171,62 @@ export default function RemediesPage({
           <p className="mt-8 text-sm text-ink/40">Laster råd…</p>
         )}
 
-        {/* Råd-liste */}
-        <ul className="mt-4 flex flex-col gap-2">
+        {/* Råd-liste — klikk åpner en forhåndsvisning uten å forlate listen (se
+            RemedyPreviewModal), i stedet for å navigere til en egen side og
+            miste scroll-posisjonen når man går tilbake. */}
+        <ul className="mt-4 flex flex-col divide-y divide-ink/10 border-t border-ink/10">
           {rankedRemedies.map((r) => {
             const myVote = myVoteByRemedy.get(r.id);
             return (
-              <li
-                key={r.id}
-                className="group relative overflow-hidden rounded-2xl"
-                style={{ background: "rgba(246,240,227,0.92)", border: "1px solid rgba(44,35,46,0.08)" }}
-              >
-                {/* Overlay-lenke — z-10, under knappene (z-20) men over bakgrunnen */}
-                <Link
-                  href={`/remedy/${r.id}`}
-                  className="absolute inset-0 z-10"
-                  aria-label={r.title}
-                />
-
-                <div className="relative flex items-center gap-3 px-4 py-3.5">
-                  {/* Venstre: tittel + les mer — pointer-events-none siden overlay tar klikk */}
-                  <div className="min-w-0 flex-1 pointer-events-none">
-                    <span className="block font-serif-display text-base leading-snug text-ink transition-colors group-hover:text-plum-700">
-                      {r.title}
+              <li key={r.id} className="flex items-center gap-3 py-3.5">
+                <button
+                  onClick={() => setOpenRemedyId(r.id)}
+                  className="group min-w-0 flex-1 text-left"
+                >
+                  <span className="block font-serif-display text-base leading-snug text-ink transition-colors group-hover:text-plum-700">
+                    {r.title}
+                  </span>
+                  {r.totalVotes > 0 && (
+                    <span className="mt-0.5 block text-xs text-ink-soft">
+                      {r.successRate}% positiv · {r.totalVotes} stemmer
                     </span>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-xs font-medium text-plum-700 opacity-80">
-                        Les mer →
-                      </span>
-                      {r.totalVotes > 0 && (
-                        <span className="text-xs text-ink/35">
-                          {r.successRate}% positiv · {r.totalVotes} stemmer
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Høyre: tommelknapper — z-20, named groups så kun den hovrete ikonet skalerer */}
-                  <div className="relative z-20 flex shrink-0 items-center gap-2">
-                    <button
-                      onClick={() => handleVote(r.id, "up")}
-                      disabled={!uid || votingId !== null}
-                      className={`group/up flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all disabled:cursor-default disabled:opacity-40 ${myVote === "up" ? "scale-110" : ""}`}
-                      style={
-                        myVote === "up"
-                          ? { background: "rgba(255,255,255,0.95)", color: "#432065", boxShadow: "0 0 0 1.5px rgba(67,32,101,0.22)" }
-                          : { background: "rgba(255,255,255,0.70)", color: "rgba(44,35,46,0.55)" }
-                      }
-                    >
-                      <span className={`transition-transform duration-150 ${myVote === "up" ? "scale-110" : "group-hover/up:scale-125"}`}>
-                        <ThumbIcon direction="up" className="h-6 w-6" />
-                      </span>
-                      <span>{r.votesUp}</span>
-                    </button>
-                    <button
-                      onClick={() => handleVote(r.id, "down")}
-                      disabled={!uid || votingId !== null}
-                      className={`group/dn flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all disabled:cursor-default disabled:opacity-40 ${myVote === "down" ? "scale-110" : ""}`}
-                      style={
-                        myVote === "down"
-                          ? { background: "rgba(255,255,255,0.95)", color: "#432065", boxShadow: "0 0 0 1.5px rgba(67,32,101,0.22)" }
-                          : { background: "rgba(255,255,255,0.70)", color: "rgba(44,35,46,0.55)" }
-                      }
-                    >
-                      <span className={`transition-transform duration-150 ${myVote === "down" ? "scale-110" : "group-hover/dn:scale-125"}`}>
-                        <ThumbIcon direction="down" className="h-6 w-6" />
-                      </span>
-                      <span>{r.votesDown}</span>
-                    </button>
-                  </div>
+                  )}
+                </button>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <button
+                    onClick={() => handleVote(r.id, "up")}
+                    disabled={!uid || votingId !== null}
+                    aria-label="Fungerte"
+                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
+                      myVote === "up" ? "text-sage" : "text-ink"
+                    }`}
+                    style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                  >
+                    <IconArrowUp className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => handleVote(r.id, "down")}
+                    disabled={!uid || votingId !== null}
+                    aria-label="Fungerte ikke"
+                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
+                      myVote === "down" ? "text-rust" : "text-ink"
+                    }`}
+                    style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                  >
+                    <IconArrowDown className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => handleToggleSaved(r.id)}
+                    disabled={!uid || savingId === r.id}
+                    aria-label={savedIds.has(r.id) ? "Fjern fra mine lagrede råd" : "Lagre i mine lagrede råd"}
+                    aria-pressed={savedIds.has(r.id)}
+                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
+                      savedIds.has(r.id) ? "text-[#E1B08C]" : "text-ink"
+                    }`}
+                    style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                  >
+                    <IconHeart className="h-3 w-3" filled={savedIds.has(r.id)} />
+                  </button>
                 </div>
               </li>
             );
@@ -216,12 +239,26 @@ export default function RemediesPage({
 
         <Link
           href={`/problem/${problemId}/legg-til`}
-          className="mt-6 block rounded-2xl px-5 py-3.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-85"
-          style={{ background: "#432065" }}
+          className="mt-6 block rounded-2xl px-5 py-3.5 text-center text-sm font-semibold transition-opacity hover:opacity-85"
+          style={{ background: "#3E2E3A", color: "#FFFAEB" }}
         >
           + Legg til nytt råd
         </Link>
       </div>
+
+      <RemedyPreviewModal
+        remedy={openRemedy}
+        problemName={problem?.name}
+        onClose={() => setOpenRemedyId(null)}
+        onVote={(direction) => openRemedy && handleVote(openRemedy.id, direction)}
+        voting={votingId !== null}
+        myVote={openRemedy ? myVoteByRemedy.get(openRemedy.id) : undefined}
+        saved={!!openRemedy && savedIds.has(openRemedy.id)}
+        onToggleSave={() => openRemedy && handleToggleSaved(openRemedy.id)}
+        saving={!!openRemedy && savingId === openRemedy.id}
+        onPrev={openIndex > 0 ? () => setOpenRemedyId(rankedRemedies[openIndex - 1].id) : undefined}
+        onNext={openIndex >= 0 && openIndex < rankedRemedies.length - 1 ? () => setOpenRemedyId(rankedRemedies[openIndex + 1].id) : undefined}
+      />
     </main>
   );
 }

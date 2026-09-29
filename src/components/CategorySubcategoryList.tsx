@@ -19,7 +19,7 @@ export function CategorySubcategoryList({
   const bySlug = new Map(problems.map((p) => [p.slug, p]));
 
   return (
-    <div className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
       {subs.map((sub) => {
         const subProblems = sub.problemSlugs.map((s) => bySlug.get(s)).filter(Boolean) as Problem[];
         return (
@@ -32,7 +32,7 @@ export function CategorySubcategoryList({
                   <Link
                     key={p.id}
                     href={`/problem/${p.id}`}
-                    className="group flex items-center gap-2 text-sm text-ink-soft transition-colors hover:text-plum-700"
+                    className="group flex items-center gap-2 text-sm text-ink-soft transition-colors hover:text-plum-700 active:opacity-60"
                   >
                     {Icon && <Icon className="h-3.5 w-3.5 shrink-0 text-plum-700/70" />}
                     <span>{p.name}</span>

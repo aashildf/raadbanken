@@ -3,11 +3,11 @@
 import { Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
 import { addDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { useAnonAuth } from "@/lib/useAnonAuth";
 import { HEALTH_SUBCATEGORIES, TOP_CATEGORIES, slugify } from "@/lib/categories";
+import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
 import type { Problem } from "@/lib/types";
 
 const ANNET = "annet";
@@ -113,17 +113,9 @@ function DelRadForm() {
   }
 
   return (
-    <main className="relative min-h-screen">
-      <Image
-        src="/bakgrunner/bg_purple.png"
-        alt=""
-        fill
-        style={{ objectFit: "cover" }}
-        priority
-        aria-hidden="true"
-      />
+    <main className="relative min-h-screen bg-paper">
       <div className="relative mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-5 py-16">
-        <div className="hairline flex flex-col gap-3 rounded-2xl bg-paper/80 p-5 backdrop-blur-sm">
+        <div className="hairline flex flex-col gap-3 rounded-2xl bg-paper-deep/50 p-5">
           <Link href="/" className="text-sm text-ink-soft hover:text-ink">
             &larr; Tilbake til Rådbanken
           </Link>
@@ -137,7 +129,7 @@ function DelRadForm() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="hairline flex flex-col gap-5 rounded-2xl bg-white/40 p-6">
+        <form onSubmit={handleSubmit} className="hairline flex flex-col gap-5 rounded-2xl bg-paper-deep/30 p-6">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-ink">Hovedkategori</span>
             <select
@@ -239,7 +231,8 @@ function DelRadForm() {
           <button
             type="submit"
             disabled={saving || !uid || !problemId}
-            className="rounded-xl bg-plum-800 px-4 py-3 font-medium text-paper transition-colors hover:bg-plum-700 disabled:opacity-50"
+            className={`disabled:opacity-50 ${BUTTON_PRIMARY_CLASS}`}
+            style={BUTTON_PRIMARY_STYLE}
           >
             {saving ? "Lagrer..." : "Del rådet"}
           </button>

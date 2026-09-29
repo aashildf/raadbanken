@@ -3,14 +3,11 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MEDICINAL_PLANTS } from "@/lib/plants";
 import { PLANT_ICON } from "@/components/icons";
+import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
 
 export function generateStaticParams() {
   return MEDICINAL_PLANTS.map((p) => ({ id: p.id }));
 }
-
-// Ren SVG-støy (feTurbulence) — dekorativt korn på bakgrunnen, ingen bildefil nødvendig.
-const NOISE_BG =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
 export default async function PlantPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,27 +22,25 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
         {/* Bakgrunn: dempet, uskarpt løvetannfelt med lett korn */}
         <div className="fixed inset-0 -z-10" aria-hidden="true">
           <Image
-            src="/pictures/lovetann.png"
+            src="/pictures/lovetann.jpg"
             alt=""
             fill
             priority
             className="object-cover"
             style={{ opacity: 0.4, filter: "blur(8px) saturate(1.05)" }}
           />
-          <div
-            className="absolute inset-0"
-            style={{ backgroundImage: NOISE_BG, opacity: 0.06, mixBlendMode: "overlay" }}
-          />
         </div>
 
-        <div className="relative mx-auto w-full max-w-4xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
+        <div className="relative mx-auto w-full max-w-5xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
           <Link href="/medisinplanter" className="text-sm text-ink-soft hover:text-ink">
             &larr; Tilbake til medisinplanter
           </Link>
 
-          {/* Kort: løvetannbilde med tekstplass til høyre */}
-          <div className="relative mt-8 min-h-[340px] w-full overflow-hidden rounded-3xl shadow-2xl shadow-plum-950/25 sm:aspect-[3/2] sm:min-h-0">
-            <Image src="/pictures/lovetannblomst.png" alt={plant.name} fill className="object-cover" priority />
+          {/* Kort: løvetannbilde med tekstplass til høyre — får bruke opptil
+              max-w-5xl nå (var låst til hele den smale sidebredden før), mens
+              seksjonene under holdes i en lesbar max-w-2xl. */}
+          <div className="relative mx-auto mt-8 min-h-[340px] w-full max-w-5xl overflow-hidden rounded-3xl shadow-2xl shadow-plum-950/25 sm:aspect-[3/2] sm:min-h-0">
+            <Image src="/pictures/lovetannblomst.jpg" alt={plant.name} fill className="object-cover" priority />
             <div className="relative grid h-full grid-cols-[3fr_2fr]">
               <div aria-hidden="true" />
               <div className="flex flex-col justify-center gap-2 py-6 pr-6 sm:gap-3 sm:py-10 sm:pr-14">
@@ -64,7 +59,7 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {plant.sections && plant.sections.length > 0 && (
-            <div className="mt-12 flex flex-col gap-10">
+            <div className="mx-auto mt-12 flex max-w-2xl flex-col gap-10">
               {plant.sections.map((section, i) => (
                 <section key={i}>
                   <h2 className="font-serif-display text-2xl text-ink">{section.heading}</h2>
@@ -84,18 +79,17 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
 
-          <p className="mt-12 text-xs text-ink-soft/70">
-            Informasjonen er ment som generell, tradisjonsbasert kunnskap, ikke medisinske
-            råd. Snakk med lege eller farmasøyt før bruk, særlig ved bruk av andre legemidler.
-          </p>
+          <div className="mx-auto max-w-2xl">
+            <p className="mt-12 text-xs text-ink-soft/70">
+              Informasjonen er ment som generell, tradisjonsbasert kunnskap, ikke medisinske
+              råd. Snakk med lege eller farmasøyt før bruk, særlig ved bruk av andre legemidler.
+            </p>
 
-          <Link
-            href="/"
-            className="mt-10 inline-flex items-center gap-2 rounded-full bg-plum-800 px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-plum-700"
-          >
-            Bla i råd
-            <span aria-hidden>→</span>
-          </Link>
+            <Link href="/" className={`mt-10 ${BUTTON_PRIMARY_CLASS}`} style={BUTTON_PRIMARY_STYLE}>
+              Bla i råd
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -103,12 +97,17 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="min-h-full bg-paper">
-      <div className="mx-auto w-full max-w-3xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
+      {/* Ytre wrapper matcher bildets egen cap (max-w-4xl) — ikke en bredere
+          --content-max — slik at det ikke blir en stor tom sone mellom
+          sidekanten og bildet. Overskrift, seksjoner og disclaimer holdes i
+          en smalere, sentrert lesbredde (max-w-2xl) inni, med en beskjeden,
+          jevn avstand til bildet over/under i stedet for et stort hopp. */}
+      <div className="mx-auto w-full max-w-4xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/medisinplanter" className="text-sm text-ink-soft hover:text-ink">
           &larr; Tilbake til medisinplanter
         </Link>
 
-        <header className="mt-8">
+        <header className="mx-auto mt-8 max-w-2xl">
           <div className="flex items-center gap-3">
             {Icon && (
               <span className="hairline flex h-11 w-11 items-center justify-center rounded-full bg-paper-deep text-plum-700">
@@ -122,11 +121,12 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
         </header>
 
         {plant.image && (
-          <div className="relative mt-10 aspect-5/3 overflow-hidden rounded-3xl">
+          <div className="relative mx-auto mt-10 aspect-5/3 max-w-4xl overflow-hidden rounded-3xl">
             <Image
               src={plant.image.src}
               alt={plant.name}
               fill
+              sizes="(max-width: 1024px) 100vw, 896px"
               className={plant.image.fit === "contain" ? "object-contain p-8" : "object-cover"}
             />
             {plant.image.credit && (
@@ -142,7 +142,7 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
           </div>
         )}
 
-        <div className="mt-12 flex flex-col gap-10">
+        <div className="mx-auto mt-12 flex max-w-2xl flex-col gap-10">
           {plant.sections?.map((section, i) => (
             <section key={i}>
               <h2 className="font-serif-display text-2xl text-ink">{section.heading}</h2>
@@ -161,18 +161,17 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
           ))}
         </div>
 
-        <p className="mt-12 text-xs text-ink-soft/70">
-          Informasjonen er ment som generell, tradisjonsbasert kunnskap, ikke medisinske
-          råd. Snakk med lege eller farmasøyt før bruk, særlig ved bruk av andre legemidler.
-        </p>
+        <div className="mx-auto max-w-2xl">
+          <p className="mt-12 text-xs text-ink-soft/70">
+            Informasjonen er ment som generell, tradisjonsbasert kunnskap, ikke medisinske
+            råd. Snakk med lege eller farmasøyt før bruk, særlig ved bruk av andre legemidler.
+          </p>
 
-        <Link
-          href="/"
-          className="mt-10 inline-flex items-center gap-2 rounded-full bg-plum-800 px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-plum-700"
-        >
-          Bla i råd
-          <span aria-hidden>→</span>
-        </Link>
+          <Link href="/" className={`mt-10 ${BUTTON_PRIMARY_CLASS}`} style={BUTTON_PRIMARY_STYLE}>
+            Bla i råd
+            <span aria-hidden>→</span>
+          </Link>
+        </div>
       </div>
     </main>
   );

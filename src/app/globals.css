@@ -7,13 +7,32 @@
      (640px), som ikke er det samme brytpunktet som --page-pad bruker, så de to
      trenger litt ulik korreksjon for å møtes presist på begge sider. */
   --menu-close-adjust: 2px;
-  /* Høyden på SiteHeader (PILL_HEIGHT), slik at SiteMenu-panelet kan starte
-     rett under navbaren i stedet for å dekke den. Kategori-tag-raden
-     (CATEGORY_TAG_ROW_HEIGHT = 44px) legges til fra samme sm-brytpunkt som
-     den selv vises fra. Hold i sync med konstantene i SiteHeader.tsx. */
-  --header-height: 68px;
+  /* Høyden på SiteHeader (PILL_HEIGHT) — nå én samlet linje på alle bredder
+     (kategori-lenkene flyttet inn i samme rad), så denne er konstant og ikke
+     lenger trenger et eget hopp ved sm. Hold i sync med SiteHeader.tsx. */
+  --header-height: 92px;
+  /* Sideveis luft rundt hero-bildet, som har fullbredde men ikke --page-bg
+     sin egen farge, slik at --page-bg står igjen som en ramme rundt det i
+     stedet for at det går kant-til-kant. */
+  --band-inset: clamp(28px, 7vw, 110px);
+  /* Standard maks-bredde for sidens hovedinnhold — grid- og listesider
+     (forside, kategori, alle, medisinplanter). Første forsøk satte denne til
+     1680px, som var for bredt: når en seksjon inni (f.eks. prosa på 672px)
+     sitter langt smalere enn dette, blir avstanden mellom dem så stor at
+     kolonnen ser ut som den "hopper" fra bred til smal i stedet for å lese
+     som én sammenhengende side. 1280px holder fortsatt sidene betydelig
+     bredere enn de gamle 2xl/4xl-cappene uten å skape det spranget. Rene
+     tekstavsnitt caps fortsatt smalere inni seksjonene (typisk max-w-xl/2xl)
+     for lesbarhet — det er et eget mål, ikke denne variabelen. Artikkel-
+     sider (Fiken/Tyttebær/Syrin/Historie/plantesider) bruker sitt eget,
+     smalere par (max-w-5xl ytre / max-w-2xl prosa) i stedet for denne, av
+     samme grunn — se kommentarene i de filene. */
+  --content-max: 1280px;
 
-  --page-bg: #f5f5f5;
+  /* Varmet opp fra #EEE9E1 — papirfølelse er halvparten fargevalg, halvparten
+     korn; en bleik, nesten nøytral bunnfarge gjør at selv synlig korn leser
+     som støy i stedet for aldret papir. */
+  --page-bg: #E7DFC9;
   --paper: #f6f0e3;
   --paper-deep: #ede2c9;
   --ink: #2c232e;
@@ -47,7 +66,6 @@
 @media (min-width: 640px) {
   :root {
     --menu-close-adjust: 8px;
-    --header-height: 112px;
   }
 }
 @media (min-width: 768px) {
@@ -96,10 +114,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --font-display: var(--font-bricolage);
-  --font-serif: var(--font-fraunces);
-  --font-logo: var(--font-ibarra);
-  --font-sans: var(--font-inter);
+  --font-display: var(--font-googlesans);
+  --font-sans: var(--font-jakarta);
 }
 
 html {
@@ -115,7 +131,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), Inter, sans-serif;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
 }
 
 ::selection {
@@ -123,37 +139,30 @@ body {
   color: var(--plum-950);
 }
 
-.font-display {
-  font-family: var(--font-bricolage), sans-serif;
+/* --focus-ring lar en mørk flate (som SiteHeader) sette sin egen, lysere
+   fokusring lokalt — uten å skru av den globale plum-ringen andre steder på
+   siden. Uten en satt --focus-ring faller den tilbake til plum-600 som før.
+   box-shadow i stedet for outline: outline er et rektangel som ignorerer
+   border-radius (synlig som en stygg firkant oppå avrundede knapper/piller),
+   box-shadow følger elementets egen radius. */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--focus-ring, var(--plum-600));
 }
 
+/* .font-display og .font-serif-display er to navn for samme font nå (Google
+   Sans Flex) — beholdt som to klasser siden de brukes på ulike stedet i
+   markupet (kickere/labels vs. store overskrifter), men de setter ikke lenger
+   forskjellig font-family. .font-metrophobic og .font-logo (Ibarra, brukt av
+   den gamle tekst-logoen) er fjernet — logoen er nå et ferdig bilde
+   (logo3.png), og alle overskrifter/kickere er samlet på Google Sans Flex. */
+.font-display,
 .font-serif-display {
-  font-family: var(--font-fraunces), serif;
-  font-optical-sizing: auto;
-  /* Skrur opp Fraunces sin SOFT-akse for en litt mykere, kurvete display-
-     følelse (inspirert av Dahlia/VJ Type) på store overskrifter. WONK er
-     bevisst avslått — den gir mye mer eksentriske bokstavformer i kursiv
-     stil enn i rett stil, og gikk ut over lesbarheten på kursive
-     overskrifter (f.eks. historie-siden). Målgruppen inkluderer eldre
-     brukere, så lesbarhet prioriteres over dekorasjon her. */
-  font-variation-settings: "SOFT" 70, "WONK" 0;
-}
-
-.font-logo {
-  font-family: var(--font-ibarra), serif;
-  font-weight: 700;
-  line-height: normal;
-}
-
-.font-metrophobic {
-  font-family: var(--font-metrophobic), sans-serif;
-  font-weight: 400;
-  letter-spacing: -0.05em;
+  font-family: var(--font-googlesans), sans-serif;
 }
 
 .card-title {
-  font-family: var(--font-fraunces), serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-googlesans), sans-serif;
   font-size: 34.4px;
   line-height: 1.15;
   font-weight: 500;
@@ -179,6 +188,16 @@ body {
   border: 1px solid rgba(36, 21, 49, 0.12);
 }
 
+/* Tredje papirlag: myk, diffus skygge som løfter en kortflate som et
+   ark på et bord, i stedet for at den bare flyter flatt på bakgrunnen.
+   To lag — en tett nærskygge og en bredere, svakere fjernskygge — leser
+   mer som naturlig fall av lys enn én hard CSS-standardskygge gjør. */
+.card-shadow {
+  box-shadow:
+    0 3px 8px -2px rgba(44, 35, 46, 0.16),
+    0 18px 36px -14px rgba(44, 35, 46, 0.24);
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -194,6 +213,89 @@ body {
   .reveal {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+}
+
+/* Delt inn/ut-transisjon for modaler (EmergencyButton, DisclaimerGate) — panelet
+   materialiserer med en lett skalering+fade i stedet for å hoppe inn/ut momentant. */
+.modal-scrim {
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.modal-scrim.is-visible {
+  opacity: 1;
+}
+.modal-panel {
+  opacity: 0;
+  transform: scale(0.96) translateY(8px);
+  transition: opacity 200ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-panel.is-visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-scrim,
+  .modal-panel {
+    transform: none;
+    transition: opacity 150ms ease-out;
+  }
+}
+
+/* SiteMenu-panelet sklir ned fra headeren i normal bevegelse (transform-only,
+   uendret oppførsel), men bytter til en enkel fade i redusert bevegelse siden
+   en full-bredde sheet som sklir er akkurat den typen bevegelse
+   prefers-reduced-motion ber oss erstatte. */
+.menu-backdrop {
+  transition: opacity 260ms ease-out;
+}
+
+.menu-panel {
+  opacity: 1;
+  /* Ankret i hjørnet der hamburger-ikonet ligger (øverst til høyre), slik at den
+     lille skaleringen leser som at panelet vokser ut fra knappen som åpnet det,
+     ikke bare et flatt slides nedover. */
+  transform-origin: top right;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-backdrop {
+    transition: opacity 150ms ease-out;
+  }
+  .menu-panel {
+    opacity: 0;
+    /* !important: panelets transform er også satt inline (drevet av JS-state),
+       som ellers ville vunnet over denne media query-regelen. */
+    transform: none !important;
+    transition: opacity 150ms ease-out;
+  }
+  .menu-panel.is-visible {
+    opacity: 1;
+  }
+}
+
+/* Accordion-raden i mobilmenyen — grid-template-rows-triks gir en jevn
+   høyde-transisjon uten å måtte måle innholdshøyden i JS. */
+.accordion-row {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.accordion-row.is-expanded {
+  grid-template-rows: 1fr;
+}
+.accordion-row > div {
+  overflow: hidden;
+  /* Grid-elementer har min-height: auto som standard, som hindrer raden i å
+     faktisk kollapse til 0fr uansett — må nullstilles eksplisitt. */
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accordion-row {
     transition: none;
   }
 }
@@ -221,6 +323,24 @@ body {
   [data-seed] { display: none; }
 }
 
+/* Bokeh-orbs over hero-bildet — lysflekker som sakte faller/driver nedover,
+   som uskarpe lyspunkt bak trær med lav skarphetsdybde. Én delt keyframe
+   (heller enn ti egne) — hver orb setter sin egen --orb-dx/--orb-dy/--orb-o
+   via inline style, så samme animasjon dekker ulik fallhøyde, sideveis
+   drift og styrke per orb. Blur kommer fra CSS filter: blur() på selve
+   elementet (ikke SVG feGaussianBlur) — det er det som gjør dem til
+   "ute av fokus-lys" og ikke bare prikker. */
+@keyframes bokeh-fall {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  8%   { opacity: var(--orb-o, 0.45); }
+  92%  { opacity: var(--orb-o, 0.45); }
+  100% { transform: translate(var(--orb-dx, 24px), var(--orb-dy, 900px)); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-orb] { display: none; }
+}
+
 @keyframes thumb-pop {
   0%   { transform: scale(1); }
   35%  { transform: scale(1.5) rotate(-12deg); }
@@ -230,4 +350,28 @@ body {
 
 .thumb-pop {
   animation: thumb-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb-pop {
+    animation: none;
+  }
+}
+
+/* Scroll-hint-chevronen nederst i hero — en myk, liten hopp-bevegelse, ikke
+   en hard opp/ned-loop, så den leser som en pust heller enn et blinkende
+   ikon. */
+@keyframes soft-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50%      { transform: translateY(5px); opacity: 1; }
+}
+
+.soft-bounce {
+  animation: soft-bounce 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soft-bounce {
+    animation: none;
+  }
 }

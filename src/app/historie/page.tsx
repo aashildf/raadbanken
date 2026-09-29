@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { OrnateFrame } from "@/components/OrnateFrame";
+import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
 
 export const metadata = {
   title: "Plantemedisinens historie | Rådbanken",
@@ -11,7 +12,7 @@ export default function HistoriePage() {
   return (
     <main className="min-h-full bg-paper">
       <div
-        className="mx-auto w-full max-w-4xl px-5 py-14 sm:py-20"
+        className="mx-auto w-full max-w-5xl px-5 py-14 sm:py-20"
         style={{ paddingInline: "var(--page-pad)" }}
       >
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
@@ -39,7 +40,7 @@ export default function HistoriePage() {
           <OrnateFrame className="max-w-md">
             <div className="relative aspect-4/5">
               <Image
-                src="/pictures/urter_historie.png"
+                src="/pictures/urter_historie.jpg"
                 alt="En gammel tinkturflaske, merket for hånd, omgitt av blomster"
                 fill
                 className="object-cover"
@@ -54,11 +55,11 @@ export default function HistoriePage() {
           </p>
         </div>
 
-        <section className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-[0.8fr_1.2fr] sm:items-start">
+        <section className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 sm:grid-cols-[0.8fr_1.2fr] sm:items-start">
           <div>
             <div className="relative aspect-3/4 overflow-hidden rounded-2xl">
               <Image
-                src="/pictures/urtemedisin_kjokken.png"
+                src="/pictures/urtemedisin_kjokken.jpg"
                 alt="En kvinne og et barn forbereder tørkede urter på et gammeldags kjøkken"
                 fill
                 className="object-cover"
@@ -91,11 +92,11 @@ export default function HistoriePage() {
           </div>
         </section>
 
-        <section className="mt-16">
+        <section className="mx-auto mt-16 max-w-2xl">
           <h2 className="font-serif-display text-2xl text-ink sm:text-3xl">
             Vitenskapen bak hvorfor urter virker
           </h2>
-          <p className="mt-4 max-w-2xl text-ink-soft">
+          <p className="mt-4 text-ink-soft">
             Moderne forskning har gitt oss et nytt språk for å beskrive det
             folk har visst lenge: planter er komplekse. De inneholder
             hundrevis av bioaktive stoffer som påvirker hverandre og kroppen i
@@ -104,7 +105,7 @@ export default function HistoriePage() {
             fordøyelsen, dempe betennelse og gi næring, alt i én og samme
             organisme.
           </p>
-          <p className="mt-4 max-w-2xl text-ink-soft">
+          <p className="mt-4 text-ink-soft">
             I motsetning til isolerte kjemiske stoffer, som ofte har én
             tydelig virkning, jobber plantebaserte preparater bredere og
             mildere. Det er nettopp denne helheten som gjør dem interessante i
@@ -112,11 +113,11 @@ export default function HistoriePage() {
           </p>
         </section>
 
-        <section className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:items-start">
+        <section className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 sm:grid-cols-2 sm:items-start">
           <div className="flex flex-col gap-4">
             <div className="relative aspect-5/4 overflow-hidden rounded-2xl">
               <Image
-                src="/pictures/urtehage_barn.png"
+                src="/pictures/urtehage_barn.jpg"
                 alt="Et barn plukker urter i en fargerik urtehage"
                 fill
                 className="object-cover"
@@ -144,18 +145,18 @@ export default function HistoriePage() {
           </div>
         </section>
 
-        <section className="mt-16">
+        <section className="mx-auto mt-16 max-w-2xl">
           <h2 className="font-serif-display text-2xl text-ink sm:text-3xl">
             Mat og medisin, to sider av samme plante
           </h2>
-          <p className="mt-4 max-w-2xl text-ink-soft">
+          <p className="mt-4 text-ink-soft">
             I mange tradisjoner har mat og medisin aldri vært adskilt. Når vi
             spiser planter, får vi ikke bare energi, men også en rekke stoffer
             som påvirker kroppen på subtile måter. Noen gir ro til
             nervesystemet, andre støtter immunforsvaret, og noen hjelper
             kroppen å håndtere stress eller betennelse.
           </p>
-          <p className="mt-4 max-w-2xl text-ink-soft">
+          <p className="mt-4 text-ink-soft">
             Dette er en av grunnene til at plantemedisin har overlevd: den er
             integrert i hverdagen. Et måltid kan være like mye forebyggende
             helse som det er ernæring.
@@ -171,11 +172,11 @@ export default function HistoriePage() {
           </span>
         </div>
 
-        <section className="mt-16">
+        <section className="mx-auto mt-16 max-w-2xl">
           <h2 className="font-serif-display text-2xl text-ink sm:text-3xl">
             En kunnskap som overlever fordi den deles
           </h2>
-          <p className="mt-4 max-w-2xl text-ink-soft">
+          <p className="mt-4 text-ink-soft">
             Selv om moderne medisin dominerte store deler av 1900-tallet,
             forsvant ikke urtekunnskapen. Den ble liggende i notatbøker, i
             gamle glassflasker og i minner fra barndommen. I dag ser vi en ny
@@ -196,10 +197,7 @@ export default function HistoriePage() {
             mønstrene opp igjen, akkurat som de gjorde rundt kjøkkenbordet for
             hundre år siden.
           </p>
-          <Link
-            href="/"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-plum-800 px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-plum-700"
-          >
+          <Link href="/" className={`mt-8 ${BUTTON_PRIMARY_CLASS}`} style={BUTTON_PRIMARY_STYLE}>
             Bla i råd
             <span aria-hidden>→</span>
           </Link>

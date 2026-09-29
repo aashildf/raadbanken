@@ -21,12 +21,12 @@ export default function AllePage() {
 
   return (
     <main className="min-h-full bg-paper">
-      <div className="mx-auto w-full max-w-4xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
+      <div className="mx-auto w-full max-w-[var(--content-max)] px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
           &larr; Tilbake til Rådbanken
         </Link>
 
-        <header className="mt-8">
+        <header className="mt-8 max-w-2xl">
           <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Rådbanken</p>
           <h1 className="font-serif-display mt-2 text-4xl text-ink sm:text-5xl">Alle kategorier</h1>
           <p className="mt-4 max-w-xl text-ink-soft">
@@ -39,7 +39,7 @@ export default function AllePage() {
               <a
                 key={cat.id}
                 href={`#${cat.id}`}
-                className="text-xs font-semibold uppercase tracking-[0.12em] text-plum-700 transition-opacity hover:opacity-70"
+                className="text-xs font-semibold uppercase tracking-[0.14em] text-plum-700 transition-opacity hover:opacity-70 active:opacity-50"
               >
                 {cat.name}
               </a>

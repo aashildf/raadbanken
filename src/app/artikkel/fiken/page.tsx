@@ -10,37 +10,50 @@ export const metadata = {
 export default function FikenArticlePage() {
   return (
     <main className="min-h-full bg-paper">
-      <div className="mx-auto w-full max-w-2xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
+      <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
           &larr; Tilbake til Rådbanken
         </Link>
 
-        <header className="mt-8">
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
-            Frukt med lange tradisjoner
-          </p>
-          <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl">
-            Fiken – en liten frukt med store helsefordeler
-          </h1>
-          <p className="mt-4 text-ink-soft">
-            Fiken har en rekke medisinske egenskaper som særlig styrker fordøyelsen, hjertehelsen
-            og skjelettet, på grunn av sitt høye innhold av kostfiber, antioksidanter og
-            essensielle mineraler. Frukten har en lang historie innen folkemedisinen som et
-            naturlig legemiddel mot flere hverdagsplager.
-          </p>
-        </header>
+        {/* Bilde til venstre / kicker, tittel og ingress til høyre — samme
+            bredde-mønster som syrin-artikkelen, i stedet for en smal
+            tekstblokk midtstilt på en ellers tom, bred side. Ytre wrapper er
+            max-w-5xl (ikke --content-max) — prøvde bredere først, men da ble
+            avstanden ned til den max-w-2xl-smale prosaen under så stor at
+            siden så ut til å "hoppe" fra bred til smal i stedet for å lese
+            som én sammenhengende kolonne. */}
+        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[420px_1fr] lg:items-center lg:gap-16">
+          <div className="mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
+            <div className="relative aspect-4/3 overflow-hidden rounded-3xl">
+              <Image
+                src="/pictures/menupictures/fiken_pexels-adriannacalvo-23384641.jpg"
+                alt="Ferske fiken, hele og oppskåret"
+                fill
+                sizes="(max-width: 1024px) 448px, 420px"
+                className="object-cover"
+                priority
+              />
+            </div>
+            <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: Adrianna CA / Pexels</p>
+          </div>
 
-        <div className="relative mt-10 aspect-5/3 overflow-hidden rounded-3xl">
-          <Image
-            src="/pictures/menupictures/fiken_pexels-adriannacalvo-23384641.jpg"
-            alt="Ferske fiken, hele og oppskåret"
-            fill
-            className="object-cover"
-          />
+          <header>
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+              Frukt med lange tradisjoner
+            </p>
+            <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl lg:text-5xl">
+              Fiken – en liten frukt med store helsefordeler
+            </h1>
+            <p className="mt-4 max-w-xl text-ink-soft">
+              Fiken har en rekke medisinske egenskaper som særlig styrker fordøyelsen, hjertehelsen
+              og skjelettet, på grunn av sitt høye innhold av kostfiber, antioksidanter og
+              essensielle mineraler. Frukten har en lang historie innen folkemedisinen som et
+              naturlig legemiddel mot flere hverdagsplager.
+            </p>
+          </header>
         </div>
-        <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: Adrianna CA / Pexels</p>
 
-        <div className="mt-10 flex flex-col gap-6 text-ink-soft">
+        <div className="mx-auto mt-16 flex w-full max-w-2xl flex-col gap-6 text-ink-soft">
           <p>Her er de viktigste medisinske fordelene og bruksområdene til fiken:</p>
 
           <section>
@@ -114,14 +127,14 @@ export default function FikenArticlePage() {
             </ul>
           </section>
 
-          <div className="hairline rounded-xl px-4 py-3 text-sm" style={{ background: "#F7EFD9" }}>
+          <div className="border-l-2 border-rust/50 pl-4 text-sm">
             <strong className="text-ink">Tips:</strong> For å få best mulig effekt mot
             forstoppelse, bør tørket fiken bløtlegges i vann over natten, og du bør drikke rikelig
             med væske ved siden av.
           </div>
         </div>
 
-        <div className="mt-10">
+        <div className="mx-auto mt-10 w-full max-w-2xl">
           <RemedyDisclaimer text="fiken forstoppelse fordøyelse" />
         </div>
       </div>

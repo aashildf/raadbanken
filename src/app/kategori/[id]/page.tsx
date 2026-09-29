@@ -26,6 +26,10 @@ const CATEGORY_INTRO: Record<string, string> = {
     "Her finner du gamle råd og enkle knep for hud, hår og personlig pleie. Før baderomshyllene ble fulle av kremer, serum og spesialprodukter, brukte man det som fantes i kjøkkenet, hagen og naturen rundt seg. Oljer, urter, honning, havre og andre råvarer har gjennom tidene fått spille mange roller i jakten på mykere hud, blankere hår og litt ekstra glød. Mange av de gamle triksene er overraskende enkle – og noen er verdt å ta frem igjen.",
   husoghjem:
     "Her har vi samlet kjerringråd for hus og hjem – små løsninger på store og små hverdagsproblemer. Før spesialmidler og produkter fantes for enhver oppgave, måtte man være kreativ med det man hadde tilgjengelig. Eddik, sitron, salt, potetmel og grønnsåpe kunne brukes til langt mer enn man kanskje skulle tro. Kunnskapen ble delt, prøvd ut og gitt videre, og mange av de gamle knepene lever fortsatt i beste velgående.",
+  godegamle:
+    "De aller mest klassiske kjerringrådene — de fleste har hørt minst ett av dem fra en bestemor eller oldemor. Denne kategorien er foreløpig ny og tom, men er tenkt som samlestedet for de rådene som har gått igjen på tvers av generasjoner og familier.",
+  sankingbevaring:
+    "Om å sanke fra naturen og ta vare på det man finner — bær, sopp, urter og frukt gjennom sesongen, og hvordan man bevarer det til senere. Denne kategorien er foreløpig ny og tom, men er tenkt som samlestedet for gamle triks knyttet til sanking, konservering og hermetisering.",
 };
 
 export default function KategoriPage({
@@ -60,7 +64,7 @@ export default function KategoriPage({
 
   return (
     <main className="min-h-full bg-paper">
-      <div className="mx-auto w-full max-w-7xl pb-4 pt-6" style={{ paddingInline: "var(--page-pad)" }}>
+      <div className="mx-auto w-full max-w-[var(--content-max)] pb-4 pt-6" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/alle" className="text-sm text-ink-soft hover:text-ink">
           &larr; Alle kategorier
         </Link>
@@ -92,24 +96,24 @@ export default function KategoriPage({
             stablet kolonne, så man slipper å scrolle forbi et stort bilde for
             å komme til det man faktisk er ute etter. Ingen søsken-kategori-tags
             her — de ligger allerede lett tilgjengelig øverst i navbaren. */}
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20" style={{ paddingInline: "var(--page-pad)" }}>
+        <div className="relative z-10 mx-auto w-full max-w-[var(--content-max)] px-5 pb-20" style={{ paddingInline: "var(--page-pad)" }}>
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-[320px_1fr] sm:gap-16">
             <div className="sm:sticky sm:top-28 sm:self-start">
               <div className="relative mx-auto aspect-[8/15] w-56 sm:w-full">
                 <Image
-                  src={CATEGORY_INTRO_IMAGE[category.id]}
+                  src={CATEGORY_INTRO_IMAGE[category.id] ?? category.image}
                   alt=""
                   aria-hidden
                   fill
                   sizes="(max-width: 640px) 224px, 320px"
-                  className="object-contain"
+                  className={CATEGORY_INTRO_IMAGE[category.id] ? "object-contain" : "object-cover"}
                   priority
                 />
               </div>
             </div>
 
             <div>
-              <p className="font-metrophobic text-xs uppercase tracking-[0.3em] text-plum-700">Kategori</p>
+              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Kategori</p>
               <h1 className="font-serif-display mt-2 text-6xl text-ink sm:text-7xl lg:text-8xl">
                 {category.name}
               </h1>

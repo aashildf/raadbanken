@@ -3,7 +3,7 @@ import Image from "next/image";
 import { RemedyDisclaimer } from "@/components/RemedyDisclaimer";
 
 export const metadata = {
-  title: "Syrin – mer enn en vakker vårduft | Rådbanken",
+  title: "Syrin, mer enn en vakker vårduft | Rådbanken",
   description: "Syrinblomster er spiselige og fulle av virkestoffer, tradisjonelt brukt mot uro, urolig mage og irritert hud.",
 };
 
@@ -49,30 +49,31 @@ type SyrinRecipe = {
   creditHref?: string;
 };
 
-function RecipeSteps({ ingredients, steps }: { ingredients?: string[]; steps: string[] }) {
+function IngredientsList({ items }: { items: string[] }) {
   return (
-    <div className={`grid grid-cols-1 gap-6 ${ingredients ? "sm:grid-cols-[1fr_1.5fr]" : ""}`}>
-      {ingredients && (
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-plum-700">Ingredienser</p>
-          <ul className="mt-2 flex flex-col gap-1.5">
-            {ingredients.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-plum-700">Steg for steg</p>
-        <ol className="mt-2 flex flex-col gap-2">
-          {steps.map((step, i) => (
-            <li key={i} className="flex gap-2">
-              <span className="text-ink">{i + 1}.</span>
-              <span>{step}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-plum-700">Ingredienser</p>
+      <ul className="mt-2 flex flex-col gap-1.5">
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function StepsList({ steps }: { steps: string[] }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-plum-700">Steg for steg</p>
+      <ol className="mt-2 flex flex-col gap-2">
+        {steps.map((step, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="text-ink">{i + 1}.</span>
+            <span>{step}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -195,45 +196,59 @@ const SYRIN_FULL_RECIPES: SyrinRecipe[] = [
 
 export default function SyrinArticlePage() {
   return (
-    <main className="min-h-full bg-paper">
-      <div className="mx-auto w-full max-w-2xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
+    <main className="min-h-full bg-page-bg">
+      <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
           &larr; Tilbake til Rådbanken
         </Link>
 
-        <header className="mt-8">
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
-            Duftende prydbusk med gamle røtter
-          </p>
-          <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl">
-            Syrin – mer enn en vakker vårduft
-          </h1>
-          <p className="mt-4 text-ink-soft">
-            Syrin (Syringa vulgaris) er mest kjent for sitt vakre utseende og sin fantastiske duft,
-            men planten har også antioksidantiske, betennelsesdempende og beroligende egenskaper
-            som har vært brukt i tradisjonell folkemedisin. Ifølge Giftinformasjonen på Helsenorge
-            er vanlig syrin en ufarlig prydbusk. Selve blomstene er spiselige og rike på aktive
-            plantestoffer, mens barken og bladene historisk har vært brukt til mer kraftfull
-            urtemedisin.
-          </p>
-        </header>
+        {/* Bilde til venstre / kicker, tittel og ingress til høyre — samme
+            mønster som kategori-sidene, i stedet for en smal tekstblokk
+            midtstilt på en ellers tom side. */}
+        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[420px_1fr] lg:items-center lg:gap-16">
+          <div className="mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
+            <div className="relative aspect-3/4 w-full overflow-hidden rounded-3xl">
+              <Image
+                src="/pictures/syrin2_pexels-jovanvasiljevic-24388204.jpg"
+                alt="Hender som holder frem en bukett med syrin i kveldslys"
+                fill
+                sizes="(max-width: 1024px) 448px, 420px"
+                className="object-cover"
+                priority
+              />
+            </div>
+            <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: Jovan Vasiljević / Pexels</p>
+          </div>
 
-        <div className="relative mx-auto mt-10 aspect-3/4 w-full max-w-md overflow-hidden rounded-3xl">
-          <Image
-            src="/pictures/syrin2_pexels-jovanvasiljevic-24388204.jpg"
-            alt="Hender som holder frem en bukett med syrin i kveldslys"
-            fill
-            className="object-cover"
-          />
+          <header>
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+              Duftende prydbusk med gamle røtter
+            </p>
+            <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl lg:text-5xl">
+              Syrin – mer enn en vakker vårduft
+            </h1>
+            <p className="mt-4 max-w-xl text-ink-soft">
+              Syrin (Syringa vulgaris) er mest kjent for sitt vakre utseende og sin fantastiske duft,
+              men planten har også antioksidantiske, betennelsesdempende og beroligende egenskaper
+              som har vært brukt i tradisjonell folkemedisin. Ifølge Giftinformasjonen på Helsenorge
+              er vanlig syrin en ufarlig prydbusk. Selve blomstene er spiselige og rike på aktive
+              plantestoffer, mens barken og bladene historisk har vært brukt til mer kraftfull
+              urtemedisin.
+            </p>
+          </header>
         </div>
-        <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: Jovan Vasiljević / Pexels</p>
 
-        <div className="mt-10 flex flex-col gap-6 text-ink-soft">
-          <p>Her er noen av de viktigste egenskapene til syrin, og hva folketradisjonen har brukt dem til:</p>
-
-          <section>
-            <h2 className="font-serif-display text-2xl text-ink">De viktigste egenskapene ved syrin</h2>
-            <ul className="mt-3 flex flex-col gap-2">
+        <div className="mt-20 text-ink-soft">
+          {/* EGENSKAPER — enkel liste. God typografi og luft gjør jobben,
+              ingen nummerering eller andre virkemidler som skal "gjøre den
+              interessant" i seg selv. */}
+          <section className="mx-auto w-full max-w-2xl">
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Egenskaper</p>
+            <h2 className="font-serif-display mt-2 text-2xl text-ink">De viktigste egenskapene ved syrin</h2>
+            <p className="mt-3">
+              Her er noen av de viktigste egenskapene til syrin, og hva folketradisjonen har brukt dem til:
+            </p>
+            <ul className="mt-6 flex flex-col gap-4">
               <li>
                 <strong className="text-ink">Rik på antioksidanter:</strong> Blomstene inneholder
                 høye nivåer av flavonoider og polyfenoler, stoffer som bidrar til å beskytte
@@ -265,75 +280,121 @@ export default function SyrinArticlePage() {
             </ul>
           </section>
 
-          <section>
-            <h2 className="font-serif-display text-2xl text-ink">Slik kan du bruke syrin</h2>
+          {/* INSPIRASJON — én forankrende bilde, ikke tre like kort. En liten,
+              roligere gjenklang av heroens bilde+tekst-oppsett, som signaliserer
+              at vi fortsatt er i den lette, redaksjonelle delen av artikkelen. */}
+          <section className="mx-auto mt-16 w-full max-w-2xl">
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Inspirasjon</p>
+            <h2 className="font-serif-display mt-2 text-2xl text-ink">Slik kan du bruke syrin</h2>
             <p className="mt-3">
               Vil du teste syrin selv, bruker du kun blomstene, plukket av den grønne stilken.
               Pass også på at busken ikke er sprøytet med kjemikalier.
             </p>
 
-            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {SYRIN_IDEAS.map((idea) => (
-                <div key={idea.title}>
-                  <div className="relative mb-3 aspect-4/3 overflow-hidden rounded-2xl">
-                    <Image src={idea.image} alt="" fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />
-                    <a
-                      href={idea.creditHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute bottom-1.5 left-2 text-[9px] text-paper/80 hover:text-paper"
-                    >
-                      Foto: {idea.credit}
-                    </a>
-                  </div>
-                  <h3 className="font-serif-display text-lg text-ink">{idea.title}</h3>
-                  <p className="mt-1 text-sm text-ink-soft">{idea.text}</p>
+            <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-10">
+              <div className="mx-auto w-full max-w-[220px] shrink-0 sm:mx-0">
+                <div className="relative aspect-4/5 overflow-hidden rounded-2xl">
+                  <Image
+                    src={SYRIN_IDEAS[0].image}
+                    alt=""
+                    fill
+                    sizes="220px"
+                    className="object-cover"
+                  />
                 </div>
-              ))}
+                <a
+                  href={SYRIN_IDEAS[0].creditHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 block text-center text-[10px] text-ink-soft/50 hover:text-ink-soft"
+                >
+                  Foto: {SYRIN_IDEAS[0].credit}
+                </a>
+              </div>
+
+              <ul className="flex flex-1 flex-col divide-y divide-ink/10">
+                {SYRIN_IDEAS.map((idea, i) => (
+                  <li key={idea.title} className="flex gap-4 py-4 first:pt-0 last:pb-0">
+                    <span className="font-display shrink-0 pt-0.5 text-xs text-plum-700/60">0{i + 1}</span>
+                    <div>
+                      <h3 className="font-serif-display text-lg text-ink">{idea.title}</h3>
+                      <p className="mt-1 text-sm">{idea.text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           </section>
 
-          {/* Bryter ut av artikkelens smale lesekolonne på store skjermer — ingrediens-/
-              steg-rutenettet trenger mer bredde enn brødteksten for å ikke føles trangt. */}
-          <section className="lg:relative lg:left-1/2 lg:w-screen lg:max-w-4xl lg:-translate-x-1/2">
-            <h2 className="font-serif-display text-2xl text-ink">Oppskrifter</h2>
-            <div className="mt-6 flex flex-col gap-12">
-              {SYRIN_FULL_RECIPES.map((recipe) => (
-                <div key={recipe.title}>
-                  {recipe.image && (
-                    <>
-                      <div className="relative aspect-3/2 overflow-hidden rounded-2xl">
-                        <Image
-                          src={recipe.image}
-                          alt=""
-                          fill
-                          sizes="(max-width: 640px) 100vw, 640px"
-                          className="object-cover"
-                        />
-                      </div>
-                      {recipe.credit && (
-                        <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: {recipe.credit}</p>
-                      )}
-                    </>
-                  )}
-                  <h3 className="font-serif-display mt-4 text-xl text-ink">{recipe.title}</h3>
-                  <p className="mt-1">{recipe.intro}</p>
+          {/* OPPSKRIFTER — hovedinnholdet, derfor mer luft foran og en litt
+              større overskrift enn de andre seksjonene. Ett system for alle
+              fire: bilde (når det finnes) pares med den korte ingredienslisten,
+              fremgangsmåten ligger alltid under i full aksebredde. Oppskriften
+              uten bilde og makron-oppskriften (med egne deler) bruker de samme
+              byggeklossene (IngredientsList/StepsList), bare uten bildeparet. */}
+          <section className="mx-auto mt-24 w-full max-w-2xl">
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Lag selv</p>
+            <h2 className="font-serif-display mt-2 text-2xl text-ink sm:text-3xl">Oppskrifter</h2>
+
+            <div className="mt-8 flex flex-col gap-16">
+              {SYRIN_FULL_RECIPES.map((recipe, i) => (
+                <div key={recipe.title} className={i > 0 ? "border-t border-ink/10 pt-16" : ""}>
+                  <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+                    Oppskrift {i + 1}
+                  </p>
+                  <h3 className="font-serif-display mt-2 text-2xl text-ink">{recipe.title}</h3>
+                  <p className="mt-2">{recipe.intro}</p>
 
                   {recipe.parts ? (
-                    <div className="mt-6 flex flex-col gap-8">
-                      {recipe.parts.map((part) => (
-                        <div key={part.heading}>
-                          <h4 className="font-serif-display text-base text-ink">{part.heading}</h4>
-                          {part.note && <p className="mt-1 text-sm">{part.note}</p>}
-                          <div className="mt-3">
-                            <RecipeSteps ingredients={part.ingredients} steps={part.steps} />
+                    <>
+                      {recipe.image && (
+                        <div className="mt-6">
+                          <div className="relative aspect-3/2 w-full overflow-hidden rounded-2xl">
+                            <Image src={recipe.image} alt="" fill sizes="672px" className="object-cover" />
                           </div>
+                          {recipe.credit && (
+                            <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: {recipe.credit}</p>
+                          )}
                         </div>
-                      ))}
-                    </div>
+                      )}
+                      <div className="mt-6 flex flex-col gap-8">
+                        {recipe.parts.map((part) => (
+                          <div key={part.heading}>
+                            <h4 className="font-serif-display text-base text-ink">{part.heading}</h4>
+                            {part.note && <p className="mt-1 text-sm">{part.note}</p>}
+                            <div className="mt-3 flex flex-col gap-6">
+                              {part.ingredients && <IngredientsList items={part.ingredients} />}
+                              <StepsList steps={part.steps} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : recipe.image ? (
+                    <>
+                      <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:gap-8">
+                        <div className="mx-auto w-full max-w-[200px] shrink-0 sm:mx-0">
+                          <div className="relative aspect-square overflow-hidden rounded-2xl">
+                            <Image src={recipe.image} alt="" fill sizes="200px" className="object-cover" />
+                          </div>
+                          {recipe.credit && (
+                            <p className="mt-1 text-center text-[10px] text-ink-soft/50">Foto: {recipe.credit}</p>
+                          )}
+                        </div>
+                        {recipe.ingredients && (
+                          <div className="flex-1">
+                            <IngredientsList items={recipe.ingredients} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-6">
+                        <StepsList steps={recipe.steps ?? []} />
+                      </div>
+                    </>
                   ) : (
-                    <div className="mt-4">
-                      <RecipeSteps ingredients={recipe.ingredients} steps={recipe.steps ?? []} />
+                    <div className="mt-6 flex flex-col gap-6">
+                      {recipe.ingredients && <IngredientsList items={recipe.ingredients} />}
+                      <StepsList steps={recipe.steps ?? []} />
                     </div>
                   )}
 
@@ -347,14 +408,16 @@ export default function SyrinArticlePage() {
             </div>
           </section>
 
-          <div className="hairline rounded-xl px-4 py-3 text-sm" style={{ background: "#F7EFD9" }}>
+          {/* AVSLUTNING — rolig og tilbaketrukket, ingen konkurranse om
+              oppmerksomheten etter hovedinnholdet. */}
+          <div className="mx-auto mt-16 w-full max-w-2xl border-l-2 border-rust/50 pl-4 text-sm">
             <strong className="text-ink">Obs:</strong> Gravide, ammende eller personer som bruker
             blodfortynnende medisiner bør rådføre seg med lege før de inntar syrin i medisinske
             mengder.
           </div>
         </div>
 
-        <div className="mt-10">
+        <div className="mx-auto mt-10 w-full max-w-2xl">
           <RemedyDisclaimer text="syrin avslapning hud fordøyelse" />
         </div>
       </div>

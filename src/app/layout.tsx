@@ -1,53 +1,28 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Courier_Prime, Fraunces, Ibarra_Real_Nova, Inter, Kantumruy_Pro, Metrophobic } from "next/font/google";
+import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { DisclaimerGate } from "@/components/DisclaimerGate";
 import { SiteHeader } from "@/components/SiteHeader";
+import { GrainOverlay } from "@/components/GrainOverlay";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
+// Overskrifter, kickere og alle-caps-labels sitewide — samme variabelnavn
+// (--font-googlesans) som før Google Sans Flex ble byttet ut, så alt som
+// allerede bruker .font-display/.font-serif-display plukker opp den nye
+// fonten uten endringer andre steder. Utprøvd først bare på forsiden, nå
+// satt som sidens faste par.
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-googlesans",
   subsets: ["latin"],
-});
-
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  // SOFT/WONK er Fraunces sine skjulte variable akser — gir de runde
-  // ball-terminalene og den litt "wonky" Art Nouveau-følelsen i display-
-  // overskrifter (se .font-serif-display i globals.css).
-  axes: ["opsz", "SOFT", "WONK"],
-});
-
-const ibarra = Ibarra_Real_Nova({
-  variable: "--font-ibarra",
-  subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+// Brødtekst sitewide — samme variabelnavn (--font-jakarta) som før Plus
+// Jakarta Sans.
+const montserrat = Montserrat({
+  variable: "--font-jakarta",
   subsets: ["latin"],
-});
-
-const courierPrime = Courier_Prime({
-  variable: "--font-courier",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-});
-
-const kantumruy = Kantumruy_Pro({
-  variable: "--font-kantumruy",
-  subsets: ["latin"],
-  weight: ["400"],
-});
-
-const metrophobic = Metrophobic({
-  variable: "--font-metrophobic",
-  subsets: ["latin"],
-  weight: ["400"],
+  weight: "variable",
 });
 
 export const metadata: Metadata = {
@@ -63,12 +38,13 @@ export default function RootLayout({
   return (
     <html
       lang="nb"
-      className={`${bricolage.variable} ${courierPrime.variable} ${fraunces.variable} ${ibarra.variable} ${inter.variable} ${kantumruy.variable} ${metrophobic.variable} h-full antialiased`}
+      className={`${cormorantGaramond.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SiteHeader />
         {children}
         <DisclaimerGate />
+        <GrainOverlay />
       </body>
     </html>
   );

@@ -277,7 +277,7 @@ export const MEDICINAL_PLANTS: Plant[] = [
       "Aromatisk krydderurt. Trekkes som te og er et gammelt husråd mot hoste og slim.",
     shape: "sprig",
     bg: "var(--sage)",
-    image: { src: "/pictures/timian.png", fit: "cover" },
+    image: { src: "/pictures/timian.jpg", fit: "cover" },
     sections: [
       {
         heading: "Historie og tradisjon: mot og renhet",
@@ -460,7 +460,7 @@ export const MEDICINAL_PLANTS: Plant[] = [
       "Flerårig fjellplante hvis rotstokk lukter av roser når den deles. Kalt «Nordens ginseng» i folkemedisinen, og brukt i norsk tradisjon på torvtak som vern mot lynnedslag og brann.",
     shape: "succulent",
     bg: "var(--plum-800)",
-    image: { src: "/pictures/rosenrot.png", fit: "cover" },
+    image: { src: "/pictures/rosenrot.jpg", fit: "cover" },
     sections: [
       {
         heading: "Egenskaper og påstått virkning",

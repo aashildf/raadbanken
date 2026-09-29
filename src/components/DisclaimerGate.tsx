@@ -1,6 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
 
 const STORAGE_KEY = "raadbanken-disclaimer-accepted-v1";
 
@@ -29,22 +30,38 @@ function useAccepted() {
 
 export function DisclaimerGate() {
   const accepted = useAccepted();
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-  function accept() {
-    try {
-      localStorage.setItem(STORAGE_KEY, "1");
-    } catch {
-      // ignorer, modalen vises da igjen neste besøk, ikke kritisk
-    }
-    // Trigger re-evaluation av snapshot for denne fanen (storage-eventet fyres bare i andre faner).
-    window.dispatchEvent(new Event("storage"));
+  if (!accepted && !mounted) {
+    setMounted(true);
   }
 
-  if (accepted) return null;
+  useEffect(() => {
+    if (!mounted) return;
+    const id = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, [mounted]);
+
+  function accept() {
+    setVisible(false);
+    window.setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, "1");
+      } catch {
+        // ignorer, modalen vises da igjen neste besøk, ikke kritisk
+      }
+      // Trigger re-evaluation av snapshot for denne fanen (storage-eventet fyres bare i andre faner).
+      window.dispatchEvent(new Event("storage"));
+      setMounted(false);
+    }, 200);
+  }
+
+  if (!mounted) return null;
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-plum-950/70 p-4">
-      <div className="hairline max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-paper p-6 shadow-2xl sm:p-8">
+    <div className={`modal-scrim fixed inset-0 z-100 flex items-center justify-center bg-plum-950/70 p-4 ${visible ? "is-visible" : ""}`}>
+      <div className={`modal-panel hairline max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-paper p-6 shadow-2xl sm:p-8 ${visible ? "is-visible" : ""}`}>
         <h2 className="font-display text-xl font-bold text-ink">
           Viktig informasjon om innholdet i appen
         </h2>
@@ -75,7 +92,8 @@ export function DisclaimerGate() {
 
         <button
           onClick={accept}
-          className="mt-6 w-full rounded-full bg-plum-800 px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-plum-700"
+          className={`mt-6 w-full active:scale-[0.97] ${BUTTON_PRIMARY_CLASS}`}
+          style={BUTTON_PRIMARY_STYLE}
         >
           Jeg forstår og godtar
         </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import Link from "next/link";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
@@ -9,38 +9,73 @@ import { wilsonScore } from "@/lib/wilson";
 import { MEDICINAL_PLANTS, plantOfTheMonth } from "@/lib/plants";
 import { useAnonAuth } from "@/lib/useAnonAuth";
 import { castVote } from "@/lib/votes";
-import { LottieVote } from "@/components/LottieVote";
+import { setSaved } from "@/lib/saves";
+import { RemedyPreviewModal } from "@/components/RemedyPreviewModal";
+import {
+  BUTTON_PRIMARY_CLASS,
+  BUTTON_PRIMARY_STYLE,
+  BUTTON_SECONDARY_CLASS,
+  BUTTON_SECONDARY_STYLE_DARK,
+} from "@/lib/buttonStyles";
 import type { Problem, Remedy } from "@/lib/types";
-import { IconSparkle, PLANT_ICON } from "@/components/icons";
+import { GRAIN_BG } from "@/components/GrainOverlay";
+import {
+  IconArrowDown,
+  IconArrowUp,
+  IconBulb,
+  IconChevronDown,
+  IconClover,
+  IconHeart,
+  IconHouse,
+  IconMore,
+  IconPlus,
+  IconPot,
+  IconSparkle,
+  IconSprig,
+  IconFlowerHerb,
+  IconWrench,
+  PLANT_ICON,
+} from "@/components/icons";
 
-const LOGO_SEEDS = [
-  { w: 28, left: "58%", top: "8%",  anim: "seed-drift-c", dur: "9s",  delay: "0s"   },
-  { w: 20, left: "66%", top: "2%",  anim: "seed-drift-a", dur: "11s", delay: "2.5s" },
-  { w: 16, left: "50%", top: "12%", anim: "seed-drift-b", dur: "13s", delay: "5s"   },
-  { w: 22, left: "72%", top: "6%",  anim: "seed-drift-c", dur: "10s", delay: "7.5s" },
+// Rotérende aksentpalett for rangeringslistens nummerering — samme varme,
+// botaniske fargefølelse som resten av siden (gull, terrakotta, salvie osv.),
+// men med litt farge i hvert tall i stedet for ett ensfarget, falmet nummer.
+const RANK_COLORS = ["#c9a14a", "#bc6c4d", "#6f8f6c", "#7a93a8", "#a8748a", "#6b7a54", "#c98a5b", "#c98a8a"];
+
+// Bokeh-orbs over hero-bildet — uskarpe lyspunkt i palettens farger som
+// sakte faller/driver nedover, som lys som slipper gjennom trær med lav
+// skarphetsdybde. Negative delay-verdier gjør at de allerede er midt i
+// syklusen ved innlasting (spredt utover bildet fra første sekund), og
+// ulik duration/blur/størrelse gir en svak parallax — raske/store/mindre
+// uskarpe orbs leser som nærmere, sakte/små/mer uskarpe som lenger bak.
+const BOKEH_ORBS = [
+  { left: "8%",  size: 30, color: RANK_COLORS[0], blur: 9,  opacity: 0.45, duration: 32, delay: -4,  dx: 22,  dy: 720 },
+  { left: "18%", size: 52, color: RANK_COLORS[2], blur: 16, opacity: 0.4,  duration: 44, delay: -18, dx: -18, dy: 760 },
+  { left: "27%", size: 22, color: RANK_COLORS[4], blur: 9,  opacity: 0.5,  duration: 26, delay: -9,  dx: 16,  dy: 680 },
+  { left: "38%", size: 64, color: RANK_COLORS[3], blur: 16, opacity: 0.35, duration: 48, delay: -30, dx: -26, dy: 800 },
+  { left: "49%", size: 34, color: RANK_COLORS[6], blur: 9,  opacity: 0.45, duration: 30, delay: -2,  dx: 20,  dy: 700 },
+  { left: "60%", size: 46, color: RANK_COLORS[1], blur: 16, opacity: 0.4,  duration: 38, delay: -21, dx: -14, dy: 740 },
+  { left: "70%", size: 26, color: RANK_COLORS[7], blur: 9,  opacity: 0.5,  duration: 24, delay: -11, dx: 18,  dy: 660 },
+  { left: "80%", size: 58, color: RANK_COLORS[5], blur: 16, opacity: 0.35, duration: 46, delay: -36, dx: -22, dy: 780 },
+  { left: "90%", size: 38, color: RANK_COLORS[0], blur: 9,  opacity: 0.45, duration: 34, delay: -14, dx: 24,  dy: 720 },
+  { left: "95%", size: 76, color: RANK_COLORS[2], blur: 16, opacity: 0.35, duration: 42, delay: -27, dx: -20, dy: 760 },
 ];
 
-function useViewportWidth() {
-  const [width, setWidth] = useState(1440);
-  useEffect(() => {
-    let raf = 0;
-    function onResize() {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        setWidth(window.innerWidth);
-        raf = 0;
-      });
-    }
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("resize", onResize);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
-  return width;
-}
-
+// "Hva finner du i Rådbanken?"-stripen rett under hero. Egen, litt bredere
+// markedsføringstaksonomi enn TOP_CATEGORIES (som bare har fem kategorier) —
+// denne er en visuell smakebit, ikke reell navigasjon, så noen punkter peker
+// til nærmeste eksisterende side i stedet for en dedikert kategori som ennå
+// ikke finnes (Mat, Reparasjon).
+const CATEGORY_STRIP = [
+  { label: "Kjerringråd", href: "/alle", Icon: IconSprig },
+  { label: "Lifehacks", href: "/#artikler", Icon: IconBulb },
+  { label: "Kultur", href: "/historie", Icon: IconClover },
+  { label: "Planter og urter", href: "/medisinplanter", Icon: IconFlowerHerb },
+  { label: "Mat", href: "/alle", Icon: IconPot },
+  { label: "Reparasjon", href: "/alle", Icon: IconWrench },
+  { label: "Hus og hjem", href: "/kategori/husoghjem", Icon: IconHouse },
+  { label: "Helse og velvære", href: "/kategori/helse", Icon: IconHeart },
+] as const;
 
 function Reveal({
   children,
@@ -85,12 +120,14 @@ function Reveal({
 
 
 export default function HomePage() {
-  const viewportWidth = useViewportWidth();
   const uid = useAnonAuth();
 
   const [problems, setProblems] = useState<Problem[]>([]);
   const [remedies, setRemedies] = useState<Remedy[]>([]);
   const [votingId, setVotingId] = useState<string | null>(null);
+  const [openRemedyId, setOpenRemedyId] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "problems"), (snap) => {
@@ -106,6 +143,28 @@ export default function HomePage() {
     return unsub;
   }, []);
 
+  // Hvilke råd den innloggede (anonyme) brukeren har lagret i "mine lagrede
+  // råd" — hjertet i rangeringslisten under. Egen collection ("saves"), ett
+  // dokument per råd+bruker, samme mønster som "votes".
+  useEffect(() => {
+    if (!uid) {
+      setSavedIds(new Set());
+      return;
+    }
+    const q = query(collection(db, "saves"), where("userId", "==", uid));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setSavedIds(new Set(snap.docs.map((d) => d.data().remedyId as string)));
+      },
+      () => {
+        // F.eks. manglende Firestore-regler ennå ikke utrullet — stille feil,
+        // hjertene viser bare uaktivert tilstand i stedet for å krasje.
+      }
+    );
+    return unsub;
+  }, [uid]);
+
   const problemById = useMemo(() => new Map(problems.map((p) => [p.id, p])), [problems]);
 
   const rankedAll = useMemo(
@@ -117,6 +176,9 @@ export default function HomePage() {
   );
 
   const topTen = rankedAll.slice(0, 10);
+
+  const openIndex = openRemedyId ? topTen.findIndex((r) => r.id === openRemedyId) : -1;
+  const openRemedy = openIndex >= 0 ? topTen[openIndex] : null;
 
   const handleQuickVote = useCallback(
     async (remedyId: string, direction: "up" | "down") => {
@@ -131,6 +193,21 @@ export default function HomePage() {
       }
     },
     [uid]
+  );
+
+  const handleToggleSaved = useCallback(
+    async (remedyId: string) => {
+      if (!uid) return;
+      setSavingId(remedyId);
+      try {
+        await setSaved(remedyId, uid, !savedIds.has(remedyId));
+      } catch {
+        // Stille feil her, på linje med stemmegivning over.
+      } finally {
+        setSavingId(null);
+      }
+    },
+    [uid, savedIds]
   );
 
   const featuredPlant = useMemo(() => plantOfTheMonth(), []);
@@ -151,17 +228,18 @@ export default function HomePage() {
   const spotlightPlants = useMemo(() => [featuredPlant, ...companionPlants], [featuredPlant, companionPlants]);
 
   return (
-    <div className="relative min-h-full" style={{ background: "#F4ECDA" }}>
+    // Headeren er nå en solid, fast farget bjelke (se SiteHeader.tsx) som
+    // ligger i normal flyt — heroen starter rett under den som en vanlig
+    // side, ikke bak den lenger (det var bare relevant da headeren var
+    // gjennomsiktig og lå oppå bildet).
+    <div
+      className="relative min-h-full"
+      style={{ background: "var(--page-bg)" }}
+    >
 
-      {/* Dekorative løvetannbilder — vekslende sider nedover */}
+      {/* Store dandelion-bakgrunnsbilder fjernet på forsiden — papirkornet
+          (GrainOverlay + det ekstra laget på hero-fotoet) er teksturen nå. */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden select-none" style={{ zIndex: 0 }}>
-        <Image src="/ikoner/dandelion_shadow.png" alt="" aria-hidden width={1020} height={1020}
-          className="absolute left-0" style={{ top: "55vh", width: 1020, height: "auto", opacity: 0.4 }} />
-        <Image src="/ikoner/dandelion_shadow.png" alt="" aria-hidden width={900} height={900}
-          className="absolute right-0" style={{ top: "195vh", width: 900, height: "auto", opacity: 0.3, transform: "scaleX(-1)" }} />
-        <Image src="/ikoner/dandelion_shadow.png" alt="" aria-hidden width={860} height={860}
-          className="absolute left-0" style={{ top: "310vh", width: 860, height: "auto", opacity: 0.25 }} />
-
         {/* Subtile radiale gradients — varmt sollys */}
         <div className="absolute" style={{ top: "5%",  right: "-10%", width: 900, height: 700,  background: "radial-gradient(ellipse, rgba(255,200,100,0.06) 0%, transparent 70%)" }} />
         <div className="absolute" style={{ top: "40%", left:  "-5%", width: 800, height: 600,  background: "radial-gradient(ellipse, rgba(255,180,80,0.05)  0%, transparent 70%)" }} />
@@ -170,306 +248,358 @@ export default function HomePage() {
       </div>
 
       <main>
-                  {/* HERO — bakgrunn er et dekorativt full-bleed lag utenfor innholdets padding-boks,
-                      derfor plain fill fremfor å følge innholdets egen paddingInline. */}
-                  <section
-                    className="relative flex flex-col overflow-hidden text-ink"
-                    style={{
-                      // Headeren er sticky (i normal flyt), så hero trenger ikke lenger
-                      // kompensere for headerens høyde — bare sin egen dekorative luft.
-                      paddingTop: 48,
-                      paddingBottom: viewportWidth >= 640 ? 56 : 40,
-                      minHeight: viewportWidth >= 640 ? "min(680px, 78vh)" : undefined,
-                      justifyContent: "center",
-                    }}
-                  >
-                    {/* Bakgrunn — dekker hele seksjonen (padding inkludert). Løvetannen i bildet sitter
-                        i venstre tredjedel; utsnittet forskyves mot venstre på sm+ slik at den ikke
-                        havner rett bak den høyrestilte logoen. */}
-                    <Image
-                      src="/bakgrunner/bg5.png"
-                      alt=""
-                      aria-hidden
-                      fill
-                      sizes="100vw"
-                      className="pointer-events-none object-cover"
-                      style={{ zIndex: 0, objectPosition: viewportWidth >= 640 ? "30% 42%" : "center" }}
-                      priority
-                    />
-
-                    {/* Hovedinnhold: logo + tagline — sentrert på mobil, høyrestilt fra sm+ slik at
-                        løvetannen til venstre i bakgrunnsbildet blir stående fritt og synlig. */}
-                    <div
-                      className="relative z-10 mx-auto w-full max-w-7xl"
-                      style={{ paddingInline: "var(--page-pad)" }}
-                    >
-                      <div className="relative flex flex-col items-center sm:items-end">
-                        <div className="relative z-10">
-                          {/* Frø som blåser av løvetannen i logoen */}
-                          {LOGO_SEEDS.map((s, i) => (
-                            <Image
-                              key={i}
-                              src="/logo/dandelionseed.png"
-                              alt=""
-                              width={60}
-                              height={60}
-                              aria-hidden="true"
-                              data-seed=""
-                              style={{
-                                position: "absolute",
-                                left: s.left,
-                                top: s.top,
-                                width: s.w,
-                                height: "auto",
-                                animation: `${s.anim} ${s.dur} ${s.delay} infinite linear`,
-                                zIndex: 20,
-                              }}
-                            />
-                          ))}
-                          <Image
-                            src="/logo/herologo2.png"
-                            alt="Rådbanken"
-                            width={499}
-                            height={455}
-                            className="h-auto w-72 sm:w-96 lg:w-[26rem]"
-                            priority
-                            style={{  }}
+                  {/* HERO — to takter i stedet for én tett klynge oppå bildet: bildet bærer
+                      bare logoen (det ene høylytte øyeblikket), tagline/kicker/CTA følger rolig
+                      rett under, i sidens vanlige bakgrunn — ikke oppå fotoet lenger, så det
+                      trengs ikke noe gradient-triks for lesbarhet der heller. */}
+                  <section className="relative w-full overflow-hidden text-ink">
+                    <div className="relative aspect-3/5 w-full overflow-hidden sm:aspect-auto sm:min-h-[clamp(500px,78vh,780px)]">
+                      <Image
+                        src="/pictures/heroimage2.png"
+                        alt="Mor og datter går gjennom skogen med kurver fulle av sanket grønt"
+                        fill
+                        sizes="100vw"
+                        className="object-cover"
+                        style={{ objectPosition: "18% 50%" }}
+                        priority
+                      />
+                      {/* Toningslag fjernet — selv på 0.3 dekket den fortsatt for mye av
+                          fotoet (mor/datter, trærne). Teksten lener seg nå bare på
+                          text-shadow-haloen under (stor blur, nesten ingen offset) for
+                          lesbarhet, som ikke legger noe som helst oppå selve bildet. */}
+                      {/* Den lyse gløden som lå her var fra da logoen satt nederst til høyre
+                          (før masthead-en ble midtstilt) — ved 70%/78% havnet den rett bak
+                          taglinen i stedet, og leste som et rart hvitt felt nederst i
+                          bildet. Fjernet: logoen har sin egen drop-shadow og teksten sin
+                          egen text-shadow-halo, ingen bakgrunnsoppklaring trengs lenger. */}
+                      {/* Papirkorn på selve fotoet — nøyaktig samme lag som i navbaren
+                          (SiteHeader: GRAIN_BG, opasitet 0.4, vanlig blend), så foto og
+                          navbar leser som samme papir. Det globale kornet bruker multiply
+                          og forsvinner på mørke flater, derfor trengs dette laget her. */}
+                      <div
+                        className="pointer-events-none absolute inset-0 z-[4]"
+                        aria-hidden="true"
+                        style={{ backgroundImage: GRAIN_BG, opacity: 0.4 }}
+                      />
+                      {/* Mørkt radialt vignett — rammer inn bildet (mørkere i hjørnene,
+                          lyst i midten der mor og datter går) og legger et ekstra mørkt
+                          felt nederst og øverst der teksten/navbaren møter fotoet, for
+                          lesbarhet uten at det legger seg som en flat, jevn toning over
+                          hele bildet. */}
+                      <div
+                        className="pointer-events-none absolute inset-0 z-[5]"
+                        aria-hidden="true"
+                        style={{
+                          background:
+                            "radial-gradient(ellipse 85% 70% at 50% 42%, transparent 35%, rgba(10,14,8,0.55) 100%), linear-gradient(to bottom, rgba(8,12,6,0.32) 0%, transparent 22%), linear-gradient(to top, rgba(8,12,6,0.45) 0%, transparent 38%)",
+                        }}
+                      />
+                      {/* Bokeh-orbs — usynlig for klikk, ligger oppå fotoet/kornet/gløden
+                          men under masthead-teksten (z-[6] < z-10). */}
+                      <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden" aria-hidden="true">
+                        {BOKEH_ORBS.map((orb, i) => (
+                          <div
+                            key={i}
+                            data-orb=""
+                            className="absolute rounded-full"
+                            style={
+                              {
+                                left: orb.left,
+                                top: "-8%",
+                                width: orb.size,
+                                height: orb.size,
+                                background: orb.color,
+                                filter: `blur(${orb.blur}px)`,
+                                mixBlendMode: "screen",
+                                animation: `bokeh-fall ${orb.duration}s ${orb.delay}s linear infinite`,
+                                "--orb-dx": `${orb.dx}px`,
+                                "--orb-dy": `${orb.dy}px`,
+                                "--orb-o": Math.min(orb.opacity * 1.8, 0.8),
+                              } as React.CSSProperties
+                            }
                           />
-                          <p className="mt-2 text-center text-xs uppercase tracking-[0.12em] sm:text-right" style={{ fontFamily: "var(--font-kantumruy)", color: "var(--logo-banken)" }}>
-                            Et oppslagsverk for gamle husråd
-                          </p>
+                        ))}
+                      </div>
+                      {/* Masthead — den ferdigtegnede logo-lockupen (bue + løvetann +
+                          kursiv "Rådbanken", public/logo/radbanken-logo.png) i stedet for
+                          satt tekst, en stor kursiv overskrift som bærer selve budskapet,
+                          en mindre brødtekst under, og to CTA-er. Varm papirhvit
+                          (#f5efeb, ikke ren #fff) + en myk, stor text-shadow for
+                          lesbarhet mot fotoet — arver til alt under uten å settes flere
+                          steder (knappene nuller den ut selv, se style der). */}
+                      <div
+                        className="absolute inset-0 z-10 flex flex-col items-center px-6 pb-10 pt-[9vh] text-center sm:pt-[8vh]"
+                        style={{ color: "#f5efeb", textShadow: "0 1px 2px rgba(0,0,0,0.55), 0 2px 22px rgba(0,0,0,0.6)" }}
+                      >
+                        <Image
+                          src="/logo/radbanken-logo-trim.png"
+                          alt="Rådbanken"
+                          width={424}
+                          height={209}
+                          priority
+                          className="h-auto w-[240px] sm:w-[320px] lg:w-[380px]"
+                          style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.45))" }}
+                        />
+                        <p className="font-serif-display mt-6 max-w-[20ch] text-balance text-3xl italic leading-[1.08] sm:max-w-2xl sm:text-5xl">
+                          Kunnskap som går i arv, tilpasset livet vi lever i dag.
+                        </p>
+                        <p
+                          className="font-sans mt-4 max-w-[32ch] text-sm leading-relaxed sm:max-w-md sm:text-base"
+                          style={{ color: "rgba(245,239,235,0.85)" }}
+                        >
+                          Et levende arkiv for kjerringråd og gode tips – der brukerne deler
+                          sine erfaringer og stemmer frem det som fungerer.
+                        </p>
+                        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                          <Link
+                            href="/alle"
+                            className={`h-11 w-[190px] ${BUTTON_PRIMARY_CLASS}`}
+                            style={{ ...BUTTON_PRIMARY_STYLE, textShadow: "none" }}
+                          >
+                            Utforsk råd
+                            <span aria-hidden>→</span>
+                          </Link>
+                          <Link
+                            href="/del-rad"
+                            className={`h-11 w-[190px] hover:bg-white/10 ${BUTTON_SECONDARY_CLASS}`}
+                            style={{ ...BUTTON_SECONDARY_STYLE_DARK, textShadow: "none" }}
+                          >
+                            Del et råd
+                            <IconPlus className="h-3.5 w-3.5" />
+                          </Link>
+                        </div>
+                        {/* Scroll-hint — bare desktop (mobil er trangere, og heroen
+                            følges uansett rett av kategori-stripen). Diskré, myk
+                            hopp-animasjon (soft-bounce, se globals.css), av med
+                            prefers-reduced-motion som resten av sidens bevegelse.
+                            mt-auto skyver den til bunnen av masthead-en uansett hvor
+                            høyt resten av innholdet flytter seg. */}
+                        <div className="pointer-events-none mt-auto hidden flex-col items-center gap-2 pt-6 sm:flex" aria-hidden="true">
+                          <span className="h-10 w-px" style={{ background: "rgba(245,239,235,0.5)" }} />
+                          <IconChevronDown className="soft-bounce h-4 w-4 text-[#f5efeb]/70" />
                         </div>
                       </div>
                     </div>
                   </section>
 
-        {/* FIKEN — fremhevet artikkel, fullbredde felt rett under hero */}
-        <section className="relative">
-          <div className="relative left-1/2 w-screen -translate-x-1/2" style={{ background: "#F9E1C1" }}>
-            <Reveal
-              className="mx-auto flex flex-col items-stretch py-8 sm:flex-row sm:py-12"
-              style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
-            >
-              {/* Bildet — 2/3 av bredden, fast aspect-ratio (ingen stretch-avhengig prosenthøyde) */}
-              <div className="relative w-full shrink-0 sm:w-2/3">
-                <Link
-                  href="/artikkel/fiken"
-                  className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
-                >
-                  <Image
-                    src="/pictures/menupictures/fiken_pexels-adriannacalvo-23384641.jpg"
-                    alt="Ferske fiken, hele og oppskåret"
-                    fill
-                    className="object-cover"
-                  />
-                </Link>
-                <a
-                  href="https://www.pexels.com/photo/figs-in-white-bowl-23384641/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
-                >
-                  Foto: Adrianna CA / Pexels
-                </a>
-              </div>
+                  {/* HVA FINNER DU I RÅDBANKEN — kategori-stripe rett under hero, i sidens
+                      lyse papirfarge. Kicker + linje, så én rad med ikon+etikett som
+                      teaser for bredden i innholdet (ikke reell mega-meny, se
+                      CATEGORY_STRIP-kommentaren over). To duse løvetann-silhuetter
+                      (samme motiv som kategori-sidene) markerer hjørnet uten å bli
+                      enda et "kort". */}
+                  <section className="relative overflow-hidden" style={{ background: "var(--paper)" }}>
+                    <Image
+                      src="/ikoner/dandelion_shadow.png"
+                      alt=""
+                      aria-hidden
+                      width={700}
+                      height={700}
+                      className="pointer-events-none absolute -right-16 -top-10 hidden select-none sm:block"
+                      style={{ width: 220, height: "auto", opacity: 0.35 }}
+                    />
+                    <Image
+                      src="/ikoner/dandelion_shadow.png"
+                      alt=""
+                      aria-hidden
+                      width={700}
+                      height={700}
+                      className="pointer-events-none absolute -right-6 bottom-0 hidden select-none md:block"
+                      style={{ width: 340, height: "auto", opacity: 0.22 }}
+                    />
+                    {/* Ingen --content-max-cap her, med vilje — denne raden skal strekke
+                        seg helt til samme kant som navbaren (bare --page-pad, som
+                        SiteHeader sin indre rad), ikke stoppe smalere på brede skjermer
+                        slik resten av sidens innholdsseksjoner gjør. */}
+                    <div className="relative py-7 sm:py-9" style={{ paddingInline: "var(--page-pad)" }}>
+                      <div className="flex items-center gap-6">
+                        <p
+                          className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em]"
+                          style={{ color: "var(--ink)" }}
+                        >
+                          Hva finner du i Rådbanken?
+                        </p>
+                        <span aria-hidden="true" className="h-px flex-1" style={{ background: "rgba(44,35,46,0.15)" }} />
+                      </div>
+                      <div className="mt-6 grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-5 lg:flex lg:flex-wrap lg:justify-between">
+                        {CATEGORY_STRIP.map(({ label, href, Icon }) => (
+                          <Link
+                            key={label}
+                            href={href}
+                            className="group flex flex-col items-center gap-3 text-center transition-opacity hover:opacity-70"
+                          >
+                            <Icon className="h-7 w-7 text-ink" />
+                            <span
+                              className="text-[10px] font-semibold uppercase leading-tight tracking-[0.1em] sm:text-[11px]"
+                              style={{ color: "var(--ink-soft)" }}
+                            >
+                              {label}
+                            </span>
+                          </Link>
+                        ))}
+                        <Link
+                          href="/alle"
+                          className="group flex flex-col items-center gap-3 text-center transition-opacity hover:opacity-70"
+                        >
+                          <IconMore className="h-7 w-7 text-gold" />
+                          <span
+                            className="text-[10px] font-semibold uppercase leading-tight tracking-[0.1em] sm:text-[11px]"
+                            style={{ color: "var(--ink-soft)" }}
+                          >
+                            Og mer
+                          </span>
+                        </Link>
+                      </div>
+                    </div>
+                  </section>
 
-              {/* Tekstboks — 1/3 av bredden, flush mot bildet, ingen mellomrom */}
-              <div
-                className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8"
-                style={{ background: "#FBEED4" }}
-              >
-                <p className="font-metrophobic text-xs uppercase tracking-[0.3em]" style={{ color: "#535E3D" }}>
-                  Frukt med lange tradisjoner
-                </p>
-                <h2 className="font-metrophobic text-2xl sm:text-3xl" style={{ color: "#535E3D" }}>
-                  Fiken – en liten frukt med store helsefordeler
-                </h2>
-                <p className="font-metrophobic" style={{ color: "#535E3D" }}>
-                  Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.
-                </p>
-                <Link
-                  href="/artikkel/fiken"
-                  className="mt-2 inline-flex items-center gap-2 rounded-[14px] px-6 py-2.5 text-sm font-semibold text-paper transition-opacity hover:opacity-90"
-                  style={{ background: "#72874E" }}
-                >
-                  Les artikkel
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
+        {/* FOLKETS FAVORITTER — rett under hero. Ti like rader (ikke lenger ett
+            stort bildekort for #1 + en smal tekstliste under) — nummer, tittel,
+            en fremgangslinje for andel positive stemmer, og pil opp/ned + lagre
+            til høyre, etter referansebildet. Bruker hele bredden på seksjonen
+            (ingen indre max-w-3xl lenger — det var det som gjorde raden smal). */}
+        <section className="relative z-10">
+          <div className="mx-auto max-w-[var(--content-max)] px-5 pb-10 pt-10 sm:py-14" style={{ paddingInline: "var(--page-pad)" }}>
+            <Reveal>
+              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Rangering</p>
+              <h2 className="font-serif-display mt-2 text-2xl text-ink sm:text-3xl">Folkets favoritter</h2>
+              <p className="mt-2 text-sm text-ink-soft">De 10 mest pålitelige kjerringrådene, rangert etter stemmer.</p>
             </Reveal>
+
+            {topTen.length === 0 && (
+              <p className="hairline mt-6 rounded-xl px-5 py-5 text-sm text-ink-soft">
+                Ingen råd med stemmer ennå.
+              </p>
+            )}
+
+            {topTen.length > 0 && (
+              <div className="mt-8 flex flex-col divide-y divide-ink/10 border-t border-b border-ink/10">
+                {topTen.map((r, i) => {
+                  const problem = problemById.get(r.problemId);
+                  const isVoting = votingId === r.id;
+                  const isSaving = savingId === r.id;
+                  const isSaved = savedIds.has(r.id);
+                  const rankColor = RANK_COLORS[i % RANK_COLORS.length];
+                  return (
+                    <Reveal
+                      key={r.id}
+                      delay={i * 25}
+                      className="group/row flex items-center gap-3 px-3 py-5 -mx-3 transition-colors hover:bg-[rgba(111,143,108,0.14)] sm:gap-6"
+                    >
+                      <span
+                        className="font-serif-display w-9 shrink-0 text-lg sm:text-xl"
+                        style={{ color: rankColor }}
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <button onClick={() => setOpenRemedyId(r.id)} className="min-w-0 flex-1 text-left">
+                        <p className="truncate text-base font-semibold text-ink sm:text-lg">
+                          {r.title}
+                        </p>
+                        <p className="truncate text-xs text-ink-soft">{problem?.name}</p>
+                      </button>
+                      <div className="hidden h-1.5 w-32 shrink-0 overflow-hidden rounded-full bg-ink/10 sm:block lg:w-44">
+                        <div
+                          className="h-full rounded-full bg-sage"
+                          style={{ width: `${r.successRate ?? 0}%` }}
+                        />
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          onClick={() => handleQuickVote(r.id, "up")}
+                          disabled={!uid || isVoting}
+                          aria-label="Fungerte"
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40"
+                          style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                        >
+                          <IconArrowUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleQuickVote(r.id, "down")}
+                          disabled={!uid || isVoting}
+                          aria-label="Fungerte ikke"
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40"
+                          style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                        >
+                          <IconArrowDown className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleToggleSaved(r.id)}
+                          disabled={!uid || isSaving}
+                          aria-label={isSaved ? "Fjern fra mine lagrede råd" : "Lagre i mine lagrede råd"}
+                          aria-pressed={isSaved}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
+                            isSaved ? "text-[#E1B08C]" : "text-ink"
+                          }`}
+                          style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                        >
+                          <IconHeart className="h-3.5 w-3.5" filled={isSaved} />
+                        </button>
+                      </div>
+                    </Reveal>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
-        {/* FOLKETS FAVORITTER, topp 3 som store kort, 4-10 som kompakt liste */}
-        <section className="relative z-10" style={{ paddingInline: 0 }}>
-        <div className="mx-auto max-w-7xl px-5 pb-10 pt-10 sm:py-12" style={{ paddingInline: "var(--page-pad)" }}>
-          <Reveal>
-            <h2 className="font-display text-xl font-bold text-ink sm:text-2xl">Folkets favoritter</h2>
-            <p className="mt-1 text-sm text-ink-soft">De 10 mest pålitelige kjerringrådene.</p>
+        {/* FIKEN — fremhevet artikkel, rett under hero */}
+        <section className="relative">
+          <Reveal
+            className="mx-auto flex flex-col items-stretch py-8 sm:flex-row sm:py-12"
+            style={{ maxWidth: "var(--content-max)", paddingInline: "var(--page-pad)" }}
+          >
+            {/* Bildet — 2/3 av bredden, fast aspect-ratio (ingen stretch-avhengig prosenthøyde) */}
+            <div className="relative w-full shrink-0 sm:w-2/3">
+              <Link
+                href="/artikkel/fiken"
+                className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
+              >
+                <Image
+                  src="/pictures/menupictures/fiken_pexels-adriannacalvo-23384641.jpg"
+                  alt="Ferske fiken, hele og oppskåret"
+                  fill
+                  className="object-cover"
+                />
+              </Link>
+              <a
+                href="https://www.pexels.com/photo/figs-in-white-bowl-23384641/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
+              >
+                Foto: Adrianna CA / Pexels
+              </a>
+            </div>
+
+            {/* Tekstboks — 1/3 av bredden, flush mot bildet, ingen mellomrom */}
+            <div className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8">
+              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+                Frukt med lange tradisjoner
+              </p>
+              <h2 className="font-display text-2xl text-ink sm:text-3xl">
+                Fiken – en liten frukt med store helsefordeler
+              </h2>
+              <p className="font-display text-ink-soft">
+                Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.
+              </p>
+              <Link
+                href="/artikkel/fiken"
+                className={`mt-2 ${BUTTON_PRIMARY_CLASS}`}
+                style={BUTTON_PRIMARY_STYLE}
+              >
+                Les artikkel
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
           </Reveal>
-
-          {topTen.length === 0 && (
-            <p className="hairline mt-5 rounded-2xl px-6 py-6 text-sm text-ink-soft" style={{ background: "#FCFAF7" }}>
-              Ingen råd med stemmer ennå.
-            </p>
-          )}
-
-          {/* Nr. 1–3: bilde-kort. Mobil: nr 1 full bredde, 2+3 side om side */}
-          {(() => {
-            const TOP3_IMAGES = [
-              { src: "/bakgrunner/te.png", bg: "#7C9053", text: "light" as const },
-              { src: "/pictures/svisker.png", bg: "#7E334A", text: "light" as const },
-              { src: "/bakgrunner/honning2.png", bg: "#F3D9A8", text: "dark" as const },
-            ];
-            return (
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-                {topTen.slice(0, 3).map((r, i) => {
-                  const problem = problemById.get(r.problemId);
-                  const { src: imgSrc, bg: cardBg, text: textTone } = TOP3_IMAGES[i];
-                  const isLight = textTone === "light";
-                  const isVoting = votingId === r.id;
-                  return (
-                    <Reveal
-                      key={r.id}
-                      delay={i * 60}
-                      className={`flex flex-col overflow-hidden rounded-2xl shadow-lg shadow-plum-950/10 transition-transform hover:-translate-y-0.5 ${i === 0 ? "col-span-2 sm:col-span-1" : ""}`}
-                      style={{ background: cardBg }}
-                    >
-                      {/* Bildets sideforhold er satt uavhengig av tekstblokken under, slik at
-                          bildene alltid blir like høye uansett hvor lang tittelen er. Mobil: nr. 1
-                          er alene i egen full-bredde rad og får derfor en bevisst bredere ramme;
-                          fra sm+ sitter alle tre likestilt i samme rad og deler samme sideforhold. */}
-                      <Link
-                        href={`/remedy/${r.id}`}
-                        className={`group relative block overflow-hidden ${i === 0 ? "aspect-[3/2]" : "aspect-square"} sm:aspect-[4/3]`}
-                      >
-                        <Image
-                          src={imgSrc}
-                          alt=""
-                          fill
-                          sizes={i === 0 ? "(max-width:640px) 100vw, 33vw" : "(max-width:640px) 50vw, 33vw"}
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <span
-                          className="absolute left-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold shadow"
-                          style={{ background: cardBg, color: isLight ? "#fff" : "#3D2213" }}
-                        >
-                          {i + 1}
-                        </span>
-                      </Link>
-                      <div className="flex flex-1 flex-col justify-between gap-2 p-3 sm:p-4">
-                        <Link href={`/remedy/${r.id}`}>
-                          <p
-                            className={`text-[10px] font-semibold uppercase tracking-widest ${isLight ? "text-white/75" : "text-plum-700"}`}
-                          >
-                            {problem?.name}
-                          </p>
-                          <p
-                            className={`mt-0.5 font-bold leading-snug ${isLight ? "text-white" : "text-ink"} ${i === 0 ? "text-base" : "text-sm"} sm:text-base`}
-                          >
-                            {r.title}
-                          </p>
-                        </Link>
-                        <div className="flex flex-col gap-1.5">
-                          <Link
-                            href={`/remedy/${r.id}`}
-                            className={`text-xs font-medium ${isLight ? "text-white/90" : "text-plum-700"}`}
-                          >
-                            Les mer →
-                          </Link>
-                          <div className="flex shrink-0 items-center gap-1">
-                            <LottieVote
-                              direction="up"
-                              count={r.votesUp ?? 0}
-                              active={false}
-                              disabled={!uid || isVoting}
-                              light={isLight}
-                              compact
-                              onClick={() => handleQuickVote(r.id, "up")}
-                            />
-                            <LottieVote
-                              direction="down"
-                              count={r.votesDown ?? 0}
-                              active={false}
-                              disabled={!uid || isVoting}
-                              light={isLight}
-                              compact
-                              onClick={() => handleQuickVote(r.id, "down")}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </Reveal>
-                  );
-                })}
-              </div>
-            );
-          })()}
-
-          {/* Nr. 4–10: kompakt liste. Rangeringstall + tittel lenker til rådet; stemmeknappene
-              stemmer direkte fra forsiden og lar Wilson-rangeringen oppdatere seg live. */}
-          {topTen.length > 3 && (() => {
-            const RANK_ACCENTS = [
-              { bg: "#7C9053", text: "light" as const },
-              { bg: "#7E334A", text: "light" as const },
-              { bg: "#F3D9A8", text: "dark" as const },
-            ];
-            return (
-              <div className="mt-3 overflow-hidden rounded-2xl border border-ink/8 bg-white/40">
-                {topTen.slice(3).map((r, i) => {
-                  const problem = problemById.get(r.problemId);
-                  const accent = RANK_ACCENTS[i % RANK_ACCENTS.length];
-                  const isLight = accent.text === "light";
-                  const isVoting = votingId === r.id;
-                  return (
-                    <Reveal
-                      key={r.id}
-                      delay={180 + i * 30}
-                      className={`flex flex-col gap-2.5 px-4 py-3 transition-colors hover:bg-white/50 sm:flex-row sm:items-center sm:gap-3 sm:px-5 sm:py-3.5 ${
-                        i > 0 ? "border-t border-ink/8" : ""
-                      }`}
-                    >
-                      <div className="flex min-w-0 items-center gap-3 sm:flex-1">
-                        <span
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                          style={{ background: accent.bg, color: isLight ? "#fff" : "#3D2213" }}
-                        >
-                          {i + 4}
-                        </span>
-                        <Link href={`/remedy/${r.id}`} className="group min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-ink transition-colors group-hover:text-plum-700">
-                            {r.title}
-                          </p>
-                          <p className="truncate text-xs text-ink-soft">{problem?.name}</p>
-                        </Link>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-1.5 pl-11 sm:pl-0">
-                        <LottieVote
-                          direction="up"
-                          count={r.votesUp ?? 0}
-                          active={false}
-                          disabled={!uid || isVoting}
-                          onClick={() => handleQuickVote(r.id, "up")}
-                        />
-                        <LottieVote
-                          direction="down"
-                          count={r.votesDown ?? 0}
-                          active={false}
-                          disabled={!uid || isVoting}
-                          onClick={() => handleQuickVote(r.id, "down")}
-                        />
-                      </div>
-                    </Reveal>
-                  );
-                })}
-              </div>
-            );
-          })()}
-        </div>
         </section>
 
-        {/* I FOKUS: MEDISINPLANTER — månedens plante + to faste følgeplanter, som tre jevnstore kort */}
-        <section className="mx-auto max-w-7xl px-5 pb-16 sm:pb-20" style={{ paddingInline: "var(--page-pad)" }}>
+        {/* I FOKUS: MEDISINPLANTER — månedens plante som redaksjonell hovedsak (samme
+            bilde+tekst-mønster som Fiken-seksjonen over), de to følgeplantene som en
+            lettere liste ved siden av — i stedet for tre jevnstore kort. */}
+        <section className="mx-auto max-w-[var(--content-max)] px-5 pb-16 sm:pb-20" style={{ paddingInline: "var(--page-pad)" }}>
           <Reveal>
             <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">I fokus</p>
             <h2 className="font-display mt-2 text-2xl font-bold text-ink sm:text-3xl">
@@ -479,230 +609,244 @@ export default function HomePage() {
             </h2>
           </Reveal>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {spotlightPlants.map((p, i) => {
-              const Icon = PLANT_ICON[p.shape];
-              const href = p.sections ? `/plante/${p.id}` : null;
-              return (
-                <Reveal key={p.id} delay={i * 60} className="flex">
-                  <div
-                    className={`group relative flex w-full flex-col overflow-hidden rounded-[2rem] bg-[#FCFAF7] shadow-lg shadow-plum-950/10 ${href ? "transition-transform hover:-translate-y-0.5" : ""}`}
-                  >
-                    {href && (
-                      <Link href={href} className="absolute inset-0 z-10" aria-label={`Les mer om ${p.name}`} />
+          {(() => {
+            const [featured, ...companions] = spotlightPlants;
+            const FeaturedIcon = PLANT_ICON[featured.shape];
+            const featuredHref = featured.sections ? `/plante/${featured.id}` : null;
+            return (
+              <div className="mt-8 flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-12">
+                <Reveal className="group relative lg:w-3/5">
+                  {featuredHref && (
+                    <Link href={featuredHref} className="absolute inset-0 z-10" aria-label={`Les mer om ${featured.name}`} />
+                  )}
+                  <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-[16/9]" style={{ background: featured.bg }}>
+                    {featured.image ? (
+                      <Image
+                        src={featured.image.src}
+                        alt={featured.name}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 60vw"
+                        className={`${featured.image.fit === "contain" ? "object-contain p-8" : "object-cover"} transition-transform duration-500 group-hover:scale-105`}
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <FeaturedIcon className="h-20 w-20 text-paper/85" />
+                      </div>
                     )}
-                    <div className="relative aspect-[4/3] w-full" style={{ background: p.bg }}>
-                      {p.image ? (
-                        <Image
-                          src={p.image.src}
-                          alt={p.name}
-                          fill
-                          sizes="(max-width: 640px) 100vw, 33vw"
-                          className={p.image.fit === "contain" ? "object-contain p-8" : "object-cover"}
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <Icon className="h-16 w-16 text-paper/85" />
-                        </div>
-                      )}
-                      {i === 0 && (
-                        <span className="hairline absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-paper/90 text-[10px] font-semibold uppercase text-plum-800">
-                          {new Date().toLocaleDateString("nb-NO", { month: "short" }).replace(".", "")}
-                        </span>
-                      )}
-                      {p.image?.credit && (
-                        <a
-                          href={p.image.creditHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="absolute bottom-2 left-3 z-20 text-[10px] text-paper/80 hover:text-paper"
-                        >
-                          Foto: {p.image.credit}
-                        </a>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-1.5 px-6 py-5">
-                      <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">{p.latinName}</p>
-                      <h3 className="card-title text-ink">{p.name}</h3>
-                      <p className="text-sm text-ink-soft">{p.description}</p>
-                      {href && (
-                        <span className="mt-2 text-sm font-medium text-plum-700 transition-colors group-hover:text-plum-800">
-                          Les mer om urten →
-                        </span>
-                      )}
-                    </div>
+                    <span className="hairline absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-paper/90 text-[10px] font-semibold uppercase text-plum-800">
+                      {new Date().toLocaleDateString("nb-NO", { month: "short" }).replace(".", "")}
+                    </span>
+                    {featured.image?.credit && (
+                      <a
+                        href={featured.image.creditHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute bottom-2 left-3 z-20 text-[10px] text-paper/80 hover:text-paper"
+                      >
+                        Foto: {featured.image.credit}
+                      </a>
+                    )}
+                  </div>
+                  <div className="mt-4 flex flex-col gap-1.5">
+                    <p className="text-xs uppercase tracking-[0.25em] text-ink-soft">{featured.latinName}</p>
+                    <h3 className="card-title text-ink">{featured.name}</h3>
+                    <p className="text-sm text-ink-soft">{featured.description}</p>
+                    {featuredHref && (
+                      <span className="mt-1 text-sm font-medium text-plum-700 transition-colors group-hover:text-plum-800">
+                        Les mer om urten →
+                      </span>
+                    )}
                   </div>
                 </Reveal>
-              );
-            })}
-          </div>
+
+                <div className="flex flex-col gap-6 lg:w-2/5 lg:border-l lg:border-ink/10 lg:pl-10">
+                  {companions.map((p, i) => {
+                    const href = p.sections ? `/plante/${p.id}` : null;
+                    return (
+                      <Reveal key={p.id} delay={(i + 1) * 60} className="group relative flex gap-4">
+                        {href && (
+                          <Link href={href} className="absolute inset-0 z-10" aria-label={`Les mer om ${p.name}`} />
+                        )}
+                        <div className="flex flex-col justify-center gap-1">
+                          <p className="text-xs uppercase tracking-[0.25em] text-ink-soft">{p.latinName}</p>
+                          <h3 className="font-display text-lg text-ink">{p.name}</h3>
+                          <p className="line-clamp-2 text-sm text-ink-soft">{p.description}</p>
+                          {href && (
+                            <span className="mt-0.5 text-sm font-medium text-plum-700 transition-colors group-hover:text-plum-800">
+                              Les mer →
+                            </span>
+                          )}
+                        </div>
+                      </Reveal>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </section>
 
-        {/* PLANTEMEDISINENS HISTORIE — samme fullbredde bånd-stil og lyse fargepalett som
-            Fiken/Tyttebær under (bildet fyller hele blokkens høyde, tekstpanelet har en
-            lysere flate ved siden av). */}
+        {/* PLANTEMEDISINENS HISTORIE — bildet speilvendt (til høyre) for variasjon. */}
         <section className="relative">
-          <div className="relative left-1/2 w-screen -translate-x-1/2" style={{ background: "#F9E1C1" }}>
-            <Reveal
-              className="mx-auto flex flex-col items-stretch py-8 sm:flex-row-reverse sm:py-12"
-              style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
-            >
-              <div className="w-full shrink-0 sm:w-2/3">
-                <Link
-                  href="/historie"
-                  className="group relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
-                >
-                  <Image
-                    src="/pictures/tinktur.png"
-                    alt="En gammel tinkturflaske, merket for hånd, omgitt av blomster"
-                    fill
-                    sizes="(max-width: 640px) 100vw, 66vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </Link>
-              </div>
-
-              <div
-                className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8"
-                style={{ background: "#FBEED4" }}
+          <Reveal
+            className="mx-auto flex flex-col items-stretch py-8 sm:flex-row-reverse sm:py-12"
+            style={{ maxWidth: "var(--content-max)", paddingInline: "var(--page-pad)" }}
+          >
+            <div className="w-full shrink-0 sm:w-2/3">
+              <Link
+                href="/historie"
+                className="group relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
               >
-                <p className="font-metrophobic text-xs uppercase tracking-[0.3em]" style={{ color: "#535E3D" }}>
-                  Fra fortiden
-                </p>
-                <h2 className="font-serif-display text-2xl italic sm:text-3xl" style={{ color: "#535E3D" }}>
-                  Fra mormor til barnebarn
-                </h2>
-                <p style={{ color: "#535E3D" }}>
-                  Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen.
-                </p>
-                <Link
-                  href="/historie"
-                  className="mt-2 inline-flex items-center gap-2 rounded-[14px] px-6 py-2.5 text-sm font-semibold text-paper transition-opacity hover:opacity-90"
-                  style={{ background: "#72874E" }}
-                >
-                  Les historien
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
-            </Reveal>
-          </div>
+                <Image
+                  src="/pictures/tinktur.jpg"
+                  alt="En gammel tinkturflaske, merket for hånd, omgitt av blomster"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 66vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </Link>
+            </div>
+
+            <div className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8">
+              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+                Fra fortiden
+              </p>
+              <h2 className="font-serif-display text-2xl italic text-ink sm:text-3xl">
+                Fra mormor til barnebarn
+              </h2>
+              <p className="text-ink-soft">
+                Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen.
+              </p>
+              <Link
+                href="/historie"
+                className={`mt-2 ${BUTTON_PRIMARY_CLASS}`}
+                style={BUTTON_PRIMARY_STYLE}
+              >
+                Les historien
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+          </Reveal>
         </section>
 
-        {/* ARTIKLER — Tyttebær i samme fullbredde bånd-stil som Fiken-artikkelen */}
+        {/* ARTIKLER — Tyttebær, samme oppsett som Fiken-artikkelen */}
         <section id="artikler" className="relative">
-          <div className="relative left-1/2 w-screen -translate-x-1/2" style={{ background: "#F9E1C1" }}>
-            <Reveal
-              className="mx-auto flex flex-col items-stretch py-8 sm:flex-row sm:py-12"
-              style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
-            >
-              {/* Bildet — 2/3 av bredden, samme oppsett som Fiken. */}
-              <div className="relative w-full shrink-0 sm:w-2/3">
-                <Link
-                  href="/artikkel/tyttebaer"
-                  className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
-                >
-                  <Image
-                    src="/pictures/menupictures/tyytebaer_pexels-sandra-seitamaa-89384773-9669197.jpg"
-                    alt="Tyttebær"
-                    fill
-                    className="object-cover"
-                  />
-                </Link>
-                <a
-                  href="https://www.pexels.com/photo/close-up-of-plants-and-berries-9669197/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
-                >
-                  Foto: Sandra Seitamaa / Pexels
-                </a>
-              </div>
-
-              {/* Tekstboks — 1/3 av bredden, flush mot bildet */}
-              <div
-                className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8"
-                style={{ background: "#FBEED4" }}
+          <Reveal
+            className="mx-auto flex flex-col items-stretch py-8 sm:flex-row sm:py-12"
+            style={{ maxWidth: "var(--content-max)", paddingInline: "var(--page-pad)" }}
+          >
+            {/* Bildet — 2/3 av bredden, samme oppsett som Fiken. */}
+            <div className="relative w-full shrink-0 sm:w-2/3">
+              <Link
+                href="/artikkel/tyttebaer"
+                className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
               >
-                <p className="font-metrophobic text-xs uppercase tracking-[0.3em]" style={{ color: "#535E3D" }}>
-                  Gammelt husråd mot hoste
-                </p>
-                <h2 className="font-metrophobic text-2xl sm:text-3xl" style={{ color: "#535E3D" }}>
-                  Tyttebær – naturens egen hostesaft
-                </h2>
-                <p className="font-metrophobic" style={{ color: "#535E3D" }}>
-                  Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du
-                  bruker det riktig.
-                </p>
-                <Link
-                  href="/artikkel/tyttebaer"
-                  className="mt-2 inline-flex items-center gap-2 rounded-[14px] px-6 py-2.5 text-sm font-semibold text-paper transition-opacity hover:opacity-90"
-                  style={{ background: "#72874E" }}
-                >
-                  Les artikkel
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
-            </Reveal>
-          </div>
+                <Image
+                  src="/pictures/menupictures/tyytebaer_pexels-sandra-seitamaa-89384773-9669197.jpg"
+                  alt="Tyttebær"
+                  fill
+                  className="object-cover"
+                />
+              </Link>
+              <a
+                href="https://www.pexels.com/photo/close-up-of-plants-and-berries-9669197/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
+              >
+                Foto: Sandra Seitamaa / Pexels
+              </a>
+            </div>
+
+            {/* Tekstboks — 1/3 av bredden, flush mot bildet */}
+            <div className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8">
+              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+                Gammelt husråd mot hoste
+              </p>
+              <h2 className="font-display text-2xl text-ink sm:text-3xl">
+                Tyttebær – naturens egen hostesaft
+              </h2>
+              <p className="font-display text-ink-soft">
+                Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du
+                bruker det riktig.
+              </p>
+              <Link
+                href="/artikkel/tyttebaer"
+                className={`mt-2 ${BUTTON_PRIMARY_CLASS}`}
+                style={BUTTON_PRIMARY_STYLE}
+              >
+                Les artikkel
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+          </Reveal>
         </section>
 
-        {/* SYRIN — tredje artikkel i samme fullbredde bånd-stil, bildet speilvendt (til høyre)
-            for å bryte opp rytmen fra Fiken/Tyttebær rett over. */}
+        {/* SYRIN — tredje artikkel, bildet speilvendt (til høyre) for å bryte opp rytmen
+            fra Fiken/Tyttebær rett over. */}
         <section className="relative">
-          <div className="relative left-1/2 w-screen -translate-x-1/2" style={{ background: "#F9E1C1" }}>
-            <Reveal
-              className="mx-auto flex flex-col items-stretch py-8 sm:flex-row-reverse sm:py-12"
-              style={{ maxWidth: 1280, paddingInline: "var(--page-pad)" }}
-            >
-              <div className="relative w-full shrink-0 sm:w-2/3">
-                <Link
-                  href="/artikkel/syrin"
-                  className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
-                >
-                  <Image
-                    src="/pictures/syrin_pexels-iriser-1431192.jpg"
-                    alt="Syrinklase i nærbilde"
-                    fill
-                    className="object-cover"
-                  />
-                </Link>
-                <a
-                  href="https://www.pexels.com/photo/close-up-photography-of-orchid-flowers-1431192/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
-                >
-                  Foto: Irina Iriser / Pexels
-                </a>
-              </div>
-
-              <div
-                className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8"
-                style={{ background: "#FBEED4" }}
+          <Reveal
+            className="mx-auto flex flex-col items-stretch py-8 sm:flex-row-reverse sm:py-12"
+            style={{ maxWidth: "var(--content-max)", paddingInline: "var(--page-pad)" }}
+          >
+            <div className="relative w-full shrink-0 sm:w-2/3">
+              <Link
+                href="/artikkel/syrin"
+                className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
               >
-                <p className="font-metrophobic text-xs uppercase tracking-[0.3em]" style={{ color: "#535E3D" }}>
-                  Duftende prydbusk med gamle røtter
-                </p>
-                <h2 className="font-metrophobic text-2xl sm:text-3xl" style={{ color: "#535E3D" }}>
-                  Syrin – mer enn en vakker vårduft
-                </h2>
-                <p className="font-metrophobic" style={{ color: "#535E3D" }}>
-                  Blomstene er spiselige og fulle av virkestoffer som tradisjonelt er brukt mot
-                  uro, urolig mage og irritert hud.
-                </p>
-                <Link
-                  href="/artikkel/syrin"
-                  className="mt-2 inline-flex items-center gap-2 rounded-[14px] px-6 py-2.5 text-sm font-semibold text-paper transition-opacity hover:opacity-90"
-                  style={{ background: "#72874E" }}
-                >
-                  Les artikkel
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
-            </Reveal>
-          </div>
+                <Image
+                  src="/pictures/syrin_pexels-iriser-1431192.jpg"
+                  alt="Syrinklase i nærbilde"
+                  fill
+                  className="object-cover"
+                />
+              </Link>
+              <a
+                href="https://www.pexels.com/photo/close-up-photography-of-orchid-flowers-1431192/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
+              >
+                Foto: Irina Iriser / Pexels
+              </a>
+            </div>
+
+            <div className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8">
+              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+                Duftende prydbusk med gamle røtter
+              </p>
+              <h2 className="font-display text-2xl text-ink sm:text-3xl">
+                Syrin – mer enn en vakker vårduft
+              </h2>
+              <p className="font-display text-ink-soft">
+                Blomstene er spiselige og fulle av virkestoffer som tradisjonelt er brukt mot
+                uro, urolig mage og irritert hud.
+              </p>
+              <Link
+                href="/artikkel/syrin"
+                className={`mt-2 ${BUTTON_PRIMARY_CLASS}`}
+                style={BUTTON_PRIMARY_STYLE}
+              >
+                Les artikkel
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+          </Reveal>
         </section>
       </main>
+
+      <RemedyPreviewModal
+        remedy={openRemedy}
+        problemName={openRemedy ? problemById.get(openRemedy.problemId)?.name : undefined}
+        onClose={() => setOpenRemedyId(null)}
+        onVote={(direction) => openRemedy && handleQuickVote(openRemedy.id, direction)}
+        voting={!!openRemedy && votingId === openRemedy.id}
+        saved={!!openRemedy && savedIds.has(openRemedy.id)}
+        onToggleSave={() => openRemedy && handleToggleSaved(openRemedy.id)}
+        saving={!!openRemedy && savingId === openRemedy.id}
+        onPrev={openIndex > 0 ? () => setOpenRemedyId(topTen[openIndex - 1].id) : undefined}
+        onNext={openIndex >= 0 && openIndex < topTen.length - 1 ? () => setOpenRemedyId(topTen[openIndex + 1].id) : undefined}
+      />
     </div>
   );
 }
