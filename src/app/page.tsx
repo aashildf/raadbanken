@@ -120,6 +120,12 @@ export default function HomePage() {
   const [votingId, setVotingId] = useState<string | null>(null);
   const [openRemedyId, setOpenRemedyId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  // Hvilken retning den innloggede brukeren har stemt per råd — manglet helt
+  // før (bare skrive-siden fantes), så opp/ned-pilene i "Folkets favoritter"
+  // kunne aldri vise hvilken man hadde trykket på. Samme mønster som
+  // savedIds/pendingSaves under.
+  const [userVotes, setUserVotes] = useState<Map<string, "up" | "down">>(new Map());
+  const [pendingVotes, setPendingVotes] = useState<Map<string, "up" | "down">>(new Map());
   // Optimistiske overstyringer, holdt helt separat fra savedIds (som
   // onSnapshot under erstatter i sin helhet ved hver endring). Da den første
   // versjonen av dette skrev direkte inn/ut av samme Set som onSnapshot
@@ -188,6 +194,44 @@ export default function HomePage() {
     });
   }, [savedIds]);
 
+  // Egen brukers stemmer — samme "saves"-mønster, og "votes" har allerede
+  // åpen lesetilgang (allow read: if true) i firestore.rules, så ingen
+  // tilsvarende regel-fallgruve her.
+  useEffect(() => {
+    if (!uid) {
+      setUserVotes(new Map());
+      return;
+    }
+    const q = query(collection(db, "votes"), where("userId", "==", uid));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setUserVotes(new Map(snap.docs.map((d) => [d.data().remedyId as string, d.data().voteType as "up" | "down"])));
+      },
+      () => {
+        // Stille feil, på linje med saves — pilene viser bare uaktivert
+        // tilstand i stedet for å krasje.
+      }
+    );
+    return unsub;
+  }, [uid]);
+
+  // Samme reconciliation-mønster som pendingSaves — se kommentaren der.
+  useEffect(() => {
+    setPendingVotes((prev) => {
+      if (prev.size === 0) return prev;
+      let changed = false;
+      const next = new Map(prev);
+      for (const [id, val] of prev) {
+        if (userVotes.get(id) === val) {
+          next.delete(id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [userVotes]);
+
   const problemById = useMemo(() => new Map(problems.map((p) => [p.id, p])), [problems]);
 
   const rankedAll = useMemo(
@@ -206,16 +250,29 @@ export default function HomePage() {
   const handleQuickVote = useCallback(
     async (remedyId: string, direction: "up" | "down") => {
       if (!uid) return;
+      const previousVote = pendingVotes.has(remedyId) ? pendingVotes.get(remedyId) : userVotes.get(remedyId);
       setVotingId(remedyId);
+      setPendingVotes((prev) => new Map(prev).set(remedyId, direction));
       try {
-        await castVote(remedyId, uid, direction, "");
+        try {
+          await castVote(remedyId, uid, direction, "");
+        } catch {
+          await castVote(remedyId, uid, direction, "");
+        }
       } catch {
-        // Stille feil her — full stemmeflyt med feilmelding og kommentarfelt finnes på rådsiden.
+        // Begge forsøk feilet reelt — rull tilbake til den forrige stemmen
+        // (eller ingen) med én gang.
+        setPendingVotes((prev) => {
+          const next = new Map(prev);
+          if (previousVote) next.set(remedyId, previousVote);
+          else next.delete(remedyId);
+          return next;
+        });
       } finally {
         setVotingId(null);
       }
     },
-    [uid]
+    [uid, userVotes, pendingVotes]
   );
 
   const handleToggleSaved = useCallback(
@@ -530,6 +587,7 @@ export default function HomePage() {
                   const isVoting = votingId === r.id;
                   const isSaving = savingId === r.id;
                   const isSaved = pendingSaves.has(r.id) ? pendingSaves.get(r.id)! : savedIds.has(r.id);
+                  const myVote = pendingVotes.has(r.id) ? pendingVotes.get(r.id) : userVotes.get(r.id);
                   return (
                     <Reveal
                       key={r.id}
@@ -559,8 +617,15 @@ export default function HomePage() {
                           onClick={() => handleQuickVote(r.id, "up")}
                           disabled={!uid || isVoting}
                           aria-label="Fungerte"
-                          className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40"
-                          style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                          aria-pressed={myVote === "up"}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-40 ${
+                            myVote === "up" ? "text-[#f5efeb]" : "text-ink hover:bg-[#E1B08C] hover:text-[#2c232e]"
+                          }`}
+                          style={
+                            myVote === "up"
+                              ? { background: "rgba(79,107,74,0.55)", border: "1px solid rgba(79,107,74,0.55)" }
+                              : { border: "1px solid rgba(44,35,46,0.22)" }
+                          }
                         >
                           <IconArrowUp className="h-3.5 w-3.5" />
                         </button>
@@ -568,8 +633,17 @@ export default function HomePage() {
                           onClick={() => handleQuickVote(r.id, "down")}
                           disabled={!uid || isVoting}
                           aria-label="Fungerte ikke"
-                          className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40"
-                          style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                          aria-pressed={myVote === "down"}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-40 ${
+                            myVote === "down" ? "text-[#2c232e]" : "text-ink hover:bg-[#E1B08C] hover:text-[#2c232e]"
+                          }`}
+                          style={
+                            // Samme aksentfarge som hjertet (ikke rust/rød) — rødt leste
+                            // som en advarsel her, ikke som "stemt ned".
+                            myVote === "down"
+                              ? { background: "rgba(225,176,140,0.82)", border: "1px solid rgba(225,176,140,0.82)" }
+                              : { border: "1px solid rgba(44,35,46,0.22)" }
+                          }
                         >
                           <IconArrowDown className="h-3.5 w-3.5" />
                         </button>
@@ -583,7 +657,16 @@ export default function HomePage() {
                           }`}
                           style={{ border: "1px solid rgba(44,35,46,0.22)" }}
                         >
-                          <IconHeart className="h-3.5 w-3.5" filled={isSaved} />
+                          {/* Kanten på selve rundingen er uendret (samme falmede grense
+                              som ellers) — det mørke "klikket"-uttrykket skal ligge på
+                              hjertet selv, ikke som en ring rundt hele knappen. stroke
+                              tvinges til ink uavhengig av fyllfargen, slik den allerede
+                              har når hjertet ikke er lagret (fill none, stroke ink). */}
+                          <IconHeart
+                            className="h-3.5 w-3.5"
+                            filled={isSaved}
+                            style={isSaved ? { stroke: "var(--ink-soft)" } : undefined}
+                          />
                         </button>
                       </div>
                     </Reveal>

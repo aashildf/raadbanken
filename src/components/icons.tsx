@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 type IconProps = {
   className?: string;
 };
@@ -131,9 +133,13 @@ export function IconArrowDown({ className }: IconProps) {
   );
 }
 
-export function IconHeart({ className, filled }: IconProps & { filled?: boolean }) {
+export function IconHeart({
+  className,
+  filled,
+  style,
+}: IconProps & { filled?: boolean; style?: CSSProperties }) {
   return (
-    <svg {...base} className={className} fill={filled ? "currentColor" : "none"}>
+    <svg {...base} className={className} style={style} fill={filled ? "currentColor" : "none"}>
       <path d="M12 20.5S3.5 15.4 3.5 9.3C3.5 6.4 5.7 4 8.6 4c1.5 0 3 .8 3.4 2 .4-1.2 1.9-2 3.4-2 2.9 0 5.1 2.4 5.1 5.3 0 6.1-8.5 11.2-8.5 11.2Z" />
     </svg>
   );
