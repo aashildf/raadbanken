@@ -34,15 +34,22 @@ service cloud.firestore {
     }
 
     match /saves/{saveId} {
-      // Sjekker eierskap via dokument-IDen (alltid tilgjengelig), ikke
-      // resource.data.userId — det feltet finnes ikke før dokumentet er
-      // opprettet, og en regel som leser det på et ennå-ikke-eksisterende
-      // dokument feiler (nektes), selv for eieren selv. Det gjorde at appen
-      // aldri klarte å lese "er dette lagret?"-status før første lagring.
-      allow read: if request.auth != null && saveId.matches('.*_' + request.auth.uid);
+      // "read" dekker appens sanntids-spørring "hvilke råd har JEG lagret"
+      // (where userId == uid) — en LIST-spørring, ikke bare enkelt-
+      // oppslag. Firestore krever at regelen for en LIST kan verifiseres
+      // opp mot selve spørre-filteret: regelen må sjekke SAMME felt
+      // (userId) som spørringen filtrerer på. Den forrige versjonen sjekket
+      // i stedet dokument-IDens mønster, som fungerer fint for et enkelt
+      // get()/delete() (se under), men Firestore kan ikke garantere at et
+      // ID-mønster gjelder for alle mulige treff i en feltbasert
+      // list()-spørring, og avviste derfor HELE listen som
+      // "insufficient permissions" — selv om brukeren eide alt i den.
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
         && request.auth.uid == request.resource.data.userId
         && saveId == request.resource.data.remedyId + '_' + request.auth.uid;
+      // delete er ikke en list — det peker på ett bestemt dokument via hele
+      // stien, så ID-mønsteret er trygt og presist å sjekke her.
       allow delete: if request.auth != null && saveId.matches('.*_' + request.auth.uid);
       allow update: if false;
     }

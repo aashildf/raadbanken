@@ -42,7 +42,7 @@ export default function FikenArticlePage() {
               Frukt med lange tradisjoner
             </p>
             <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl lg:text-5xl">
-              Fiken – en liten frukt med store helsefordeler
+              Fiken: en liten frukt med store helsefordeler
             </h1>
             <p className="mt-4 max-w-xl text-ink-soft">
               Fiken har en rekke medisinske egenskaper som særlig styrker fordøyelsen, hjertehelsen

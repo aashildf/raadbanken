@@ -59,9 +59,9 @@ export const MEDICINAL_PLANTS: Plant[] = [
       {
         heading: "Oversikt: bruk av de ulike plantedelene",
         list: [
-          "Blader — urindrivende, kaliumrik. Brukes som te, ferskpresset juice eller i salater, mot væskeansamlinger og lett høyt blodtrykk.",
-          "Rot — fordøyelses- og leverstimulerende, prebiotisk. Brukes som avkok, tinktur eller tørket pulver, mot forstoppelse, oppblåsthet og for å støtte leveren.",
-          "Blomst — antioksidantrik. Brukes i sirup, te eller oljeekstrakter, for generell immunstøtte og hudpleie.",
+          "Blader: urindrivende, kaliumrik. Brukes som te, ferskpresset juice eller i salater, mot væskeansamlinger og lett høyt blodtrykk.",
+          "Rot: fordøyelses- og leverstimulerende, prebiotisk. Brukes som avkok, tinktur eller tørket pulver, mot forstoppelse, oppblåsthet og for å støtte leveren.",
+          "Blomst: antioksidantrik. Brukes i sirup, te eller oljeekstrakter, for generell immunstøtte og hudpleie.",
         ],
       },
       {
@@ -157,7 +157,7 @@ export const MEDICINAL_PLANTS: Plant[] = [
         list: [
           "Kurvplantefamilien (allergi): Kamille tilhører kurvplantefamilien (Asteraceae). Er du allergisk mot burot, prestekrage, løvetann eller krysantemum, kan du også reagere på kamille.",
           "Interaksjoner: Kamille inneholder naturlige kumariner, som kan ha en lett blodfortynnende effekt. Bør brukes med forsiktighet ved bruk av sterke blodfortynnende medisiner (som Marevan), og unngås i store mengder de siste to ukene før planlagt kirurgi.",
-          "Øyne: Kamille-te ble tradisjonelt brukt til å skylle øyekatarr, men moderne øyeleger fraråder dette — fine partikler fra teen kan irritere øyet, og planten kan utløse allergiske reaksjoner.",
+          "Øyne: Kamille-te ble tradisjonelt brukt til å skylle øyekatarr, men moderne øyeleger fraråder dette. Fine partikler fra teen kan irritere øyet, og planten kan utløse allergiske reaksjoner.",
         ],
       },
     ],
@@ -429,7 +429,7 @@ export const MEDICINAL_PLANTS: Plant[] = [
           "Brannskader og solbrenthet: Kliniske studier viser at aloe vera-gel kan redusere legetiden ved første- og andregrads forbrenninger sammenlignet med tradisjonelle kremer, siden den danner en beskyttende barriere og tilfører fuktighet.",
           "Sårheling: Geléen antas å stimulere kollagenproduksjonen og øke blodsirkulasjonen i huden, noe som kan fremskynde regenerering av celler.",
           "Hudlidelser: Brukes tradisjonelt for å lindre symptomer ved psoriasis, seborreisk eksem og tørr hud.",
-          "Viktig advarsel: Aloe vera skal aldri brukes på dype operasjonssår eller åpne kirurgiske kutt — studier viser at den kan forsinke helingsprosessen og øke smerte i disse tilfellene.",
+          "Viktig advarsel: Aloe vera skal aldri brukes på dype operasjonssår eller åpne kirurgiske kutt. Studier viser at den kan forsinke helingsprosessen og øke smerte i disse tilfellene.",
         ],
       },
       {

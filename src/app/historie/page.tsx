@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { OrnateFrame } from "@/components/OrnateFrame";
-import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
+import { PrimaryButton } from "@/components/Button";
 
 export const metadata = {
   title: "Plantemedisinens historie | Rådbanken",
@@ -197,10 +197,10 @@ export default function HistoriePage() {
             mønstrene opp igjen, akkurat som de gjorde rundt kjøkkenbordet for
             hundre år siden.
           </p>
-          <Link href="/" className={`mt-8 ${BUTTON_PRIMARY_CLASS}`} style={BUTTON_PRIMARY_STYLE}>
+          <PrimaryButton href="/" className="mt-8">
             Bla i råd
             <span aria-hidden>→</span>
-          </Link>
+          </PrimaryButton>
         </section>
       </div>
     </main>

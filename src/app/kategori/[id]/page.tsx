@@ -21,15 +21,15 @@ const CATEGORY_INTRO_IMAGE: Record<string, string> = {
 // Litt lengre redaksjonell introduksjon, vist rett under overskriften.
 const CATEGORY_INTRO: Record<string, string> = {
   helse:
-    "Her har vi samlet kjerringråd knyttet til helse, velvære og det å ta vare på kroppen. Før moderne medisiner og apotek fantes på hvert hjørne, ble planter, urter og andre naturlige råvarer sanket, dyrket og brukt som en del av hverdagen. Mange råd gikk i arv fra generasjon til generasjon – enkle løsninger basert på det man hadde for hånden. Noen har glemt dem, andre brukes fortsatt.",
+    "Her har vi samlet kjerringråd knyttet til helse, velvære og det å ta vare på kroppen. Før moderne medisiner og apotek fantes på hvert hjørne, ble planter, urter og andre naturlige råvarer sanket, dyrket og brukt som en del av hverdagen. Mange råd gikk i arv fra generasjon til generasjon, enkle løsninger basert på det man hadde for hånden. Noen har glemt dem, andre brukes fortsatt.",
   hudharskjonnhet:
-    "Her finner du gamle råd og enkle knep for hud, hår og personlig pleie. Før baderomshyllene ble fulle av kremer, serum og spesialprodukter, brukte man det som fantes i kjøkkenet, hagen og naturen rundt seg. Oljer, urter, honning, havre og andre råvarer har gjennom tidene fått spille mange roller i jakten på mykere hud, blankere hår og litt ekstra glød. Mange av de gamle triksene er overraskende enkle – og noen er verdt å ta frem igjen.",
+    "Her finner du gamle råd og enkle knep for hud, hår og personlig pleie. Før baderomshyllene ble fulle av kremer, serum og spesialprodukter, brukte man det som fantes i kjøkkenet, hagen og naturen rundt seg. Oljer, urter, honning, havre og andre råvarer har gjennom tidene fått spille mange roller i jakten på mykere hud, blankere hår og litt ekstra glød. Mange av de gamle triksene er overraskende enkle, og noen er verdt å ta frem igjen.",
   husoghjem:
-    "Her har vi samlet kjerringråd for hus og hjem – små løsninger på store og små hverdagsproblemer. Før spesialmidler og produkter fantes for enhver oppgave, måtte man være kreativ med det man hadde tilgjengelig. Eddik, sitron, salt, potetmel og grønnsåpe kunne brukes til langt mer enn man kanskje skulle tro. Kunnskapen ble delt, prøvd ut og gitt videre, og mange av de gamle knepene lever fortsatt i beste velgående.",
+    "Her har vi samlet kjerringråd for hus og hjem: små løsninger på store og små hverdagsproblemer. Før spesialmidler og produkter fantes for enhver oppgave, måtte man være kreativ med det man hadde tilgjengelig. Eddik, sitron, salt, potetmel og grønnsåpe kunne brukes til langt mer enn man kanskje skulle tro. Kunnskapen ble delt, prøvd ut og gitt videre, og mange av de gamle knepene lever fortsatt i beste velgående.",
   godegamle:
-    "De aller mest klassiske kjerringrådene — de fleste har hørt minst ett av dem fra en bestemor eller oldemor. Denne kategorien er foreløpig ny og tom, men er tenkt som samlestedet for de rådene som har gått igjen på tvers av generasjoner og familier.",
+    "De aller mest klassiske kjerringrådene, de fleste har hørt minst ett av dem fra en bestemor eller oldemor. Denne kategorien er foreløpig ny og tom, men er tenkt som samlestedet for de rådene som har gått igjen på tvers av generasjoner og familier.",
   sankingbevaring:
-    "Om å sanke fra naturen og ta vare på det man finner — bær, sopp, urter og frukt gjennom sesongen, og hvordan man bevarer det til senere. Denne kategorien er foreløpig ny og tom, men er tenkt som samlestedet for gamle triks knyttet til sanking, konservering og hermetisering.",
+    "Om å sanke fra naturen og ta vare på det man finner: bær, sopp, urter og frukt gjennom sesongen, og hvordan man bevarer det til senere. Denne kategorien er foreløpig ny og tom, men er tenkt som samlestedet for gamle triks knyttet til sanking, konservering og hermetisering.",
 };
 
 export default function KategoriPage({

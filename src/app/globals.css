@@ -150,6 +150,15 @@ body {
   box-shadow: 0 0 0 2px var(--focus-ring, var(--plum-600));
 }
 
+/* Søk-ikonet og selve søkefeltet i SiteHeader: panelet som slår ut ER
+   allerede tydelig fokus-tilbakemelding (pillen åpnes, markøren blinker
+   rett etterpå), så ringen oppå det i tillegg leste bare som en uønsket
+   oransje ramme som "henger igjen" — fjernet helt for disse to, resten av
+   siden beholder fokusringen som normalt. */
+.no-focus-ring:focus-visible {
+  box-shadow: none !important;
+}
+
 /* .font-display og .font-serif-display er to navn for samme font nå (Google
    Sans Flex) — beholdt som to klasser siden de brukes på ulike stedet i
    markupet (kickere/labels vs. store overskrifter), men de setter ikke lenger

@@ -172,7 +172,7 @@ export const TOP_CATEGORIES = [
     name: "Gode gamle",
     enabled: true,
     image: "/pictures/tinktur.jpg",
-    tagline: "De klassiske husrådene — godt utprøvde triks gitt videre fra generasjon til generasjon.",
+    tagline: "De klassiske husrådene, godt utprøvde triks gitt videre fra generasjon til generasjon.",
   },
   {
     id: "hudharskjonnhet",
@@ -200,7 +200,7 @@ export const TOP_CATEGORIES = [
     name: "Sanking & bevaring",
     enabled: true,
     image: "/pictures/tyttebaer2.png",
-    tagline: "Å sanke fra naturen og ta vare på det du finner — bær, urter og frukt gjennom sesongen.",
+    tagline: "Å sanke fra naturen og ta vare på det du finner: bær, urter og frukt gjennom sesongen.",
   },
 ];
 

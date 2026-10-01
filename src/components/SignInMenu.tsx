@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IconUser } from "@/components/icons";
-import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
+import { PrimaryButton } from "@/components/Button";
 import { useProfile } from "@/lib/useProfile";
 
 /** Liksom-innlogging (se useProfile) — bare et visningsnavn, ikke ekte
@@ -81,14 +81,9 @@ export function SignInMenu() {
                 className="mt-3 w-full rounded-lg border border-ink/15 px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-plum-600"
                 style={{ background: "rgba(61,46,58,0.04)" }}
               />
-              <button
-                type="submit"
-                disabled={!name.trim()}
-                className={`mt-3 w-full disabled:opacity-40 ${BUTTON_PRIMARY_CLASS}`}
-                style={BUTTON_PRIMARY_STYLE}
-              >
+              <PrimaryButton type="submit" disabled={!name.trim()} className="mt-3 w-full disabled:opacity-40">
                 Logg inn
-              </button>
+              </PrimaryButton>
             </form>
           )}
         </div>

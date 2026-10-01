@@ -225,7 +225,7 @@ export default function SyrinArticlePage() {
               Duftende prydbusk med gamle røtter
             </p>
             <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl lg:text-5xl">
-              Syrin – mer enn en vakker vårduft
+              Syrin: mer enn en vakker vårduft
             </h1>
             <p className="mt-4 max-w-xl text-ink-soft">
               Syrin (Syringa vulgaris) er mest kjent for sitt vakre utseende og sin fantastiske duft,

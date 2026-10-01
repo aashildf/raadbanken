@@ -39,6 +39,14 @@ export function SiteHeader() {
   function scheduleClose() {
     closeTimer.current = setTimeout(() => setActiveEntryId(null), 150);
   }
+  // Header/dropdown ligger i layouten og overlever selve sidenavigeringen —
+  // uten dette ble aktiveEntryId stående etter et klikk på en lenke inni
+  // dropdownen (museevnten "forlot" aldri lenken, den navigerte bare vekk),
+  // så menyen sto synlig åpen oppå den nye siden til man flyttet musen.
+  function closeEntry() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setActiveEntryId(null);
+  }
   const activeLinkEntry = menuEntries.find((e) => e.id === activeEntryId) ?? null;
   const activeEntry = activeLinkEntry?.kind === "dropdown" ? activeLinkEntry : null;
 
@@ -120,14 +128,17 @@ export function SiteHeader() {
         }}
       >
         {/* VENSTRE: logo — den gamle sorte/kremhvite dandelion-ikonet byttet ut
-            med den nye gullversjonen, som leser bedre mot den mørke bjelken. */}
+            med den nye gullversjonen, som leser bedre mot den mørke bjelken.
+            Prøvde et ordmerke ved siden av ikonet (for den tomme venstre
+            spalten), men det så rart ut — tilbake til bare ikonet, litt
+            større enn før i stedet. */}
         <Link href="/" aria-label="Rådbanken" className="flex items-center transition-opacity active:opacity-70">
           <Image
             src="/logo/gold-logo.png"
             alt="Rådbanken"
             width={331}
             height={281}
-            style={{ height: "clamp(44px, 4.8vw, 62px)", width: "auto" }}
+            style={{ height: "clamp(46px, 5.2vw, 66px)", width: "auto" }}
           />
         </Link>
 
@@ -149,6 +160,7 @@ export function SiteHeader() {
             >
               <Link
                 href={entry.href}
+                onClick={closeEntry}
                 className="text-xs font-normal uppercase tracking-[0.14em] transition-colors hover:text-[#E1B08C]"
                 style={activeEntryId === entry.id ? { color: "#E1B08C" } : undefined}
               >
@@ -169,14 +181,19 @@ export function SiteHeader() {
         <div className="flex items-center justify-end gap-4 sm:gap-6" style={{ gridColumn: 3, color: HEADER_TEXT }}>
           <button
             aria-label="Søk"
-            onClick={() => {
+            onClick={(e) => {
+              // blur: musetrykk skal ikke la en firkantet fokusring henge
+              // igjen på selve ikon-knappen (den er ikke rund/avlang, så
+              // ringen leser som en løsrevet firkant) — fokus flyttes uansett
+              // videre til søkefeltet rett etter, se under.
+              e.currentTarget.blur();
               setSearchOpen((open) => {
                 const next = !open;
                 if (next) setTimeout(() => inputRef.current?.focus(), 50);
                 return next;
               });
             }}
-            className="flex items-center justify-center transition-opacity hover:opacity-70 active:opacity-50"
+            className="no-focus-ring flex items-center justify-center rounded-full p-1 transition-opacity hover:opacity-70 active:opacity-50"
           >
             <IconSearch className="h-5 w-5" />
           </button>
@@ -215,7 +232,7 @@ export function SiteHeader() {
           <div className="relative" style={{ paddingInline: "var(--page-pad)", paddingTop: 32, paddingBottom: 28 }}>
             <div className="flex flex-wrap gap-8">
               {activeEntry.cards.map((card) => (
-                <Link key={card.key} href={card.href} className="group w-44 shrink-0">
+                <Link key={card.key} href={card.href} onClick={closeEntry} className="group w-44 shrink-0">
                   <p className="font-serif-display mb-2 truncate text-sm" style={{ color: HEADER_TEXT }}>
                     {card.label}
                   </p>
@@ -240,6 +257,7 @@ export function SiteHeader() {
               </p>
               <Link
                 href={activeEntry.href}
+                onClick={closeEntry}
                 className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] transition-opacity hover:opacity-75"
                 style={{ color: "#E1B08C" }}
               >
@@ -283,7 +301,7 @@ export function SiteHeader() {
                   if (!query) setSearchOpen(false);
                 }}
                 placeholder="Søk råd"
-                className="w-full bg-transparent font-sans text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none"
+                className="no-focus-ring w-full rounded-full bg-transparent font-sans text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none"
               />
             </div>
             {focused && query.trim() && (

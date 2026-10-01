@@ -3,7 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MEDICINAL_PLANTS } from "@/lib/plants";
 import { PLANT_ICON } from "@/components/icons";
-import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
+import { PrimaryButton } from "@/components/Button";
 
 export function generateStaticParams() {
   return MEDICINAL_PLANTS.map((p) => ({ id: p.id }));
@@ -85,10 +85,10 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
               råd. Snakk med lege eller farmasøyt før bruk, særlig ved bruk av andre legemidler.
             </p>
 
-            <Link href="/" className={`mt-10 ${BUTTON_PRIMARY_CLASS}`} style={BUTTON_PRIMARY_STYLE}>
+            <PrimaryButton href="/" className="mt-10">
               Bla i råd
               <span aria-hidden>→</span>
-            </Link>
+            </PrimaryButton>
           </div>
         </div>
       </main>
@@ -167,10 +167,10 @@ export default async function PlantPage({ params }: { params: Promise<{ id: stri
             råd. Snakk med lege eller farmasøyt før bruk, særlig ved bruk av andre legemidler.
           </p>
 
-          <Link href="/" className={`mt-10 ${BUTTON_PRIMARY_CLASS}`} style={BUTTON_PRIMARY_STYLE}>
+          <PrimaryButton href="/" className="mt-10">
             Bla i råd
             <span aria-hidden>→</span>
-          </Link>
+          </PrimaryButton>
         </div>
       </div>
     </main>

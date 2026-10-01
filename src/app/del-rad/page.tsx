@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { useAnonAuth } from "@/lib/useAnonAuth";
 import { HEALTH_SUBCATEGORIES, TOP_CATEGORIES, slugify } from "@/lib/categories";
-import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
+import { PrimaryButton } from "@/components/Button";
 import type { Problem } from "@/lib/types";
 
 const ANNET = "annet";
@@ -228,14 +228,9 @@ function DelRadForm() {
 
           {error && <p className="text-sm text-rust">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={saving || !uid || !problemId}
-            className={`disabled:opacity-50 ${BUTTON_PRIMARY_CLASS}`}
-            style={BUTTON_PRIMARY_STYLE}
-          >
+          <PrimaryButton type="submit" disabled={saving || !uid || !problemId} className="disabled:opacity-50">
             {saving ? "Lagrer..." : "Del rådet"}
-          </button>
+          </PrimaryButton>
         </form>
       </div>
     </main>

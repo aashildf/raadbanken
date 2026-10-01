@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
+import { PrimaryButton } from "@/components/Button";
 
 export const metadata = {
   title: "Om oss | Rådbanken",
@@ -102,10 +102,10 @@ export default function OmOssPage() {
               </section>
             </div>
 
-            <Link href="/del-rad" className={`mt-10 ${BUTTON_PRIMARY_CLASS}`} style={BUTTON_PRIMARY_STYLE}>
+            <PrimaryButton href="/del-rad" className="mt-10">
               Del et råd
               <span aria-hidden>→</span>
-            </Link>
+            </PrimaryButton>
           </div>
         </div>
       </div>

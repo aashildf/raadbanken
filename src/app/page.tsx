@@ -11,12 +11,7 @@ import { useAnonAuth } from "@/lib/useAnonAuth";
 import { castVote } from "@/lib/votes";
 import { setSaved } from "@/lib/saves";
 import { RemedyPreviewModal } from "@/components/RemedyPreviewModal";
-import {
-  BUTTON_PRIMARY_CLASS,
-  BUTTON_PRIMARY_STYLE,
-  BUTTON_SECONDARY_CLASS,
-  BUTTON_SECONDARY_STYLE_DARK,
-} from "@/lib/buttonStyles";
+import { PrimaryButton, SecondaryButton } from "@/components/Button";
 import type { Problem, Remedy } from "@/lib/types";
 import { GRAIN_BG } from "@/components/GrainOverlay";
 import {
@@ -37,28 +32,26 @@ import {
   PLANT_ICON,
 } from "@/components/icons";
 
-// Rotérende aksentpalett for rangeringslistens nummerering — samme varme,
-// botaniske fargefølelse som resten av siden (gull, terrakotta, salvie osv.),
-// men med litt farge i hvert tall i stedet for ett ensfarget, falmet nummer.
-const RANK_COLORS = ["#c9a14a", "#bc6c4d", "#6f8f6c", "#7a93a8", "#a8748a", "#6b7a54", "#c98a5b", "#c98a8a"];
-
-// Bokeh-orbs over hero-bildet — uskarpe lyspunkt i palettens farger som
-// sakte faller/driver nedover, som lys som slipper gjennom trær med lav
-// skarphetsdybde. Negative delay-verdier gjør at de allerede er midt i
-// syklusen ved innlasting (spredt utover bildet fra første sekund), og
-// ulik duration/blur/størrelse gir en svak parallax — raske/store/mindre
-// uskarpe orbs leser som nærmere, sakte/små/mer uskarpe som lenger bak.
+// Bokeh-orbs over hero-bildet — uskarpe lyspunkt som sakte faller/driver
+// nedover, som lys som slipper gjennom trær med lav skarphetsdybde. Kun
+// varme, naturlige toner fra selve fotoet (kremhvit sollys, gult/gyllent lys,
+// dempet løvgrønt) — den forrige versjonen brukte hele rangeringslistens
+// regnbue-palett (gull, terrakotta, salvie, blågrå, malve …) og leste som et
+// juletre i stedet for lys i skogen. Negative delay-verdier gjør at de
+// allerede er midt i syklusen ved innlasting (spredt utover bildet fra første
+// sekund), og ulik duration/blur/størrelse gir en svak parallax.
+const BOKEH_COLORS = ["#F5EFE2", "#D9B25C", "#8FA876"];
 const BOKEH_ORBS = [
-  { left: "8%",  size: 30, color: RANK_COLORS[0], blur: 9,  opacity: 0.45, duration: 32, delay: -4,  dx: 22,  dy: 720 },
-  { left: "18%", size: 52, color: RANK_COLORS[2], blur: 16, opacity: 0.4,  duration: 44, delay: -18, dx: -18, dy: 760 },
-  { left: "27%", size: 22, color: RANK_COLORS[4], blur: 9,  opacity: 0.5,  duration: 26, delay: -9,  dx: 16,  dy: 680 },
-  { left: "38%", size: 64, color: RANK_COLORS[3], blur: 16, opacity: 0.35, duration: 48, delay: -30, dx: -26, dy: 800 },
-  { left: "49%", size: 34, color: RANK_COLORS[6], blur: 9,  opacity: 0.45, duration: 30, delay: -2,  dx: 20,  dy: 700 },
-  { left: "60%", size: 46, color: RANK_COLORS[1], blur: 16, opacity: 0.4,  duration: 38, delay: -21, dx: -14, dy: 740 },
-  { left: "70%", size: 26, color: RANK_COLORS[7], blur: 9,  opacity: 0.5,  duration: 24, delay: -11, dx: 18,  dy: 660 },
-  { left: "80%", size: 58, color: RANK_COLORS[5], blur: 16, opacity: 0.35, duration: 46, delay: -36, dx: -22, dy: 780 },
-  { left: "90%", size: 38, color: RANK_COLORS[0], blur: 9,  opacity: 0.45, duration: 34, delay: -14, dx: 24,  dy: 720 },
-  { left: "95%", size: 76, color: RANK_COLORS[2], blur: 16, opacity: 0.35, duration: 42, delay: -27, dx: -20, dy: 760 },
+  { left: "8%",  size: 30, color: BOKEH_COLORS[0], blur: 9,  opacity: 0.45, duration: 32, delay: -4,  dx: 22,  dy: 720 },
+  { left: "18%", size: 52, color: BOKEH_COLORS[2], blur: 16, opacity: 0.4,  duration: 44, delay: -18, dx: -18, dy: 760 },
+  { left: "27%", size: 22, color: BOKEH_COLORS[1], blur: 9,  opacity: 0.5,  duration: 26, delay: -9,  dx: 16,  dy: 680 },
+  { left: "38%", size: 64, color: BOKEH_COLORS[0], blur: 16, opacity: 0.35, duration: 48, delay: -30, dx: -26, dy: 800 },
+  { left: "49%", size: 34, color: BOKEH_COLORS[2], blur: 9,  opacity: 0.45, duration: 30, delay: -2,  dx: 20,  dy: 700 },
+  { left: "60%", size: 46, color: BOKEH_COLORS[1], blur: 16, opacity: 0.4,  duration: 38, delay: -21, dx: -14, dy: 740 },
+  { left: "70%", size: 26, color: BOKEH_COLORS[0], blur: 9,  opacity: 0.5,  duration: 24, delay: -11, dx: 18,  dy: 660 },
+  { left: "80%", size: 58, color: BOKEH_COLORS[2], blur: 16, opacity: 0.35, duration: 46, delay: -36, dx: -22, dy: 780 },
+  { left: "90%", size: 38, color: BOKEH_COLORS[1], blur: 9,  opacity: 0.45, duration: 34, delay: -14, dx: 24,  dy: 720 },
+  { left: "95%", size: 76, color: BOKEH_COLORS[0], blur: 16, opacity: 0.35, duration: 42, delay: -27, dx: -20, dy: 760 },
 ];
 
 // "Hva finner du i Rådbanken?"-stripen rett under hero. Egen, litt bredere
@@ -127,6 +120,15 @@ export default function HomePage() {
   const [votingId, setVotingId] = useState<string | null>(null);
   const [openRemedyId, setOpenRemedyId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  // Optimistiske overstyringer, holdt helt separat fra savedIds (som
+  // onSnapshot under erstatter i sin helhet ved hver endring). Da den første
+  // versjonen av dette skrev direkte inn/ut av samme Set som onSnapshot
+  // erstatter, kunne en pågående optimistisk endring på ett råd bli overskrevet
+  // av en snapshot som trigget av et ANNET råd rett før skrivingen dens var
+  // bekreftet — synlig som at bare noen hjerter (og et annet sett hver gang)
+  // faktisk skiftet farge. Rendring slår sammen de to: en pending-overstyring
+  // vinner til den fjernes (skriving ferdig, uansett utfall).
+  const [pendingSaves, setPendingSaves] = useState<Map<string, boolean>>(new Map());
   const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -165,6 +167,27 @@ export default function HomePage() {
     return unsub;
   }, [uid]);
 
+  // Rydder bort en optimistisk overstyring først når de bekreftede dataene
+  // fra Firestore faktisk har tatt den igjen — ikke med én gang skrive-
+  // kallet returnerer. Det siste kan skje FØR onSnapshot-oppdateringen for
+  // akkurat den skrivingen har rukket fram, og å fjerne overstyringen da gir
+  // et glimt tilbake til feil farge (synlig som at hjertet fylles et
+  // øyeblikk og så forsvinner igjen) før/om savedIds noen gang tar den igjen.
+  useEffect(() => {
+    setPendingSaves((prev) => {
+      if (prev.size === 0) return prev;
+      let changed = false;
+      const next = new Map(prev);
+      for (const [id, val] of prev) {
+        if (savedIds.has(id) === val) {
+          next.delete(id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [savedIds]);
+
   const problemById = useMemo(() => new Map(problems.map((p) => [p.id, p])), [problems]);
 
   const rankedAll = useMemo(
@@ -198,16 +221,40 @@ export default function HomePage() {
   const handleToggleSaved = useCallback(
     async (remedyId: string) => {
       if (!uid) return;
+      const current = pendingSaves.has(remedyId) ? pendingSaves.get(remedyId)! : savedIds.has(remedyId);
+      const willSave = !current;
       setSavingId(remedyId);
+      // Optimistisk UI: speiler endringen med én gang i stedet for å vente på
+      // Firestore-rundturen + onSnapshot — uten det føltes hjertet dødt/
+      // uresponsivt ved selv en liten forsinkelse. Egen pendingSaves-stat i
+      // stedet for å skrive rett i savedIds (se kommentar der). Ett nytt
+      // forsøk dekker et kortvarig kappløp rett etter en fersk anonym
+      // innlogging, før Firestore-SDKen har fått med seg det ferske
+      // ID-tokenet på første forespørsel (sett i feilsøking 2026-10-01).
+      setPendingSaves((prev) => new Map(prev).set(remedyId, willSave));
       try {
-        await setSaved(remedyId, uid, !savedIds.has(remedyId));
+        try {
+          await setSaved(remedyId, uid, willSave);
+          // Lyktes — IKKE fjern overstyringen her. Reconciliation-effekten
+          // over gjør det, først når savedIds fra Firestore faktisk har
+          // tatt den igjen.
+        } catch {
+          await setSaved(remedyId, uid, willSave);
+        }
       } catch {
-        // Stille feil her, på linje med stemmegivning over.
+        // Begge forsøk feilet reelt — ingenting ble skrevet, rull tilbake
+        // med én gang i stedet for å vente på noe fra serveren som aldri
+        // kommer.
+        setPendingSaves((prev) => {
+          const next = new Map(prev);
+          next.delete(remedyId);
+          return next;
+        });
       } finally {
         setSavingId(null);
       }
     },
-    [uid, savedIds]
+    [uid, savedIds, pendingSaves]
   );
 
   const featuredPlant = useMemo(() => plantOfTheMonth(), []);
@@ -340,33 +387,37 @@ export default function HomePage() {
                           className="h-auto w-[240px] sm:w-[320px] lg:w-[380px]"
                           style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.45))" }}
                         />
-                        <p className="font-serif-display mt-6 max-w-[20ch] text-balance text-3xl italic leading-[1.08] sm:max-w-2xl sm:text-5xl">
+                        {/* Bevisst enkel/rolig her (vanlig sans, ikke font-serif-display) —
+                            en pyntet serif-overskrift rett under den kursive, "høylytte"
+                            logoen gled i ett med den; ren, enkel sans skiller de to
+                            momentene fra hverandre i stedet for å konkurrere. */}
+                        <p
+                          className="font-sans mt-6 max-w-[24ch] text-balance text-lg sm:max-w-xl sm:text-2xl"
+                          style={{ fontWeight: 500, letterSpacing: "0.01em" }}
+                        >
                           Kunnskap som går i arv, tilpasset livet vi lever i dag.
                         </p>
                         <p
                           className="font-sans mt-4 max-w-[32ch] text-sm leading-relaxed sm:max-w-md sm:text-base"
                           style={{ color: "rgba(245,239,235,0.85)" }}
                         >
-                          Et levende arkiv for kjerringråd og gode tips – der brukerne deler
-                          sine erfaringer og stemmer frem det som fungerer.
+                          Et levende arkiv for kjerringråd og gode tips, der brukerne deler sine
+                          erfaringer og stemmer frem det som fungerer.
                         </p>
                         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-                          <Link
-                            href="/alle"
-                            className={`h-11 w-[190px] ${BUTTON_PRIMARY_CLASS}`}
-                            style={{ ...BUTTON_PRIMARY_STYLE, textShadow: "none" }}
-                          >
+                          <PrimaryButton href="/alle" className="h-11 w-[190px]" style={{ textShadow: "none" }}>
                             Utforsk råd
                             <span aria-hidden>→</span>
-                          </Link>
-                          <Link
+                          </PrimaryButton>
+                          <SecondaryButton
                             href="/del-rad"
-                            className={`h-11 w-[190px] hover:bg-white/10 ${BUTTON_SECONDARY_CLASS}`}
-                            style={{ ...BUTTON_SECONDARY_STYLE_DARK, textShadow: "none" }}
+                            tone="dark"
+                            className="h-11 w-[190px]"
+                            style={{ textShadow: "none" }}
                           >
                             Del et råd
                             <IconPlus className="h-3.5 w-3.5" />
-                          </Link>
+                          </SecondaryButton>
                         </div>
                         {/* Scroll-hint — bare desktop (mobil er trangere, og heroen
                             følges uansett rett av kategori-stripen). Diskré, myk
@@ -478,8 +529,7 @@ export default function HomePage() {
                   const problem = problemById.get(r.problemId);
                   const isVoting = votingId === r.id;
                   const isSaving = savingId === r.id;
-                  const isSaved = savedIds.has(r.id);
-                  const rankColor = RANK_COLORS[i % RANK_COLORS.length];
+                  const isSaved = pendingSaves.has(r.id) ? pendingSaves.get(r.id)! : savedIds.has(r.id);
                   return (
                     <Reveal
                       key={r.id}
@@ -488,7 +538,7 @@ export default function HomePage() {
                     >
                       <span
                         className="font-serif-display w-9 shrink-0 text-lg sm:text-xl"
-                        style={{ color: rankColor }}
+                        style={{ color: "var(--gold)" }}
                       >
                         {String(i + 1).padStart(2, "0")}
                       </span>
@@ -579,19 +629,15 @@ export default function HomePage() {
                 Frukt med lange tradisjoner
               </p>
               <h2 className="font-display text-2xl text-ink sm:text-3xl">
-                Fiken – en liten frukt med store helsefordeler
+                Fiken: en liten frukt med store helsefordeler
               </h2>
               <p className="font-display text-ink-soft">
                 Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.
               </p>
-              <Link
-                href="/artikkel/fiken"
-                className={`mt-2 ${BUTTON_PRIMARY_CLASS}`}
-                style={BUTTON_PRIMARY_STYLE}
-              >
+              <PrimaryButton href="/artikkel/fiken" className="mt-2">
                 Les artikkel
                 <span aria-hidden>→</span>
-              </Link>
+              </PrimaryButton>
             </div>
           </Reveal>
         </section>
@@ -717,14 +763,10 @@ export default function HomePage() {
               <p className="text-ink-soft">
                 Hvordan kjerringråd ble til en muntlig tradisjon, og hvorfor vi samler den igjen.
               </p>
-              <Link
-                href="/historie"
-                className={`mt-2 ${BUTTON_PRIMARY_CLASS}`}
-                style={BUTTON_PRIMARY_STYLE}
-              >
+              <PrimaryButton href="/historie" className="mt-2">
                 Les historien
                 <span aria-hidden>→</span>
-              </Link>
+              </PrimaryButton>
             </div>
           </Reveal>
         </section>
@@ -764,20 +806,16 @@ export default function HomePage() {
                 Gammelt husråd mot hoste
               </p>
               <h2 className="font-display text-2xl text-ink sm:text-3xl">
-                Tyttebær – naturens egen hostesaft
+                Tyttebær: naturens egen hostesaft
               </h2>
               <p className="font-display text-ink-soft">
                 Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du
                 bruker det riktig.
               </p>
-              <Link
-                href="/artikkel/tyttebaer"
-                className={`mt-2 ${BUTTON_PRIMARY_CLASS}`}
-                style={BUTTON_PRIMARY_STYLE}
-              >
+              <PrimaryButton href="/artikkel/tyttebaer" className="mt-2">
                 Les artikkel
                 <span aria-hidden>→</span>
-              </Link>
+              </PrimaryButton>
             </div>
           </Reveal>
         </section>
@@ -816,20 +854,16 @@ export default function HomePage() {
                 Duftende prydbusk med gamle røtter
               </p>
               <h2 className="font-display text-2xl text-ink sm:text-3xl">
-                Syrin – mer enn en vakker vårduft
+                Syrin: mer enn en vakker vårduft
               </h2>
               <p className="font-display text-ink-soft">
                 Blomstene er spiselige og fulle av virkestoffer som tradisjonelt er brukt mot
                 uro, urolig mage og irritert hud.
               </p>
-              <Link
-                href="/artikkel/syrin"
-                className={`mt-2 ${BUTTON_PRIMARY_CLASS}`}
-                style={BUTTON_PRIMARY_STYLE}
-              >
+              <PrimaryButton href="/artikkel/syrin" className="mt-2">
                 Les artikkel
                 <span aria-hidden>→</span>
-              </Link>
+              </PrimaryButton>
             </div>
           </Reveal>
         </section>
@@ -841,7 +875,10 @@ export default function HomePage() {
         onClose={() => setOpenRemedyId(null)}
         onVote={(direction) => openRemedy && handleQuickVote(openRemedy.id, direction)}
         voting={!!openRemedy && votingId === openRemedy.id}
-        saved={!!openRemedy && savedIds.has(openRemedy.id)}
+        saved={
+          !!openRemedy &&
+          (pendingSaves.has(openRemedy.id) ? pendingSaves.get(openRemedy.id)! : savedIds.has(openRemedy.id))
+        }
         onToggleSave={() => openRemedy && handleToggleSaved(openRemedy.id)}
         saving={!!openRemedy && savingId === openRemedy.id}
         onPrev={openIndex > 0 ? () => setOpenRemedyId(topTen[openIndex - 1].id) : undefined}

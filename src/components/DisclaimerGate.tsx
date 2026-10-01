@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { BUTTON_PRIMARY_CLASS, BUTTON_PRIMARY_STYLE } from "@/lib/buttonStyles";
+import { PrimaryButton } from "@/components/Button";
 
 const STORAGE_KEY = "raadbanken-disclaimer-accepted-v1";
 
@@ -90,13 +90,9 @@ export function DisclaimerGate() {
           legevakt (116 117) eller nødnummer (113).
         </p>
 
-        <button
-          onClick={accept}
-          className={`mt-6 w-full active:scale-[0.97] ${BUTTON_PRIMARY_CLASS}`}
-          style={BUTTON_PRIMARY_STYLE}
-        >
+        <PrimaryButton onClick={accept} className="mt-6 w-full active:scale-[0.97]">
           Jeg forstår og godtar
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );
