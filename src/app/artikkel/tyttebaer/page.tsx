@@ -34,7 +34,7 @@ export default function TyttebaerArticlePage() {
           </div>
 
           <header>
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
               Naturens egen hostesaft
             </p>
             <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl lg:text-5xl">

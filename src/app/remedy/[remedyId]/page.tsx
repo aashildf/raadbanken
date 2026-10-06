@@ -119,7 +119,7 @@ export default function RemedyDetailPage({
           <>
             {/* Tittel + beskrivelse */}
             <header className="mt-8">
-              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+              <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
                 Kjerringråd{problemName ? ` mot ${problemName.toLowerCase()}` : ""}
               </p>
               <h1 className="font-serif-display mt-3 text-3xl text-ink sm:text-4xl">{remedy.title}</h1>
@@ -142,7 +142,9 @@ export default function RemedyDetailPage({
                       disabled={!uid || submitting !== null}
                       className={`flex items-center justify-center rounded-full border-2 text-ink transition-all hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-50 ${
                         myVote?.voteType === dir
-                          ? dir === "up" ? "border-sage bg-sage/10" : "border-rust bg-rust/10"
+                          ? dir === "up"
+                            ? "border-sage bg-sage/10"
+                            : "border-[#E1B08C] bg-[#E1B08C]/10 text-[#E1B08C]"
                           : "border-ink/15 hover:border-[#E1B08C]"
                       }`}
                       style={{ width: 72, height: 72 }}
@@ -230,7 +232,7 @@ export default function RemedyDetailPage({
                       {v.voteType === "up" ? (
                         <IconArrowUp className="mr-2 inline h-4 w-4 align-text-bottom text-sage" />
                       ) : (
-                        <IconArrowDown className="mr-2 inline h-4 w-4 align-text-bottom text-rust" />
+                        <IconArrowDown className="mr-2 inline h-4 w-4 align-text-bottom text-[#E1B08C]" />
                       )}
                       {v.comment}
                     </li>

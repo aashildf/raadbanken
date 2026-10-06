@@ -105,7 +105,7 @@ export default function MineLagredeRadPage() {
         </Link>
 
         <header className="mt-8">
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+          <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
             {profileLoaded && displayName ? displayName : "Mine råd"}
           </p>
           <h1 className="font-serif-display mt-2 text-4xl text-ink sm:text-5xl">Mine lagrede råd</h1>

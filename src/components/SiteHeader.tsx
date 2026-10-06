@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { synonymsForSlug } from "@/lib/categories";
@@ -10,6 +11,8 @@ import { bestPartialSimilarity } from "@/lib/fuzzy";
 import { useMenuEntries } from "@/lib/useMenuEntries";
 import { SiteMenu } from "@/components/SiteMenu";
 import { SignInMenu } from "@/components/SignInMenu";
+import { SecondaryButton } from "@/components/Button";
+import { Paper } from "@/components/Paper";
 import { GRAIN_BG } from "@/components/GrainOverlay";
 import { HEADER_BG, HEADER_TEXT } from "@/lib/theme";
 import { IconSearch } from "@/components/icons";
@@ -18,6 +21,26 @@ import type { Problem, Remedy } from "@/lib/types";
 const PILL_HEIGHT = 92;
 
 export function SiteHeader() {
+  // Redesign-pakken (design/design_handoff_radbanken_forside) vil ha menyen
+  // flytende og halvgjennomsiktig over toppbildet på forsiden, og mørkere
+  // etter scroll. Resten av siten beholder dagens faste, heldekkende meny —
+  // ellers hadde innhold på alle andre sider havnet skjult bak en
+  // gjennomsiktig meny i normal flyt (ingen av de sidene har et hero-bilde
+  // å flyte over).
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!isHome) return;
+    function onScroll() {
+      setScrolled(window.scrollY > 480);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isHome]);
+
   const [problems, setProblems] = useState<Problem[]>([]);
   const [remedies, setRemedies] = useState<Remedy[]>([]);
   const [query, setQuery] = useState("");
@@ -104,22 +127,33 @@ export function SiteHeader() {
 
   return (
     <header
-      className="relative z-50 overflow-visible"
-      style={{ background: HEADER_BG, "--focus-ring": "#E1B08C" } as React.CSSProperties}
+      className={`z-50 overflow-visible ${isHome ? "fixed inset-x-0 top-0 transition-colors duration-500" : "relative"}`}
+      style={
+        {
+          background: isHome ? (scrolled ? "rgba(17,36,24,0.96)" : "rgba(52,64,54,0.62)") : HEADER_BG,
+          backdropFilter: isHome ? "blur(10px)" : undefined,
+          WebkitBackdropFilter: isHome ? "blur(10px)" : undefined,
+          "--focus-ring": "#E1B08C",
+        } as React.CSSProperties
+      }
     >
-      {/* Papirkorn oppå den solide bakgrunnsfargen — samme feTurbulence-teknikk
-          som resten av siden, så headeren føles som et trykt papirfelt i
-          stedet for en flat digital bjelke. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: GRAIN_BG, opacity: 0.4 }}
-      />
+      {/* Papirkorn — <Paper variant="dark"> per papirtekstur.md, kun på
+          forsiden der menyen er flytende/gjennomsiktig (isHome). Andre
+          sider beholder den gamle GRAIN_BG-stripen under, uendret. */}
+      {isHome ? (
+        <Paper id="header" variant="dark" />
+      ) : (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{ backgroundImage: GRAIN_BG, opacity: 0.4 }}
+        />
+      )}
       {/* Ett samlet linje: logo venstre, kategori-lenker midtstilt (egen
           grid-kolonne — sentrert uavhengig av hvor bred logoen/høyre-klyngen
           er), søk/del råd/meny høyre. Ikke sticky. */}
       <div
-        className="relative grid items-center"
+        className="relative z-10 grid items-center"
         style={{
           height: PILL_HEIGHT,
           paddingInline: "var(--page-pad)",
@@ -134,11 +168,11 @@ export function SiteHeader() {
             større enn før i stedet. */}
         <Link href="/" aria-label="Rådbanken" className="flex items-center transition-opacity active:opacity-70">
           <Image
-            src="/logo/gold-logo.png"
+            src="/logo/radbanken-ikon-krem.svg"
             alt="Rådbanken"
-            width={331}
-            height={281}
-            style={{ height: "clamp(46px, 5.2vw, 66px)", width: "auto" }}
+            width={100}
+            height={100}
+            className="h-[clamp(28px,3.2vw,38px)] w-[clamp(28px,3.2vw,38px)]"
           />
         </Link>
 
@@ -161,8 +195,12 @@ export function SiteHeader() {
               <Link
                 href={entry.href}
                 onClick={closeEntry}
-                className="text-xs font-normal uppercase tracking-[0.14em] transition-colors hover:text-[#E1B08C]"
-                style={activeEntryId === entry.id ? { color: "#E1B08C" } : undefined}
+                className="border-b border-transparent pb-0.5 text-xs font-normal uppercase tracking-[0.14em] transition-colors hover:text-[#E1B08C]"
+                style={
+                  activeEntryId === entry.id
+                    ? { color: "#E1B08C", borderBottomColor: "#E1B08C" }
+                    : undefined
+                }
               >
                 {entry.name}
               </Link>
@@ -198,13 +236,13 @@ export function SiteHeader() {
             <IconSearch className="h-5 w-5" />
           </button>
           <SignInMenu />
-          <Link
+          <SecondaryButton
             href="/del-rad"
-            className="hidden shrink-0 items-center whitespace-nowrap rounded-lg px-5 py-2.5 text-xs font-normal uppercase tracking-[0.14em] transition-colors hover:bg-[#f6f0e3] hover:text-[#2c232e] sm:flex"
-            style={{ border: `1px solid ${HEADER_TEXT}` }}
+            tone="dark"
+            className="hidden !px-5 !py-2.5 sm:inline-flex"
           >
             Del råd
-          </Link>
+          </SecondaryButton>
           <div className="md:hidden">
             <SiteMenu tone={HEADER_TEXT} />
           </div>
@@ -220,7 +258,7 @@ export function SiteHeader() {
       {activeEntry && (
         <div
           className="absolute inset-x-0 top-full z-30 hidden overflow-hidden md:block"
-          style={{ background: HEADER_BG }}
+          style={{ background: HEADER_BG, borderBottom: "3px solid #E1B08C" }}
           onMouseEnter={keepOpen}
           onMouseLeave={scheduleClose}
         >

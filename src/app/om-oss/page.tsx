@@ -26,7 +26,7 @@ export default function OmOssPage() {
             et tall. Under lg stables det som før. */}
         <div className="mt-10 lg:grid lg:grid-cols-[280px_1fr] lg:gap-16">
           <header className="lg:sticky lg:top-28 lg:self-start">
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Om oss</p>
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">Om oss</p>
             <h1 className="font-serif-display mt-4 text-4xl text-ink sm:text-5xl lg:text-4xl">
               Kunnskap er noe vi gir videre
             </h1>

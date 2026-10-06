@@ -7,7 +7,56 @@ import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { TOP_CATEGORIES } from "@/lib/categories";
 import { CategorySubcategoryList } from "@/components/CategorySubcategoryList";
+import { PrimaryButton } from "@/components/Button";
 import type { Problem } from "@/lib/types";
+
+// Fordypningsartiklene som tidligere lå som faste teasere på forsiden, flyttet
+// hit til kategorien de faktisk hører hjemme i (se forsidens "Ukens utfordring"
+// og "Folkets favoritter" — artiklene konkurrerte med rangeringen om plass der).
+type CategoryArticle = {
+  href: string;
+  image: string;
+  alt: string;
+  credit: { text: string; href: string };
+  kicker: string;
+  title: string;
+  description: string;
+};
+
+const CATEGORY_ARTICLES: Record<string, CategoryArticle[]> = {
+  sankingbevaring: [
+    {
+      href: "/artikkel/fiken",
+      image: "/pictures/menupictures/fiken_pexels-adriannacalvo-23384641.jpg",
+      alt: "Ferske fiken, hele og oppskåret",
+      credit: { text: "Adrianna CA / Pexels", href: "https://www.pexels.com/photo/figs-in-white-bowl-23384641/" },
+      kicker: "Frukt med lange tradisjoner",
+      title: "Fiken: en liten frukt med store helsefordeler",
+      description: "Derfor er den søte frukten godt for fordøyelsen, hjertehelsen og skjelettet.",
+    },
+    {
+      href: "/artikkel/tyttebaer",
+      image: "/pictures/menupictures/tyytebaer_pexels-sandra-seitamaa-89384773-9669197.jpg",
+      alt: "Tyttebær",
+      credit: { text: "Sandra Seitamaa / Pexels", href: "https://www.pexels.com/photo/close-up-of-plants-and-berries-9669197/" },
+      kicker: "Gammelt husråd mot hoste",
+      title: "Tyttebær: naturens egen hostesaft",
+      description: "Derfor virker det gamle tyttebærtrikset mot hoste og sår hals, og hvordan du bruker det riktig.",
+    },
+  ],
+  helse: [
+    {
+      href: "/artikkel/syrin",
+      image: "/pictures/syrin_pexels-iriser-1431192.jpg",
+      alt: "Syrinklase i nærbilde",
+      credit: { text: "Irina Iriser / Pexels", href: "https://www.pexels.com/photo/close-up-photography-of-orchid-flowers-1431192/" },
+      kicker: "Duftende prydbusk med gamle røtter",
+      title: "Syrin: mer enn en vakker vårduft",
+      description:
+        "Blomstene er spiselige og fulle av virkestoffer som tradisjonelt er brukt mot uro, urolig mage og irritert hud.",
+    },
+  ],
+};
 
 // Frittstående collage-illustrasjoner (transparent PNG), brukt som venstre-spalte-
 // bildet. Portrettformat (~8:15) egner seg godt til en sticky sidespalte, i
@@ -29,7 +78,7 @@ const CATEGORY_INTRO: Record<string, string> = {
   godegamle:
     "De aller mest klassiske kjerringrådene, de fleste har hørt minst ett av dem fra en bestemor eller oldemor. Denne kategorien er foreløpig ny og tom, men er tenkt som samlestedet for de rådene som har gått igjen på tvers av generasjoner og familier.",
   sankingbevaring:
-    "Om å sanke fra naturen og ta vare på det man finner: bær, sopp, urter og frukt gjennom sesongen, og hvordan man bevarer det til senere. Denne kategorien er foreløpig ny og tom, men er tenkt som samlestedet for gamle triks knyttet til sanking, konservering og hermetisering.",
+    "Konservering, tørking, safting og andre gamle triks for å ta vare på det man har sanket. Vi bygger fortsatt opp denne kategorien med flere konkrete kjerringråd, men her er noen artikler å begynne med i mellomtiden.",
 };
 
 export default function KategoriPage({
@@ -113,7 +162,7 @@ export default function KategoriPage({
             </div>
 
             <div>
-              <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Kategori</p>
+              <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">Kategori</p>
               <h1 className="font-serif-display mt-2 text-6xl text-ink sm:text-7xl lg:text-8xl">
                 {category.name}
               </h1>
@@ -127,6 +176,50 @@ export default function KategoriPage({
           </div>
         </div>
       </div>
+
+      {/* Fordypningsartikler — samme bilde-venstre/tekst-høyre mønster som
+          tidligere lå på forsiden, nå flyttet til kategorien de hører til. */}
+      {CATEGORY_ARTICLES[category.id] && (
+        <div className="relative border-t border-ink/10">
+          {CATEGORY_ARTICLES[category.id].map((article, i) => (
+            <section key={article.href} className="relative">
+              <div
+                className={`mx-auto flex flex-col items-stretch py-8 sm:py-12 ${
+                  i % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"
+                }`}
+                style={{ maxWidth: "var(--content-max)", paddingInline: "var(--page-pad)" }}
+              >
+                <div className="relative w-full shrink-0 sm:w-2/3">
+                  <Link
+                    href={article.href}
+                    className="relative block aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2]"
+                  >
+                    <Image src={article.image} alt={article.alt} fill className="object-cover" />
+                  </Link>
+                  <a
+                    href={article.credit.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-2 left-3 z-10 text-[10px] text-paper/80 hover:text-paper"
+                  >
+                    Foto: {article.credit.text}
+                  </a>
+                </div>
+
+                <div className="flex w-full flex-col items-start justify-center gap-3 px-6 py-10 sm:w-1/3 sm:px-8">
+                  <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">{article.kicker}</p>
+                  <h2 className="font-serif-display text-2xl text-ink sm:text-3xl">{article.title}</h2>
+                  <p className="text-ink-soft">{article.description}</p>
+                  <PrimaryButton href={article.href} className="mt-2">
+                    Les artikkel
+                    <span aria-hidden>→</span>
+                  </PrimaryButton>
+                </div>
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

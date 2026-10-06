@@ -3,7 +3,6 @@
 import { use, useEffect, useMemo, useState } from "react";
 import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import Link from "next/link";
-import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { useAnonAuth } from "@/lib/useAnonAuth";
 import { castVote } from "@/lib/votes";
@@ -12,6 +11,7 @@ import { wilsonScore } from "@/lib/wilson";
 import { ACUTE_RISK_SLUGS } from "@/lib/categories";
 import { EmergencyButton } from "@/components/EmergencyButton";
 import { RemedyPreviewModal } from "@/components/RemedyPreviewModal";
+import { PrimaryButton } from "@/components/Button";
 import { IconArrowDown, IconArrowUp, IconHeart } from "@/components/icons";
 import type { Problem, Remedy, Vote } from "@/lib/types";
 
@@ -115,55 +115,27 @@ export default function RemediesPage({
   }
 
   return (
-    <main className="relative flex min-h-screen flex-col">
-      {/* Bakgrunn */}
-      <Image
-        src="/bakgrunner/beige_bg.jpg"
-        alt=""
-        fill
-        style={{ objectFit: "cover" }}
-        priority
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "rgba(210,195,168,0.4)" }}
-        aria-hidden="true"
-      />
-      {/* Gradient for lesbarhet på overskrift */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-72"
-        style={{ background: "linear-gradient(to bottom, rgba(238,223,196,0.72) 0%, transparent 100%)", zIndex: 1 }}
-        aria-hidden="true"
-      />
-
+    <main className="relative flex min-h-screen flex-col bg-paper">
       <div
         className="relative mx-auto w-full max-w-4xl flex-1 py-8 sm:py-12"
-        style={{ paddingInline: "var(--page-pad)", zIndex: 2 }}
+        style={{ paddingInline: "var(--page-pad)" }}
       >
         {/* Toppraden */}
         <div className="mb-6 flex items-center justify-between gap-4">
-          <Link
-            href="/alle"
-            className="text-sm font-medium transition-opacity hover:opacity-70"
-            style={{ color: "#432065" }}
-          >
+          <Link href="/alle" className="text-sm font-medium text-plum-700 transition-opacity hover:opacity-70">
             ← Alle kategorier
           </Link>
           {problem && ACUTE_RISK_SLUGS.includes(problem.slug) && <EmergencyButton />}
         </div>
 
-        {/* Overskrift */}
-        <p
-          className="mt-4 font-display text-[10px] uppercase tracking-[0.3em] text-plum-800/70"
-          style={{ textShadow: "0 1px 6px rgba(238,223,196,0.9)" }}
-        >
-          Folkemedisin
-        </p>
-        <h1
-          className="font-serif-display mt-0.5 text-2xl text-ink sm:text-3xl"
-          style={{ textShadow: "0 1px 0 rgba(255,248,235,0.95), 0 2px 14px rgba(220,200,160,0.7)" }}
-        >
+        {/* Overskrift — kickeren bruker bevisst IKKE font-display: den klassen
+            peker (etter et tidligere fontbytte) på samme serif som
+            overskriften under, og store bokstaver + bokstavavstand i en
+            kalligrafisk serif er vanskelig å lese uansett størrelse/vekt.
+            Vanlig sans (sidens body-font) leser derimot fint som liten,
+            sporet versal-tekst. */}
+        <p className="font-sans text-sm font-bold uppercase tracking-[0.14em] text-plum-700">Folkemedisin</p>
+        <h1 className="font-serif-display mt-2 text-4xl text-ink sm:text-5xl">
           {problem ? `Råd mot ${problem.name.toLowerCase()}` : "Råd"}
         </h1>
 
@@ -174,33 +146,45 @@ export default function RemediesPage({
         {/* Råd-liste — klikk åpner en forhåndsvisning uten å forlate listen (se
             RemedyPreviewModal), i stedet for å navigere til en egen side og
             miste scroll-posisjonen når man går tilbake. */}
-        <ul className="mt-4 flex flex-col divide-y divide-ink/10 border-t border-ink/10">
-          {rankedRemedies.map((r) => {
+        <ul className="mt-6 flex flex-col divide-y divide-ink/10 border-t border-b border-ink/10">
+          {rankedRemedies.map((r, i) => {
             const myVote = myVoteByRemedy.get(r.id);
+            const isSaved = savedIds.has(r.id);
             return (
-              <li key={r.id} className="flex items-center gap-3 py-3.5">
-                <button
-                  onClick={() => setOpenRemedyId(r.id)}
-                  className="group min-w-0 flex-1 text-left"
-                >
-                  <span className="block font-serif-display text-base leading-snug text-ink transition-colors group-hover:text-plum-700">
+              <li
+                key={r.id}
+                className="flex items-center gap-3 px-3 py-4 -mx-3 transition-colors hover:bg-[rgba(111,143,108,0.14)] sm:gap-4"
+              >
+                <span className="font-serif-display w-8 shrink-0 text-base sm:text-lg" style={{ color: "var(--gold)" }}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <button onClick={() => setOpenRemedyId(r.id)} className="group min-w-0 flex-1 text-left">
+                  <span className="block truncate text-base font-semibold text-ink transition-colors group-hover:text-plum-700 sm:text-lg">
                     {r.title}
                   </span>
                   {r.totalVotes > 0 && (
-                    <span className="mt-0.5 block text-xs text-ink-soft">
+                    <span className="mt-0.5 block truncate text-xs text-ink-soft">
                       {r.successRate}% positiv · {r.totalVotes} stemmer
                     </span>
                   )}
                 </button>
+                <div className="hidden h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-ink/10 sm:block md:w-32">
+                  <div className="h-full rounded-full bg-sage" style={{ width: `${r.successRate ?? 0}%` }} />
+                </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <button
                     onClick={() => handleVote(r.id, "up")}
                     disabled={!uid || votingId !== null}
                     aria-label="Fungerte"
-                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
-                      myVote === "up" ? "text-sage" : "text-ink"
+                    aria-pressed={myVote === "up"}
+                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors disabled:opacity-40 ${
+                      myVote === "up" ? "text-[#f5efeb]" : "text-ink hover:bg-[#E1B08C] hover:text-[#2c232e]"
                     }`}
-                    style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                    style={
+                      myVote === "up"
+                        ? { background: "rgba(79,107,74,0.55)", border: "1px solid rgba(79,107,74,0.55)" }
+                        : { border: "1px solid rgba(44,35,46,0.22)" }
+                    }
                   >
                     <IconArrowUp className="h-3 w-3" />
                   </button>
@@ -208,24 +192,33 @@ export default function RemediesPage({
                     onClick={() => handleVote(r.id, "down")}
                     disabled={!uid || votingId !== null}
                     aria-label="Fungerte ikke"
-                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
-                      myVote === "down" ? "text-rust" : "text-ink"
+                    aria-pressed={myVote === "down"}
+                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors disabled:opacity-40 ${
+                      myVote === "down" ? "text-[#2c232e]" : "text-ink hover:bg-[#E1B08C] hover:text-[#2c232e]"
                     }`}
-                    style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                    style={
+                      myVote === "down"
+                        ? { background: "rgba(225,176,140,0.82)", border: "1px solid rgba(225,176,140,0.82)" }
+                        : { border: "1px solid rgba(44,35,46,0.22)" }
+                    }
                   >
                     <IconArrowDown className="h-3 w-3" />
                   </button>
                   <button
                     onClick={() => handleToggleSaved(r.id)}
                     disabled={!uid || savingId === r.id}
-                    aria-label={savedIds.has(r.id) ? "Fjern fra mine lagrede råd" : "Lagre i mine lagrede råd"}
-                    aria-pressed={savedIds.has(r.id)}
+                    aria-label={isSaved ? "Fjern fra mine lagrede råd" : "Lagre i mine lagrede råd"}
+                    aria-pressed={isSaved}
                     className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
-                      savedIds.has(r.id) ? "text-[#E1B08C]" : "text-ink"
+                      isSaved ? "text-[#E1B08C]" : "text-ink"
                     }`}
                     style={{ border: "1px solid rgba(44,35,46,0.22)" }}
                   >
-                    <IconHeart className="h-3 w-3" filled={savedIds.has(r.id)} />
+                    <IconHeart
+                      className="h-3 w-3"
+                      filled={isSaved}
+                      style={isSaved ? { stroke: "var(--ink-soft)" } : undefined}
+                    />
                   </button>
                 </div>
               </li>
@@ -237,13 +230,9 @@ export default function RemediesPage({
           <p className="mt-8 text-sm text-ink/50">Ingen råd registrert for denne plagen ennå.</p>
         )}
 
-        <Link
-          href={`/problem/${problemId}/legg-til`}
-          className="mt-6 block rounded-2xl px-5 py-3.5 text-center text-sm font-semibold transition-opacity hover:opacity-85"
-          style={{ background: "#3E2E3A", color: "#FFFAEB" }}
-        >
+        <PrimaryButton href={`/problem/${problemId}/legg-til`} className="mt-8 w-full">
           + Legg til nytt råd
-        </Link>
+        </PrimaryButton>
       </div>
 
       <RemedyPreviewModal

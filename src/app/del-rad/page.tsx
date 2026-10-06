@@ -120,7 +120,7 @@ function DelRadForm() {
             &larr; Tilbake til Rådbanken
           </Link>
           <div>
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Del ditt råd</p>
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">Del ditt råd</p>
             <h1 className="font-serif-display mt-2 text-3xl text-ink">Hva har funket for deg?</h1>
             <p className="mt-2 text-ink-soft">
               Del et husråd eller kjerringråd andre kan prøve. Beskriv det som en erfaring, ikke en

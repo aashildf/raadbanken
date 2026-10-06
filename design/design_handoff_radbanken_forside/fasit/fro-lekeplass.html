@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rådbanken – Frø-lekeplass</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#efe8da;font-family:'Figtree',system-ui,sans-serif;color:#152318;min-height:100vh}
+.wrap{max-width:1480px;margin:0 auto;padding:48px clamp(20px,3vw,40px) 120px;display:flex;flex-direction:column;gap:28px}
+h1{margin:0;font-family:'Lora',serif;font-weight:500;font-size:24px;letter-spacing:.14em;text-transform:uppercase;color:#8a6a2a}
+.lead{margin:0;font-size:15px;color:#2e4332;max-width:70ch}
+.panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:22px;padding:22px;background:#f5eee0;box-shadow:inset 0 0 0 1px #d8c9a6;border-radius:6px}
+.group{display:flex;flex-direction:column;gap:10px}
+.group > b{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#8a6a2a}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 13px 'Figtree',sans-serif;padding:9px 14px;border:0;border-radius:2px;background:transparent;color:#2c3727;box-shadow:inset 0 0 0 1px #b9ab86;cursor:pointer;transition:background-color .4s,color .4s}
+.chip:hover{background:#e6dcc0}
+.chip[aria-pressed="true"]{background:#2c3727;color:#f5eee0;box-shadow:inset 0 0 0 1px #2c3727}
+.hint{font-size:13px;color:#4a5a4d;line-height:1.45;min-height:2.9em}
+.slider{display:flex;align-items:center;gap:12px;font-size:13px;color:#2e4332}
+.slider input{flex:1;accent-color:#8a5c47}
+.slider output{width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.stage{position:relative;padding:64px 0}
+.rb-paper{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.grid{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;list-style:none;margin:0;padding:0}
+.tile{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px 6px 20px;border-radius:6px;text-align:center;text-decoration:none;color:#f5eee0;cursor:pointer;
+  background-color:#2c3727;box-shadow:inset 0 0 0 3px transparent;transition:background-color .7s cubic-bezier(.3,.6,.25,1) 60ms,box-shadow .7s cubic-bezier(.3,.6,.25,1) 60ms,color .7s cubic-bezier(.3,.6,.25,1) 60ms}
+.tile:hover{background-color:var(--hbg,#7e523f);box-shadow:inset 0 0 0 3px var(--hring,#8c9476);color:var(--htx,#fffaf0)}
+.tile svg{position:relative;z-index:2;width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tile span{position:relative;z-index:2;font-size:14px;font-weight:600;line-height:1.25;text-wrap:balance}
+.dark-strip{background:#2c3727;border-radius:6px;padding:28px;color:#e1d6c2;font-size:14px;text-align:center}
+.seed{position:fixed;left:0;top:0;pointer-events:none;z-index:9999;will-change:transform,opacity}
+.seed svg{display:block;width:100%;height:100%;overflow:visible}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="seedGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1e4bf"/><stop offset=".5" stop-color="#c9b27a"/><stop offset="1" stop-color="#9c8456"/></linearGradient>
+</defs></svg>
+<div class="wrap">
+<h1>Frø-lekeplass</h1>
+<p class="lead">Velg bevegelse og utseende, og stryk musen over rutene. Valgene huskes. Den mørke stripen nederst viser hvordan frøene ser ut på mørk grunn.</p>
+<div class="panel">
+  <div class="group"><b>Bevegelse</b><div class="chips" id="motion"></div><div class="hint" id="motionHint"></div></div>
+  <div class="group"><b>Utseende</b><div class="chips" id="look"></div><div class="hint" id="lookHint"></div></div>
+  <div class="group"><b>Hover-farge</b><div class="chips" id="hover"></div><div class="hint" id="hoverHint"></div></div>
+  <div class="group"><b>Mengde og kraft</b>
+    <label class="slider">Antall <input id="count" type="range" min="6" max="40" step="1"><output id="countO"></output></label>
+    <label class="slider">Avstand <input id="dist" type="range" min="40" max="160" step="5"><output id="distO"></output></label>
+    <label class="slider">Varighet <input id="dur" type="range" min="60" max="200" step="5"><output id="durO"></output></label>
+  </div>
+</div>
+<div class="stage">
+<svg class="rb-paper" aria-hidden="true"><filter id="pf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.04 0.9" numOctaves="2"/><feColorMatrix values="0 0 0 0 0.4 0 0 0 0 0.32 0 0 0 0 0.2 0 0 0 0.1 0"/></filter><filter id="pg" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.32 0 0 0 0 0.25 0 0 0 0 0.16 0 0 0 0.26 0"/></filter><rect width="100%" height="100%" filter="url(#pf)"/><rect width="100%" height="100%" filter="url(#pg)"/></svg>
+<ul class="grid">
+<li style="display:contents"><a class="tile" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"/></svg><span>Kjerringråd</span></a></li>
+<li style="display:contents"><a class="tile" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z M19 17l.7 1.8 1.8.7-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7Z"/></svg><span>Lifehacks</span></a></li>
+<li style="display:contents"><a class="tile" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m7.5 0a4.5 4.5 0 1 1-4.5 4.5m4.5-4.5H15m-3 4.5V15M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg><span>Kultur</span></a></li>
+<li style="display:contents"><a class="tile" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8ZM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2Z"/></svg><span>Planter & urter</span></a></li>
+<li style="display:contents"><a class="tile" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2h8v3H8ZM7 5h10l1 3v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8Z M6 12h12"/></svg><span>Mat & konservering</span></a></li>
+<li style="display:contents"><a class="tile" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg><span>Hus & hjem</span></a></li>
+<li style="display:contents"><a class="tile" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9Z"/></svg><span>Reparasjon</span></a></li>
+<li style="display:contents"><a class="tile" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg><span>Helse & velvære</span></a></li>
+</ul>
+</div>
+<div class="dark-strip">Mørk grunn – se kontrasten når frøene flyr hit</div>
+</div>
+<script>
+(() => {
+  const MOTIONS = {
+    bris:      ['Bris',       'Frøene løsner i alle retninger og driver med vinden fra musebevegelsen. Rolig og luftig.'],
+    puff:      ['Puff',       'Et raskt «pust»: frøene skytes ut, bremser brått og svever så sakte ned. Mest fysisk og morsomt.'],
+    fallskjerm:['Fallskjerm', 'Frøene spretter opp og daler ned i pendelbevegelse, slik ekte løvetannfrø gjør.'],
+    virvel:    ['Virvel',     'Frøene snurrer i en spiral rundt musepekeren før de stiger opp og forsvinner.'],
+    vindkast:  ['Vindkast',   'Alle frøene blåses i samme retning tvers over siden, i den retningen du dro musen.'],
+    regn:      ['Drysse',     'Frøene drysser ned fra punktet, som når man rister en løvetann. Stille og poetisk.']
+  };
+  const LOOKS = {
+    strek:  ['Strek',  'Dagens: tynn strek i dempet champagne. Rent og grafisk.'],
+    dun:    ['Dun',    'Ekte fallskjerm: mange fine hår og et lite frø nederst. Mest naturtro, lys krem.'],
+    gull:   ['Gull',   'Samme champagne-metall som klokken i logoen. Litt glitter i bevegelsen.'],
+    blekk:  ['Blekk',  'Mørk skogsnatt, som tusjtegnede frø på papir. Synes best på lyst.'],
+    blandet:['Blandet','Tilfeldig blanding av dun, strek og gull i ulike størrelser. Mest liv.']
+  };
+  const store = JSON.parse(localStorage.getItem('rb-seed-play') || '{}');
+  const S = Object.assign({ motion: 'bris', look: 'dun', count: 8, dist: 75, dur: 70, hover: 'krem' }, store);
+  const save = () => localStorage.setItem('rb-seed-play', JSON.stringify(S));
+  const chips = (el, map, key, hint) => {
+    const draw = () => { el.innerHTML = ''; Object.entries(map).forEach(([k, [label]]) => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = label; b.setAttribute('aria-pressed', S[key] === k); b.onclick = () => { S[key] = k; save(); draw(); }; el.appendChild(b); }); hint.textContent = map[S[key]][1]; };
+    draw();
+  };
+  const HOVERS = {
+    terrakotta:['Terrakotta','Dagens: dyp terrakotta med salvie-ring. Varm kontrast til den grønne.', '#7e523f', '#8c9476', '#fffaf0'],
+    nype:      ['Nype',      'Dempet rød-brun, litt rosa i seg. Varmere og mer «bær» enn terrakotta.', '#8e4f48', '#d9b6a8', '#fffaf0'],
+    skog:      ['Skogsnatt', 'Ruten blir mørkere i samme grønne familie, champagne-ring. Rolig – frøene får hele oppmerksomheten.', '#152318', '#d9c89c', '#efe6cf'],
+    salvie:    ['Salvie',    'Lysere grønn med krem-ring. Friskt, som et blad som snur seg mot lyset.', '#6f7d61', '#efe6cf', '#fffaf0'],
+    champagne: ['Champagne', 'Ruten fylles med logoens champagne, mørk tekst. Mest «gull» og festlig.', '#cdbb8f', '#8a6a2a', '#152318'],
+    krem:      ['Krem',      'Ruten blir lyst papir med mørk tekst – som å snu et kort. Tydeligst kontrast.', '#efe6cf', '#8a5c47', '#152318']
+  };
+  const applyHover = () => { const [, , bg, ring, tx] = HOVERS[S.hover] || HOVERS.terrakotta; const g = document.querySelector('.grid'); g.style.setProperty('--hbg', bg); g.style.setProperty('--hring', ring); g.style.setProperty('--htx', tx); };
+  const hoverEl = document.getElementById('hover'), hoverHint = document.getElementById('hoverHint');
+  const drawHover = () => { hoverEl.innerHTML = ''; Object.entries(HOVERS).forEach(([k, [label, , bg]]) => { const b = document.createElement('button'); b.className = 'chip'; b.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(21,35,24,.25);background:' + bg + '"></span>' + label; b.setAttribute('aria-pressed', S.hover === k); b.onclick = () => { S.hover = k; save(); drawHover(); }; hoverEl.appendChild(b); }); hoverHint.textContent = (HOVERS[S.hover] || HOVERS.terrakotta)[1]; applyHover(); };
+  drawHover();
+  chips(document.getElementById('motion'), MOTIONS, 'motion', document.getElementById('motionHint'));
+  chips(document.getElementById('look'), LOOKS, 'look', document.getElementById('lookHint'));
+  [['count', v => v], ['dist', v => v + '%'], ['dur', v => v + '%']].forEach(([k, fmt]) => {
+    const i = document.getElementById(k), o = document.getElementById(k + 'O');
+    i.value = S[k]; o.textContent = fmt(S[k]);
+    i.oninput = () => { S[k] = +i.value; o.textContent = fmt(S[k]); save(); };
+  });
+
+  const svg = {
+    strek: c => `<svg viewBox="0 0 20 30"><path d="M10 28V10M10 10L3 3M10 10V1M10 10L17 3M10 10L1.5 7M10 10L18.5 7" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 .6px rgba(21,35,24,.35))"/></svg>`,
+    dun: c => { let p = ''; for (let i = 0; i < 15; i++) { const a = -Math.PI + (i / 14) * Math.PI; p += `M10 11L${(10 + Math.cos(a) * 9).toFixed(1)} ${(11 + Math.sin(a) * 9).toFixed(1)}`; } return `<svg viewBox="0 0 20 34"><path d="${p}" fill="none" stroke="${c}" stroke-width=".7" stroke-linecap="round" opacity=".95"/><path d="M10 11V27" stroke="${c}" stroke-width=".9"/><ellipse cx="10" cy="29.5" rx="1.4" ry="3" fill="#8a6a3a"/><circle cx="10" cy="11" r=".9" fill="${c}"/></svg>`; },
+    gull: () => `<svg viewBox="0 0 20 30"><path d="M10 28V10M10 10L3 3M10 10V1M10 10L17 3M10 10L1.5 7M10 10L18.5 7" fill="none" stroke="url(#seedGold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 1.5px rgba(241,228,191,.7))"/></svg>`,
+    blekk: c => `<svg viewBox="0 0 20 30"><path d="M10 28V10M10 10L3 3M10 10V1M10 10L17 3M10 10L1.5 7M10 10L18.5 7" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  };
+  const pickLook = () => {
+    let l = S.look;
+    if (l === 'blandet') l = ['dun', 'dun', 'strek', 'gull'][Math.floor(Math.random() * 4)];
+    if (l === 'strek') return { html: svg.strek('#b9a77a'), w: 12, h: 18 };
+    if (l === 'dun') return { html: svg.dun('#fbf6ea'), w: 15, h: 26, glow: true };
+    if (l === 'gull') return { html: svg.gull(), w: 12, h: 18 };
+    return { html: svg.blekk('#1f3423'), w: 11, h: 17 };
+  };
+
+  let last = { x: 0, y: 0 }, vel = { x: 0, y: 0 };
+  addEventListener('pointermove', e => { vel = { x: e.clientX - last.x, y: e.clientY - last.y }; last = { x: e.clientX, y: e.clientY }; }, { passive: true });
+  const R = (a, b) => a + Math.random() * (b - a);
+
+  function path(m, x, y, i, n, wind, D) {
+    const a = R(0, Math.PI * 2);
+    switch (m) {
+      case 'puff': { const d = R(110, 260) * D, dx = Math.cos(a) * d, dy = Math.sin(a) * d * .8 - 30; const sw = R(-30, 30);
+        return { k: [[0, 0, 0, .3, 0], [dx * .7, dy * .7, R(-90, 90), 1, 1, .12], [dx * .85 + sw, dy * .85 + 20, R(-180, 180), 1, .85, .45], [dx + sw * .4, dy + 140, R(-240, 240), .9, 0]], ease: 'cubic-bezier(.05,.9,.3,1)', dur: R(2600, 3800) }; }
+      case 'fallskjerm': { const dx = R(-140, 140) * D, up = R(60, 140) * D, sw = R(18, 34);
+        return { k: [[0, 0, 0, .4, 0], [dx * .3, -up, 0, 1, 1, .2], [dx * .5 - sw, -up + 60, -18, 1, .95, .4], [dx * .7 + sw, -up + 120, 18, 1, .8, .6], [dx * .85 - sw, -up + 180, -16, 1, .6, .8], [dx + sw * .5, -up + 240, 10, .95, 0]], ease: 'ease-in-out', dur: R(3600, 5000) }; }
+      case 'virvel': { const k = [[0, 0, 0, .3, 0]]; const turns = R(.9, 1.4), r0 = R(20, 40) * D, ph = (i / n) * Math.PI * 2;
+        for (let s = 1; s <= 6; s++) { const t = s / 6, ang = ph + t * turns * Math.PI * 2, r = r0 + t * 90 * D; k.push([Math.cos(ang) * r, Math.sin(ang) * r * .7 - t * 160 * D, t * 360, 1, s < 6 ? 1 - t * .5 : 0, t]); }
+        k[k.length - 1][4] = 0; return { k, ease: 'cubic-bezier(.3,.5,.4,1)', dur: R(2400, 3400) }; }
+      case 'vindkast': { let wx = wind.x, wy = wind.y; if (Math.hypot(wx, wy) < .25) { wx = 1; wy = -.2; } const L = Math.hypot(wx, wy); wx /= L; wy /= L;
+        const d = R(260, 620) * D, spread = R(-70, 70), nx = -wy, ny = wx, sw = R(-25, 25);
+        return { k: [[0, 0, 0, .4, 0], [wx * d * .25 + nx * spread * .4, wy * d * .25 + ny * spread * .4 - 20, 90, 1, 1, .15], [wx * d * .65 + nx * spread + sw, wy * d * .65 + ny * spread - 30, 260, 1, .8, .6], [wx * d + nx * spread * 1.2, wy * d + ny * spread * 1.2 + 10, 420, .9, 0]], ease: 'cubic-bezier(.25,.6,.35,1)', dur: R(2600, 3600) }; }
+      case 'regn': { const dx = R(-80, 80) * D, fall = R(140, 300) * D, sw = R(10, 26);
+        return { k: [[0, 0, 0, .5, 0], [dx * .2, 12, 0, 1, 1, .1], [dx * .5 + sw, fall * .4, 20, 1, .9, .45], [dx * .8 - sw, fall * .75, -15, 1, .6, .75], [dx, fall, 10, .9, 0]], ease: 'cubic-bezier(.4,0,.6,1)', dur: R(3000, 4400), delay: R(0, 500) }; }
+      default: { const d = R(70, 260) * D, dx = Math.cos(a) * d + wind.x * 120, dy = Math.sin(a) * d * .8 - 40 + wind.y * 80, sw = R(-30, 30), rot = R(-270, 270);
+        return { k: [[0, 0, 0, .4, 0], [dx * .35, dy * .35 - 20, rot * .3, 1, .95, .18], [dx * .8 + sw, dy * .8, rot * .75, 1, .7, .65], [dx - sw * .5, dy + 70, rot, .9, 0]], ease: 'cubic-bezier(.2,.7,.3,1)', dur: R(2200, 4000) }; }
+    }
+  }
+
+  function burst(x, y) {
+    const n = S.count, D = S.dist / 100, T = S.dur / 100, wind = { x: Math.max(-1, Math.min(1, vel.x / 18)), y: Math.max(-1, Math.min(1, vel.y / 18)) };
+    for (let i = 0; i < n; i++) {
+      const L = pickLook(), s = R(.6, 1.25), el = document.createElement('i');
+      el.className = 'seed'; el.innerHTML = L.html; el.style.width = L.w * s + 'px'; el.style.height = L.h * s + 'px';
+      if (L.glow) el.style.filter = 'drop-shadow(0 0 1px rgba(21,35,24,.45))';
+      document.body.appendChild(el);
+      const P = path(S.motion, x, y, i, n, wind, D);
+      const frames = P.k.map(([dx, dy, rot, sc, op, off]) => { const f = { transform: `translate(${x + dx - L.w * s / 2}px,${y + dy - L.h * s / 2}px) rotate(${rot}deg) scale(${sc})`, opacity: op }; if (off !== undefined) f.offset = off; return f; });
+      el.animate(frames, { duration: P.dur * T, delay: P.delay || 0, easing: P.ease, fill: 'both' }).onfinish = () => el.remove();
+    }
+  }
+
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelectorAll('.tile').forEach(t => { let cool = 0; t.addEventListener('pointerenter', e => { const now = performance.now(); if (now - cool < 900) return; cool = now; burst(e.clientX, e.clientY); }); });
+})();
+</script>
+</body></html>

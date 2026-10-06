@@ -27,7 +27,7 @@ export default function AllePage() {
         </Link>
 
         <header className="mt-8 max-w-2xl">
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Rådbanken</p>
+          <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">Rådbanken</p>
           <h1 className="font-serif-display mt-2 text-4xl text-ink sm:text-5xl">Alle kategorier</h1>
           <p className="mt-4 max-w-xl text-ink-soft">
             Alle plager, samlet ett sted. Hopp rett til en kategori, eller bla gjennom alle tre.

@@ -119,7 +119,7 @@ export function RemedyPreviewModal({
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6 sm:p-8">
           {problemName && (
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
               Kjerringråd mot {problemName.toLowerCase()}
             </p>
           )}
@@ -145,7 +145,7 @@ export function RemedyPreviewModal({
               disabled={voting}
               aria-label="Fungerte ikke"
               className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
-                myVote === "down" ? "text-rust" : "text-ink"
+                myVote === "down" ? "text-[#E1B08C]" : "text-ink"
               }`}
               style={{ border: "1px solid rgba(44,35,46,0.22)" }}
             >

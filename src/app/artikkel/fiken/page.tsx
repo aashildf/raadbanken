@@ -38,7 +38,7 @@ export default function FikenArticlePage() {
           </div>
 
           <header>
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
               Frukt med lange tradisjoner
             </p>
             <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl lg:text-5xl">

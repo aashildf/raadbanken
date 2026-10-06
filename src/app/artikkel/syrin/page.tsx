@@ -221,7 +221,7 @@ export default function SyrinArticlePage() {
           </div>
 
           <header>
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
               Duftende prydbusk med gamle røtter
             </p>
             <h1 className="font-serif-display mt-4 text-3xl text-ink sm:text-4xl lg:text-5xl">
@@ -243,7 +243,7 @@ export default function SyrinArticlePage() {
               ingen nummerering eller andre virkemidler som skal "gjøre den
               interessant" i seg selv. */}
           <section className="mx-auto w-full max-w-2xl">
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Egenskaper</p>
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">Egenskaper</p>
             <h2 className="font-serif-display mt-2 text-2xl text-ink">De viktigste egenskapene ved syrin</h2>
             <p className="mt-3">
               Her er noen av de viktigste egenskapene til syrin, og hva folketradisjonen har brukt dem til:
@@ -284,7 +284,7 @@ export default function SyrinArticlePage() {
               roligere gjenklang av heroens bilde+tekst-oppsett, som signaliserer
               at vi fortsatt er i den lette, redaksjonelle delen av artikkelen. */}
           <section className="mx-auto mt-16 w-full max-w-2xl">
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Inspirasjon</p>
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">Inspirasjon</p>
             <h2 className="font-serif-display mt-2 text-2xl text-ink">Slik kan du bruke syrin</h2>
             <p className="mt-3">
               Vil du teste syrin selv, bruker du kun blomstene, plukket av den grønne stilken.
@@ -333,13 +333,13 @@ export default function SyrinArticlePage() {
               uten bilde og makron-oppskriften (med egne deler) bruker de samme
               byggeklossene (IngredientsList/StepsList), bare uten bildeparet. */}
           <section className="mx-auto mt-24 w-full max-w-2xl">
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">Lag selv</p>
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">Lag selv</p>
             <h2 className="font-serif-display mt-2 text-2xl text-ink sm:text-3xl">Oppskrifter</h2>
 
             <div className="mt-8 flex flex-col gap-16">
               {SYRIN_FULL_RECIPES.map((recipe, i) => (
                 <div key={recipe.title} className={i > 0 ? "border-t border-ink/10 pt-16" : ""}>
-                  <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+                  <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
                     Oppskrift {i + 1}
                   </p>
                   <h3 className="font-serif-display mt-2 text-2xl text-ink">{recipe.title}</h3>

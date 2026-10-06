@@ -20,7 +20,7 @@ export default function HistoriePage() {
         </Link>
 
         <header className="mt-8 text-center">
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-plum-700">
+          <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
             Tradisjon &middot; Kunnskap &middot; Fellesskap
           </p>
           <h1 className="font-serif-display mt-4 text-4xl text-ink sm:text-5xl">

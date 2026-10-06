@@ -41,7 +41,7 @@ export function useMenuEntries(): NavItem[] {
         tagline: "Fem samlinger med gamle husråd, fra klassikerne til det du sanker i skogen.",
         cards: kjerringradCards,
       },
-      { id: "lifehacks", name: "Lifehacks", href: "/#artikler", kind: "link" },
+      { id: "lifehacks", name: "Lifehacks", href: "/alle", kind: "link" },
       { id: "kultur", name: "Kultur", href: "/historie", kind: "link" },
       { id: "planter", name: "Planter og urter", href: "/medisinplanter", kind: "link" },
     ];
