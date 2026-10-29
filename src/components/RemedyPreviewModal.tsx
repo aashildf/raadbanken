@@ -4,16 +4,26 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { REMEDY_IMAGES } from "@/lib/remedyImages";
-import { IconArrowDown, IconArrowUp, IconHeart, IconShare, IconX } from "@/components/icons";
+import { PrimaryButton, SecondaryButton } from "@/components/Button";
+import { Paper } from "@/components/Paper";
+import { IconAlertTriangle, IconArrowRight, IconBookmark, IconHeart, IconShare, IconX } from "@/components/icons";
 import type { Remedy } from "@/lib/types";
 
-/** Kompakt forhåndsvisning av ett råd — åpnes fra en liste uten å forlate den
-    (ingen navigasjon, ingen tapt scroll-posisjon når den lukkes igjen).
-    "Les full artikkel" tar deg videre til den fyldige siden for de som vil ha
-    mer (flere avsnitt, erfaringer fra andre, stemmegivning med kommentar). */
+// Forhåndsvisning av ett råd — fasit/komponent-modal.html, .pv. Kompakt
+// forhåndsvisning uten å forlate listen (ingen navigasjon, ingen tapt
+// scroll-posisjon). "Les hele rådet" tar deg videre til den fyldige siden.
+//
+// Fasitens modal har ett enkelt stem-hjerte (ikke opp/ned) og et
+// "Prøvd av X"-tall i meta-raden — vi har ikke den sistnevnte dataen (bare
+// stemmer), så meta-raden viser i stedet den reelle treffprosenten
+// (successRate). Stegliste/sikkerhetsnotat i fasiten er plasshoder-tekst;
+// `note` er derfor en valgfri prop siden vi ikke har strukturerte
+// fremgangsmåte-steg i datamodellen — sidene sender bare inn ekte tekst der
+// de har den (f.eks. akutt-risiko-varsel for enkelte plager).
 export function RemedyPreviewModal({
   remedy,
   problemName,
+  note,
   onClose,
   onVote,
   voting,
@@ -26,6 +36,7 @@ export function RemedyPreviewModal({
 }: {
   remedy: Remedy | null;
   problemName?: string;
+  note?: string;
   onClose: () => void;
   onVote: (direction: "up" | "down") => void;
   voting: boolean;
@@ -54,24 +65,29 @@ export function RemedyPreviewModal({
     window.setTimeout(() => {
       setMounted(false);
       onClose();
-    }, 200);
+    }, 300);
   }
 
   useEffect(() => {
     if (!mounted) return;
+    document.body.style.overflow = "hidden";
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") handleClose();
       if (e.key === "ArrowRight" && onNext) onNext();
       if (e.key === "ArrowLeft" && onPrev) onPrev();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, onNext, onPrev]);
 
   if (!mounted || !remedy) return null;
 
   const image = REMEDY_IMAGES[remedy.title];
+  const isVoted = myVote === "up";
 
   async function handleShare() {
     if (!remedy) return;
@@ -93,115 +109,129 @@ export function RemedyPreviewModal({
 
   return (
     <div
-      className={`modal-scrim fixed inset-0 z-100 flex items-center justify-center p-4 ${visible ? "is-visible" : ""}`}
-      style={{ background: "rgba(20,10,35,0.4)" }}
+      className="fixed inset-0 z-100 flex items-center justify-center p-4 transition-opacity duration-[450ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)]"
+      style={{ background: "rgba(17,17,16,.6)", backdropFilter: "blur(3px)", opacity: visible ? 1 : 0 }}
       onClick={handleClose}
     >
       <div
-        className={`modal-panel relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-page-bg sm:flex-row ${visible ? "is-visible" : ""}`}
-        style={{ maxHeight: "88vh" }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pv-title"
+        className="relative flex rounded-[6px] p-1.5 transition-[opacity,transform] duration-[450ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)]"
+        style={{
+          width: "min(680px, calc(100vw - 32px))",
+          maxHeight: "calc(100dvh - 48px)",
+          background: "#faf5ea",
+          boxShadow: "inset 0 0 0 1.5px #6d685c, 0 30px 70px rgba(17,17,16,.35)",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "none" : "translateY(12px)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={handleClose}
-          aria-label="Lukk"
-          className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full text-ink shadow-sm transition-transform hover:scale-105 active:scale-95"
-          style={{ background: "#FFFFFF" }}
+        <div
+          className="relative flex flex-1 flex-col overflow-y-auto rounded-[2px]"
+          style={{ maxHeight: "calc(100dvh - 48px)", boxShadow: "inset 0 0 0 1px rgba(166,118,40,.5)" }}
         >
-          <IconX className="h-4 w-4" />
-        </button>
+          <Paper id="pv" variant="light" />
+          {image && (
+            <div className="relative mx-3.5 mt-3.5 aspect-[16/8] shrink-0 rounded-[2px] p-[5px] shadow-[inset_0_0_0_1px_#6d685c]">
+              <div className="relative h-full w-full overflow-hidden rounded-[inherit]">
+                <Image src={image.src} alt="" fill sizes="(max-width: 680px) 100vw, 650px" className="object-cover" />
+              </div>
+            </div>
+          )}
 
-        {image && (
-          <div className="relative aspect-4/3 w-full shrink-0 sm:aspect-auto sm:w-2/5">
-            <Image src={image.src} alt="" fill sizes="(max-width: 640px) 100vw, 320px" className="object-cover" />
+          <button
+            onClick={handleClose}
+            aria-label="Lukk forhåndsvisning"
+            className="absolute right-[26px] top-[26px] z-10 grid h-11 w-11 place-items-center rounded-[2px] bg-[#faf5ea] text-[#111110] shadow-[inset_0_0_0_1px_#6d685c] transition-colors duration-[550ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)] delay-[60ms] hover:bg-[#111110] hover:text-[#f5eee0]"
+          >
+            <IconX className="h-[18px] w-[18px]" />
+          </button>
+
+          <div className="relative z-[1] flex flex-col gap-3 px-[34px] pb-2 pt-[26px]">
+            {problemName && (
+              <span className="font-figtree text-[11px] font-bold uppercase tracking-[0.2em] text-[#4a473f]">{problemName}</span>
+            )}
+            <h2 id="pv-title" className="font-lora m-0 text-[clamp(26px,3vw,32px)] leading-[1.15] text-[#111110] text-balance">
+              {remedy.title}
+            </h2>
+            <ul className="m-0 flex list-none flex-wrap gap-x-[18px] gap-y-1.5 p-0 text-sm text-[#4a473f]">
+              <li className="inline-flex items-center gap-1.5">
+                <IconHeart className="h-4 w-4 text-[#6d685c]" />
+                {remedy.totalVotes} stemmer
+              </li>
+              {remedy.totalVotes > 0 && (
+                <li className="inline-flex items-center gap-1.5">{remedy.successRate}% positivt</li>
+              )}
+            </ul>
+            {remedy.description && <p className="m-1 mt-1 text-[17px] leading-[1.6] text-[#3d3a33]">{remedy.description}</p>}
+            {note && (
+              <p className="m-0 flex items-start gap-2.5 rounded-[2px] bg-[#e9e3d6] px-4 py-3.5 text-sm leading-[1.5] text-[#3d3a33]">
+                <IconAlertTriangle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#6d685c]" />
+                <span>{note}</span>
+              </p>
+            )}
           </div>
-        )}
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6 sm:p-8">
-          {problemName && (
-            <p className="font-sans text-xs uppercase tracking-[0.3em] text-plum-700">
-              Kjerringråd mot {problemName.toLowerCase()}
-            </p>
-          )}
-          <h2 className="font-serif-display mt-2 text-2xl text-ink">{remedy.title}</h2>
-          {remedy.description && (
-            <p className="mt-3 leading-relaxed text-ink-soft">{remedy.description}</p>
-          )}
-
-          <div className="mt-5 flex items-center gap-2">
-            <button
+          <div
+            className="sticky bottom-0 z-[1] mt-auto flex flex-wrap items-center gap-2.5 px-[34px] pb-[22px] pt-[18px] max-[560px]:px-5"
+            style={{ background: "linear-gradient(to bottom, rgba(250,245,234,0), #faf5ea 26%)" }}
+          >
+            <SecondaryButton
+              tone="olive"
+              aria-pressed={isVoted}
+              disabled={voting}
               onClick={() => onVote("up")}
-              disabled={voting}
-              aria-label="Fungerte"
-              className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
-                myVote === "up" ? "text-sage" : "text-ink"
-              }`}
-              style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+              className="!px-6 !py-[14px] !text-[11px]"
             >
-              <IconArrowUp className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => onVote("down")}
-              disabled={voting}
-              aria-label="Fungerte ikke"
-              className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
-                myVote === "down" ? "text-[#E1B08C]" : "text-ink"
-              }`}
-              style={{ border: "1px solid rgba(44,35,46,0.22)" }}
-            >
-              <IconArrowDown className="h-4 w-4" />
-            </button>
+              <IconHeart className="h-4 w-4" filled={isVoted} />
+              {isVoted ? "Stemt" : "Stem"}
+            </SecondaryButton>
             {onToggleSave && (
-              <button
-                onClick={onToggleSave}
-                disabled={saving}
-                aria-label={saved ? "Fjern fra mine lagrede råd" : "Lagre i mine lagrede råd"}
+              <SecondaryButton
+                tone="olive"
                 aria-pressed={saved}
-                className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
-                  saved ? "text-[#E1B08C]" : "text-ink"
-                }`}
-                style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                disabled={saving}
+                onClick={onToggleSave}
+                className="!px-6 !py-[14px] !text-[11px]"
               >
-                <IconHeart className="h-4 w-4" filled={saved} />
-              </button>
+                <IconBookmark className="h-4 w-4" filled={saved} />
+                {saved ? "Lagret" : "Lagre"}
+              </SecondaryButton>
             )}
             <button
               onClick={handleShare}
               aria-label="Del"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e]"
-              style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+              className="relative grid h-11 w-11 place-items-center rounded-[2px] text-[#111110] shadow-[inset_0_0_0_1px_#111110] transition-colors duration-[550ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)] delay-[60ms] hover:bg-[#111110] hover:text-[#f5eee0]"
             >
-              <IconShare className="h-4 w-4" />
+              <IconShare className="h-[18px] w-[18px]" />
             </button>
-            {remedy.totalVotes > 0 && (
-              <span className="ml-1 text-xs text-ink-soft">{remedy.successRate}% positiv</span>
-            )}
+            <PrimaryButton
+              onClick={() => (window.location.href = `/remedy/${remedy.id}`)}
+              className="!px-6 !py-[14px] !text-[11px] ml-auto max-[560px]:ml-0 max-[560px]:w-full"
+            >
+              Les hele rådet
+            </PrimaryButton>
           </div>
 
-          <Link
-            href={`/remedy/${remedy.id}`}
-            className="group mt-6 inline-flex w-fit items-center gap-2 border-b pb-0.5 text-sm font-semibold transition-colors"
-            style={{ color: "#3E2E3A", borderColor: "rgba(62,46,58,0.35)" }}
-          >
-            Les full artikkel
-            <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
-          </Link>
-
           {(onPrev || onNext) && (
-            <div className="mt-auto flex items-center justify-between border-t border-ink/10 pt-5">
+            <div className="relative z-[1] flex items-center justify-between px-[34px] pb-4 max-[560px]:px-5">
               <button
                 onClick={onPrev}
                 disabled={!onPrev}
-                className="text-sm font-medium text-ink-soft transition-colors hover:text-ink disabled:opacity-30"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4a473f] transition-colors hover:text-[#111110] disabled:opacity-30"
               >
-                ← Forrige
+                <IconArrowRight className="h-3.5 w-3.5 rotate-180" />
+                Forrige
               </button>
               <button
                 onClick={onNext}
                 disabled={!onNext}
-                className="text-sm font-medium text-ink-soft transition-colors hover:text-ink disabled:opacity-30"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4a473f] transition-colors hover:text-[#111110] disabled:opacity-30"
               >
-                Neste →
+                Neste
+                <IconArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
           )}

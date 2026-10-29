@@ -4,8 +4,8 @@ import { MEDICINAL_PLANTS, plantOfTheMonth } from "@/lib/plants";
 import { PLANT_ICON } from "@/components/icons";
 
 export const metadata = {
-  title: "Medisinplanter | Rådbanken",
-  description: "Oversikt over medisinplanter og urter i Rådbanken, med tradisjonell bruk og bakgrunn.",
+  title: "Medisinplanter | RAVN",
+  description: "Oversikt over medisinplanter og urter i RAVN, med tradisjonell bruk og bakgrunn.",
 };
 
 // Flyttet hit fra forsiden ("I fokus: Medisinplanter") — hører naturlig hjemme
@@ -35,7 +35,7 @@ export default function MedisinplanterPage() {
     <main className="min-h-full bg-paper">
       <div className="mx-auto w-full max-w-[var(--content-max)] px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
-          &larr; Tilbake til Rådbanken
+          &larr; Tilbake til RAVN
         </Link>
 
         <header className="mt-8">
@@ -72,7 +72,7 @@ export default function MedisinplanterPage() {
                     <FeaturedIcon className="h-20 w-20 text-paper/85" />
                   </div>
                 )}
-                <span className="hairline absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-paper/90 text-[10px] font-semibold uppercase text-plum-800">
+                <span className="hairline absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-paper/90 text-[10px] font-semibold uppercase text-ink">
                   {new Date().toLocaleDateString("nb-NO", { month: "short" }).replace(".", "")}
                 </span>
                 {featured.image?.credit && (

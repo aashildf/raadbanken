@@ -3,7 +3,7 @@ import Image from "next/image";
 import { RemedyDisclaimer } from "@/components/RemedyDisclaimer";
 
 export const metadata = {
-  title: "Fikens mange helsefordeler | Rådbanken",
+  title: "Fikens mange helsefordeler | RAVN",
   description: "Derfor er fiken godt for fordøyelsen, hjertehelsen og skjelettet.",
 };
 
@@ -12,7 +12,7 @@ export default function FikenArticlePage() {
     <main className="min-h-full bg-paper">
       <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
-          &larr; Tilbake til Rådbanken
+          &larr; Tilbake til RAVN
         </Link>
 
         {/* Bilde til venstre / kicker, tittel og ingress til høyre — samme

@@ -101,7 +101,7 @@ export default function MineLagredeRadPage() {
     <main className="min-h-full bg-paper">
       <div className="mx-auto w-full max-w-4xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
-          &larr; Tilbake til Rådbanken
+          &larr; Tilbake til RAVN
         </Link>
 
         <header className="mt-8">
@@ -146,8 +146,8 @@ export default function MineLagredeRadPage() {
                     onClick={() => handleToggleSaved(r.id)}
                     disabled={isSaving}
                     aria-label="Fjern fra mine lagrede råd"
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#E1B08C] transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40"
-                    style={{ border: "1px solid rgba(44,35,46,0.22)" }}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#a93415] transition-colors hover:bg-[#a93415] hover:text-[#111110] disabled:opacity-40"
+                    style={{ border: "1px solid rgba(17,17,16,0.22)" }}
                   >
                     <IconHeart className="h-4 w-4" filled />
                   </button>

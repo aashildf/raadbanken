@@ -35,7 +35,7 @@ export function LeafShadow({ style }: { style?: React.CSSProperties }) {
           animation: "leafSway 11s ease-in-out infinite",
         }}
       >
-        <path d={STEMS} fill="none" stroke="#3c4a32" strokeWidth="4" opacity={0.5} />
+        <path d={STEMS} fill="none" stroke="#3d3a33" strokeWidth="4" opacity={0.5} />
         {LEAVES.map(([x, y, r], i) => (
           <ellipse
             key={i}
@@ -44,7 +44,7 @@ export function LeafShadow({ style }: { style?: React.CSSProperties }) {
             rx="30"
             ry="11"
             transform={`rotate(${r} ${x} ${y})`}
-            fill="#3c4a32"
+            fill="#3d3a33"
             opacity={0.32}
           />
         ))}

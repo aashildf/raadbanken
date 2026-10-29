@@ -4,7 +4,7 @@ import { OrnateFrame } from "@/components/OrnateFrame";
 import { PrimaryButton } from "@/components/Button";
 
 export const metadata = {
-  title: "Plantemedisinens historie | Rådbanken",
+  title: "Plantemedisinens historie | RAVN",
   description: "Historien bak kjerringråd og plantemedisin, kunnskapen som gikk fra mormor til barnebarn.",
 };
 
@@ -16,7 +16,7 @@ export default function HistoriePage() {
         style={{ paddingInline: "var(--page-pad)" }}
       >
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
-          &larr; Tilbake til Rådbanken
+          &larr; Tilbake til RAVN
         </Link>
 
         <header className="mt-8 text-center">
@@ -168,7 +168,7 @@ export default function HistoriePage() {
             &laquo;Kunnskap som overlever fordi den deles.&raquo;
           </span>
           <span className="mt-4 text-sm uppercase tracking-wide text-paper/60">
-            - Rådbanken
+            - RAVN
           </span>
         </div>
 
@@ -191,7 +191,7 @@ export default function HistoriePage() {
             Hvorfor vi samler det igjen
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-ink-soft">
-            Rådbanken er et forsøk på å samle denne typen kunnskap på nytt,
+            RAVN er et forsøk på å samle denne typen kunnskap på nytt,
             ikke som medisinske fasitsvar, men som erfaringer delt mellom
             folk. Når mange stemmer på hva som har fungert for dem, dukker
             mønstrene opp igjen, akkurat som de gjorde rundt kjøkkenbordet for

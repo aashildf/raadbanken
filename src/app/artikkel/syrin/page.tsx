@@ -3,7 +3,7 @@ import Image from "next/image";
 import { RemedyDisclaimer } from "@/components/RemedyDisclaimer";
 
 export const metadata = {
-  title: "Syrin, mer enn en vakker vårduft | Rådbanken",
+  title: "Syrin, mer enn en vakker vårduft | RAVN",
   description: "Syrinblomster er spiselige og fulle av virkestoffer, tradisjonelt brukt mot uro, urolig mage og irritert hud.",
 };
 
@@ -199,7 +199,7 @@ export default function SyrinArticlePage() {
     <main className="min-h-full bg-page-bg">
       <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:py-20" style={{ paddingInline: "var(--page-pad)" }}>
         <Link href="/" className="text-sm text-ink-soft hover:text-ink">
-          &larr; Tilbake til Rådbanken
+          &larr; Tilbake til RAVN
         </Link>
 
         {/* Bilde til venstre / kicker, tittel og ingress til høyre — samme

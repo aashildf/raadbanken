@@ -4,7 +4,7 @@
 // importeres AV SiteHeader — å importere tilbake derfra hadde gitt en
 // sirkulær import.
 //
-// #2E362C (ønsket av Åshild, litt mørkere/kaldere enn den opprinnelige #333E31)
+// #111110 (ønsket av Åshild, litt mørkere/kaldere enn den opprinnelige #333E31)
 // mot #E2DDD7 måler fortsatt godt over WCAG AAA (7:1) på den tynne nav-teksten.
-export const HEADER_BG = "#2E362C";
+export const HEADER_BG = "#111110";
 export const HEADER_TEXT = "#E2DDD7";

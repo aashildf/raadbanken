@@ -48,11 +48,21 @@ const GRAIN_OPACITY = 0.2;
 export function GrainOverlay() {
   // Redesign-pakken (design/design_handoff_radbanken_forside/papirtekstur.md,
   // regel 4) forbyr eksplisitt ett felles fixed/mix-blend-mode-lag over hele
-  // siden — "det ble testet og gav feil resultat". Forsiden har egne
-  // per-seksjon <Paper>-overlegg nå, så det globale laget kobles ut akkurat
-  // der. Resten av siten (ikke redesignet ennå) beholder det som før.
+  // siden — "det ble testet og gav feil resultat". Sider med egne
+  // per-seksjon <Paper>-overlegg kobler derfor ut dette globale laget — uten
+  // det her dobbeltekstureres de (synlig som et uønsket, flist bladmønster
+  // oppå Paper sin egen korntekstur). Resten av siten (ikke redesignet ennå)
+  // beholder det globale laget som før.
   const pathname = usePathname();
-  if (pathname === "/") return null;
+  const hasOwnPaper =
+    pathname === "/" ||
+    pathname === "/alle" ||
+    pathname === "/del-rad" ||
+    pathname === "/om-oss" ||
+    pathname === "/artikkel/nordisk-rad" ||
+    pathname.startsWith("/kategori/") ||
+    pathname.startsWith("/problem/");
+  if (hasOwnPaper) return null;
 
   return (
     <>

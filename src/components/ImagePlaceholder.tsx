@@ -18,7 +18,7 @@ export function ImagePlaceholder({
         className="absolute inset-0 opacity-60"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(45deg, rgba(44,35,46,0.05) 0px, rgba(44,35,46,0.05) 1px, transparent 1px, transparent 11px)",
+            "repeating-linear-gradient(45deg, rgba(17,17,16,0.05) 0px, rgba(17,17,16,0.05) 1px, transparent 1px, transparent 11px)",
         }}
       />
       <div className="relative flex flex-col items-center gap-2 px-4 text-center text-ink-soft">

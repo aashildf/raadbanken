@@ -124,7 +124,7 @@ export const MEDICINAL_PLANTS: Plant[] = [
     description:
       "Liten daisy-aktig blomst. De tørkede blomstene trekkes som te og brukes tradisjonelt for å roe ned før søvn.",
     shape: "flower",
-    bg: "var(--plum-600)",
+    bg: "#d4c9b3",
     image: {
       src: "/pictures/menupictures/kamille_pexels-noelnico-11052368.jpg",
       fit: "cover",
@@ -224,7 +224,7 @@ export const MEDICINAL_PLANTS: Plant[] = [
     description:
       "Skarp løkplante med lange røtter i folkemedisinen, ofte brukt mot forkjølelse og luftveisplager.",
     shape: "root",
-    bg: "var(--plum-800)",
+    bg: "#e9e3d6",
     image: {
       src: "/pictures/menupictures/garlic_pexels-karola-g-4033161.jpg",
       fit: "cover",
@@ -318,7 +318,7 @@ export const MEDICINAL_PLANTS: Plant[] = [
     description:
       "Søtaktig urt med frø som tradisjonelt brukes for å løse opp slim og lindre mageknute.",
     shape: "flower",
-    bg: "var(--plum-600)",
+    bg: "#d4c9b3",
     image: {
       src: "/pictures/menupictures/fenikkel_pexels-andromeda99-36248176.jpg",
       fit: "cover",
@@ -459,7 +459,7 @@ export const MEDICINAL_PLANTS: Plant[] = [
     description:
       "Flerårig fjellplante hvis rotstokk lukter av roser når den deles. Kalt «Nordens ginseng» i folkemedisinen, og brukt i norsk tradisjon på torvtak som vern mot lynnedslag og brann.",
     shape: "succulent",
-    bg: "var(--plum-800)",
+    bg: "#e9e3d6",
     image: { src: "/pictures/rosenrot.jpg", fit: "cover" },
     sections: [
       {

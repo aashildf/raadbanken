@@ -1,5 +1,3 @@
-import { IconFlourish } from "@/components/icons";
-
 export function OrnateFrame({
   children,
   className = "",
@@ -14,11 +12,6 @@ export function OrnateFrame({
           <div className="overflow-hidden rounded-[1.1rem]">{children}</div>
         </div>
       </div>
-
-      <IconFlourish className="absolute -left-2 -top-2 h-8 w-8 text-plum-700/50" />
-      <IconFlourish className="absolute -right-2 -top-2 h-8 w-8 rotate-90 text-plum-700/50" />
-      <IconFlourish className="absolute -bottom-2 -left-2 h-8 w-8 -rotate-90 text-plum-700/50" />
-      <IconFlourish className="absolute -bottom-2 -right-2 h-8 w-8 rotate-180 text-plum-700/50" />
     </div>
   );
 }

@@ -140,12 +140,12 @@ export default function RemedyDetailPage({
                     <button
                       onClick={() => handleVote(dir)}
                       disabled={!uid || submitting !== null}
-                      className={`flex items-center justify-center rounded-full border-2 text-ink transition-all hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-50 ${
+                      className={`flex items-center justify-center rounded-full border-2 text-ink transition-all hover:bg-[#a93415] hover:text-[#111110] disabled:opacity-50 ${
                         myVote?.voteType === dir
                           ? dir === "up"
                             ? "border-sage bg-sage/10"
-                            : "border-[#E1B08C] bg-[#E1B08C]/10 text-[#E1B08C]"
-                          : "border-ink/15 hover:border-[#E1B08C]"
+                            : "border-[#a93415] bg-[#a93415]/10 text-[#a93415]"
+                          : "border-ink/15 hover:border-[#a93415]"
                       }`}
                       style={{ width: 72, height: 72 }}
                     >
@@ -165,8 +165,8 @@ export default function RemedyDetailPage({
                     onClick={handleToggleSaved}
                     disabled={!uid || saving}
                     aria-pressed={saved}
-                    className={`flex items-center justify-center rounded-full border-2 transition-all hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-50 ${
-                      saved ? "border-[#E1B08C] bg-[#E1B08C]/10 text-[#E1B08C]" : "border-ink/15 text-ink hover:border-[#E1B08C]"
+                    className={`flex items-center justify-center rounded-full border-2 transition-all hover:bg-[#a93415] hover:text-[#111110] disabled:opacity-50 ${
+                      saved ? "border-[#a93415] bg-[#a93415]/10 text-[#a93415]" : "border-ink/15 text-ink hover:border-[#a93415]"
                     }`}
                     style={{ width: 72, height: 72 }}
                   >
@@ -190,7 +190,7 @@ export default function RemedyDetailPage({
                 placeholder="Del din erfaring (valgfritt)"
                 rows={3}
                 className="mt-5 w-full rounded-lg border border-ink/15 px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-plum-600"
-                style={{ background: "rgba(61,46,58,0.04)" }}
+                style={{ background: "rgba(17,17,16,0.04)" }}
               />
               {error && <p className="mt-2 text-sm text-rust">{error}</p>}
             </section>
@@ -232,7 +232,7 @@ export default function RemedyDetailPage({
                       {v.voteType === "up" ? (
                         <IconArrowUp className="mr-2 inline h-4 w-4 align-text-bottom text-sage" />
                       ) : (
-                        <IconArrowDown className="mr-2 inline h-4 w-4 align-text-bottom text-[#E1B08C]" />
+                        <IconArrowDown className="mr-2 inline h-4 w-4 align-text-bottom text-[#a93415]" />
                       )}
                       {v.comment}
                     </li>

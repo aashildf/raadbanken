@@ -108,6 +108,14 @@ export function IconSearch({ className }: IconProps) {
   );
 }
 
+export function IconThumbUp({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M7 10v11M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 7A2 2 0 0 1 17.5 21H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h2.8a2 2 0 0 0 1.8-1.1L12 2a3.1 3.1 0 0 1 3 3.9Z" />
+    </svg>
+  );
+}
+
 export function IconUser({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
@@ -141,6 +149,26 @@ export function IconHeart({
   return (
     <svg {...base} className={className} style={style} fill={filled ? "currentColor" : "none"}>
       <path d="M12 20.5S3.5 15.4 3.5 9.3C3.5 6.4 5.7 4 8.6 4c1.5 0 3 .8 3.4 2 .4-1.2 1.9-2 3.4-2 2.9 0 5.1 2.4 5.1 5.3 0 6.1-8.5 11.2-8.5 11.2Z" />
+    </svg>
+  );
+}
+
+export function IconBookmark({
+  className,
+  filled,
+  style,
+}: IconProps & { filled?: boolean; style?: CSSProperties }) {
+  return (
+    <svg {...base} className={className} style={style} fill={filled ? "currentColor" : "none"}>
+      <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" />
+    </svg>
+  );
+}
+
+export function IconAlertTriangle({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
     </svg>
   );
 }
@@ -288,6 +316,30 @@ export function IconPlus({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
       <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+export function IconArrowRight({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+export function IconUpload({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+    </svg>
+  );
+}
+
+export function IconCheck({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M20 6 9 17l-5-5" />
     </svg>
   );
 }
