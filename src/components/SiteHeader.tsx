@@ -1,32 +1,31 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { synonymsForSlug } from "@/lib/categories";
-import { bestPartialSimilarity } from "@/lib/fuzzy";
-import { useMenuEntries } from "@/lib/useMenuEntries";
+import { MEGA_CATEGORIES, MEGA_SHORTCUTS, MEGA_FEATURE } from "@/lib/megaMenu";
+import { useSiteSearch } from "@/lib/useSiteSearch";
 import { SiteMenu } from "@/components/SiteMenu";
 import { SignInMenu } from "@/components/SignInMenu";
 import { SecondaryButton } from "@/components/Button";
 import { Paper } from "@/components/Paper";
-import { GRAIN_BG } from "@/components/GrainOverlay";
-import { HEADER_BG, HEADER_TEXT } from "@/lib/theme";
-import { IconSearch } from "@/components/icons";
-import type { Problem, Remedy } from "@/lib/types";
+import { RavnLogo } from "@/components/RavnLogo";
+import { IconSearch, IconChevronDown, IconArrowRight } from "@/components/icons";
 
-const PILL_HEIGHT = 92;
+// Navbar — gjenskapt 1:1 fra
+// design/design_handoff_radbanken_forside/fasit/komponent-navbar.html.
+// Brytpunktet er 980px i fasiten, ikke Tailwinds vanlige md(768)/lg(1024) —
+// derfor egne [min-width:981px]-varianter under i stedet for md:/lg:.
+// Høyden (64px under 980px, 76px over) er satt via Tailwind h-16/h-[76px]
+// på innholds-raden, ikke en JS-konstant, siden den må bytte med viewporten.
 
 export function SiteHeader() {
-  // Redesign-pakken (design/design_handoff_radbanken_forside) vil ha menyen
-  // flytende og halvgjennomsiktig over toppbildet på forsiden, og mørkere
-  // etter scroll. Resten av siten beholder dagens faste, heldekkende meny —
-  // ellers hadde innhold på alle andre sider havnet skjult bak en
-  // gjennomsiktig meny i normal flyt (ingen av de sidene har et hero-bilde
-  // å flyte over).
+  // Forsiden har menyen flytende/halvgjennomsiktig over toppbildet, og
+  // mørkere etter scroll (se bredde-og-bladskygger.md/README). Resten av
+  // siten har den faste navbaren fra komponent-navbar.html — samme
+  // lenkestruktur og mega-meny begge steder, bare positurering/bakgrunn som
+  // skiller dem.
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
@@ -41,189 +40,202 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [isHome]);
 
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [remedies, setRemedies] = useState<Remedy[]>([]);
-  const [query, setQuery] = useState("");
+  const { query, setQuery, results: searchResults, suggestions: fuzzySuggestions } = useSiteSearch();
   const [focused, setFocused] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const menuEntries = useMenuEntries();
-  const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
+  const [megaOpen, setMegaOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function openEntry(id: string) {
+  function openMega() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    setActiveEntryId(id);
+    setMegaOpen(true);
   }
-  function keepOpen() {
+  function keepMegaOpen() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
   }
-  function scheduleClose() {
-    closeTimer.current = setTimeout(() => setActiveEntryId(null), 150);
+  function scheduleMegaClose() {
+    // 220ms per fasit (".. eller når musen forlater (220 ms forsinkelse)").
+    closeTimer.current = setTimeout(() => setMegaOpen(false), 220);
   }
-  // Header/dropdown ligger i layouten og overlever selve sidenavigeringen —
-  // uten dette ble aktiveEntryId stående etter et klikk på en lenke inni
-  // dropdownen (museevnten "forlot" aldri lenken, den navigerte bare vekk),
-  // så menyen sto synlig åpen oppå den nye siden til man flyttet musen.
-  function closeEntry() {
+  // Overlever selve sidenavigeringen (header ligger i layouten) — uten
+  // dette sto mega-menyen åpen oppå den nye siden til man flyttet musen.
+  function closeMega() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    setActiveEntryId(null);
+    setMegaOpen(false);
   }
-  const activeLinkEntry = menuEntries.find((e) => e.id === activeEntryId) ?? null;
-  const activeEntry = activeLinkEntry?.kind === "dropdown" ? activeLinkEntry : null;
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "problems"), (snap) => {
-      setProblems(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Problem, "id">) })));
-    });
-    return unsub;
-  }, []);
-
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "remedies"), (snap) => {
-      setRemedies(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Remedy, "id">) })));
-    });
-    return unsub;
-  }, []);
-
-  const problemById = useMemo(() => new Map(problems.map((p) => [p.id, p])), [problems]);
-
-  const searchResults = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    const problemMatches = problems
-      .filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          synonymsForSlug(p.slug).some((syn) => syn.toLowerCase().includes(q))
-      )
-      .map((p) => ({ type: "problem" as const, id: p.id, label: p.name, sub: "Plage" }));
-    const remedyMatches = remedies
-      .filter((r) => r.title.toLowerCase().includes(q))
-      .slice(0, 6)
-      .map((r) => ({
-        type: "remedy" as const,
-        id: r.id,
-        label: r.title,
-        sub: problemById.get(r.problemId)?.name ?? "",
-      }));
-    return [...problemMatches, ...remedyMatches];
-  }, [problems, remedies, problemById, query]);
-
-  const fuzzySuggestions = useMemo(() => {
-    const q = query.trim();
-    if (!q || searchResults.length > 0) return [];
-    const candidates = [
-      ...problems.map((p) => ({ type: "problem" as const, id: p.id, label: p.name })),
-      ...remedies.map((r) => ({ type: "remedy" as const, id: r.id, label: r.title })),
-    ];
-    return candidates
-      .map((c) => ({ ...c, score: bestPartialSimilarity(q, c.label) }))
-      .filter((c) => c.score >= 0.45)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 4);
-  }, [problems, remedies, query, searchResults]);
+    if (!megaOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeMega();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [megaOpen]);
 
   return (
     <header
-      className={`z-50 overflow-visible ${isHome ? "fixed inset-x-0 top-0 transition-colors duration-500" : "relative"}`}
+      className={`z-50 overflow-visible [transition:background-color_.5s,backdrop-filter_.5s] ${
+        isHome ? "fixed inset-x-0 top-0" : "sticky top-0"
+      }`}
       style={
         {
-          background: isHome ? (scrolled ? "rgba(17,36,24,0.96)" : "rgba(52,64,54,0.62)") : HEADER_BG,
+          // Samme farge som heroen (#faf5ea). Litt gjennomsiktig + blur på
+          // forsiden etter scroll, så innhold som glir under fortsatt anes.
+          background: isHome && scrolled ? "rgba(250,245,234,0.94)" : "#faf5ea",
           backdropFilter: isHome ? "blur(10px)" : undefined,
           WebkitBackdropFilter: isHome ? "blur(10px)" : undefined,
-          "--focus-ring": "#E1B08C",
+          "--focus-ring": "#a93415",
         } as React.CSSProperties
       }
     >
-      {/* Papirkorn — <Paper variant="dark"> per papirtekstur.md, kun på
-          forsiden der menyen er flytende/gjennomsiktig (isHome). Andre
-          sider beholder den gamle GRAIN_BG-stripen under, uendret. */}
-      {isHome ? (
-        <Paper id="header" variant="dark" />
-      ) : (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{ backgroundImage: GRAIN_BG, opacity: 0.4 }}
-        />
-      )}
-      {/* Ett samlet linje: logo venstre, kategori-lenker midtstilt (egen
-          grid-kolonne — sentrert uavhengig av hvor bred logoen/høyre-klyngen
-          er), søk/del råd/meny høyre. Ikke sticky. */}
+      <Paper id="nav" variant="light" mottle={false} />
       <div
-        className="relative z-10 grid items-center"
-        style={{
-          height: PILL_HEIGHT,
-          paddingInline: "var(--page-pad)",
-          gridTemplateColumns: "1fr auto 1fr",
-          columnGap: 16,
-        }}
+        className="relative z-10 mx-auto flex h-16 items-center gap-8 [@media(min-width:981px)]:h-[76px]"
+        style={{ maxWidth: 1480, paddingInline: "clamp(20px,3vw,40px)" }}
       >
-        {/* VENSTRE: logo — den gamle sorte/kremhvite dandelion-ikonet byttet ut
-            med den nye gullversjonen, som leser bedre mot den mørke bjelken.
-            Prøvde et ordmerke ved siden av ikonet (for den tomme venstre
-            spalten), men det så rart ut — tilbake til bare ikonet, litt
-            større enn før i stedet. */}
-        <Link href="/" aria-label="Rådbanken" className="flex items-center transition-opacity active:opacity-70">
-          <Image
-            src="/logo/radbanken-ikon-krem.svg"
-            alt="Rådbanken"
-            width={100}
-            height={100}
-            className="h-[clamp(28px,3.2vw,38px)] w-[clamp(28px,3.2vw,38px)]"
-          />
+        {/* Venstre: animert Ravn-logo (se RavnLogo.tsx), lenker til forsiden.
+            Lenkens navn kommer fra logoens alt-tekst, "Ravn". */}
+        <Link href="/" className="flex shrink-0 items-center transition-opacity active:opacity-70">
+          <RavnLogo className="h-[52px] w-[81px] [@media(min-width:981px)]:h-[64px] [@media(min-width:981px)]:w-[100px]" />
         </Link>
 
-        {/* MIDTEN: fem nav-punkter, md+. Bare "Kjerringråd" har en
-            hover-dropdown (kort + sitat + "se hele"-lenke) — resten
-            (Om oss/Lifehacks/Kultur/Planter og urter) er vanlige lenker,
-            akkurat som i referansebildet der bare "Categories" har en pil.
-            Mobil bruker hamburgermenyen — hover finnes jo ikke på touch. */}
+        {/* Midten: Utforsk (mega-meny), Nordisk råd, Om Rådbanken — skjult
+            under 981px, hamburger overtar der (se høyre-klyngen). */}
         <nav
-          className="hidden items-center gap-6 lg:gap-8 md:flex"
-          style={{ gridColumn: 2, color: HEADER_TEXT }}
-          onMouseLeave={scheduleClose}
+          className="hidden items-center gap-9 [@media(min-width:981px)]:flex"
+          style={{ marginInline: "auto", color: "#111110" }}
+          onMouseLeave={scheduleMegaClose}
         >
-          {menuEntries.map((entry) => (
-            <div
-              key={entry.id}
-              className="relative flex h-full items-center py-2"
-              onMouseEnter={entry.kind === "dropdown" ? () => openEntry(entry.id) : undefined}
+          <div className="flex h-full items-center" onMouseEnter={() => matchMedia("(hover:hover)").matches && openMega()}>
+            <button
+              type="button"
+              onClick={() => (megaOpen ? closeMega() : openMega())}
+              aria-expanded={megaOpen}
+              aria-controls="mega"
+              className="inline-flex items-center gap-1.5 border-b border-transparent py-2 text-[13px] font-normal uppercase tracking-[0.2em] transition-colors hover:border-[#a93415] hover:text-[#a93415]"
             >
-              <Link
-                href={entry.href}
-                onClick={closeEntry}
-                className="border-b border-transparent pb-0.5 text-xs font-normal uppercase tracking-[0.14em] transition-colors hover:text-[#E1B08C]"
-                style={
-                  activeEntryId === entry.id
-                    ? { color: "#E1B08C", borderBottomColor: "#E1B08C" }
-                    : undefined
-                }
+              Utforsk
+              <IconChevronDown className={`h-3 w-3 transition-transform duration-500 ${megaOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {megaOpen && (
+              <div
+                id="mega"
+                className="absolute top-full z-[60]"
+                style={{ left: "clamp(20px,3vw,40px)", width: "min(1000px, calc(100vw - 40px))" }}
+                onMouseEnter={keepMegaOpen}
+                onMouseLeave={scheduleMegaClose}
               >
-                {entry.name}
-              </Link>
-              {entry.kind === "dropdown" && activeEntryId === entry.id && (
-                <span
-                  aria-hidden="true"
-                  className="absolute -bottom-1 left-1/2 h-0 w-0 -translate-x-1/2 border-x-4 border-t-4 border-x-transparent"
-                  style={{ borderTopColor: "#E1B08C" }}
-                />
-              )}
-            </div>
-          ))}
+                <div className="relative overflow-hidden" style={{ background: "#f5eee0", padding: 6, boxShadow: "inset 0 0 0 1px #6d685c, 0 24px 48px rgba(17,17,16,.28)" }}>
+                  <Paper id="mega" variant="light" />
+                  <div
+                    className="relative z-[3] grid gap-9"
+                    style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)", padding: "28px 30px 30px", boxShadow: "inset 0 0 0 1px rgba(138,92,71,.55)" }}
+                  >
+                    <div>
+                      <p className="font-figtree mb-3 text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: "#6d685c" }}>
+                        Kategorier
+                      </p>
+                      {/* Én kolonne — grid-cols-2 var satt opp for fasitens åtte
+                          plasshoder-kategorier; med tre reelle kategorier ga
+                          to-kolonners oppsett en skjev 2-over-1-rad. */}
+                      <ul className="flex list-none flex-col p-0" style={{ margin: 0 }}>
+                        {MEGA_CATEGORIES.map((cat) => (
+                          <li key={cat.label}>
+                            <Link
+                              href={cat.href}
+                              onClick={closeMega}
+                              className="flex items-center gap-3 py-[11px] text-[15px] font-medium transition-colors hover:text-[#a93415]"
+                              style={{ borderBottom: "1px solid #d9d2c1", color: "#111110" }}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden className="h-5 w-5 shrink-0" fill="none" stroke="#6d685c" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+                                <path d={cat.d} />
+                              </svg>
+                              <span>{cat.label}</span>
+                            </Link>
+                          </li>
+                        ))}
+                        <li>
+                          <Link
+                            href="/alle"
+                            onClick={closeMega}
+                            className="flex items-center gap-2 py-[11px] text-[15px] font-semibold transition-colors hover:text-[#a93415]"
+                            style={{ color: "#a93415" }}
+                          >
+                            <span>Se alle kategorier</span>
+                            <IconArrowRight className="h-3.5 w-3.5" />
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <p className="font-figtree mb-3 text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: "#6d685c" }}>
+                        Snarveier
+                      </p>
+                      <ul className="list-none p-0" style={{ margin: 0 }}>
+                        {MEGA_SHORTCUTS.map((s) => (
+                          <li key={s.label}>
+                            <Link
+                              href={s.href}
+                              onClick={closeMega}
+                              className="font-lora flex items-center justify-between gap-3 py-[11px] text-lg transition-colors hover:text-[#a93415]"
+                              style={{ borderBottom: "1px solid #d9d2c1", color: "#111110" }}
+                            >
+                              <span>{s.label}</span>
+                              <IconArrowRight className="h-3.5 w-3.5 shrink-0 text-[#a93415]" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <Link href={MEGA_FEATURE.href} onClick={closeMega} className="group flex flex-col gap-1.5 no-underline" style={{ color: "#111110" }}>
+                      <div className="relative mb-2.5 aspect-4/3 overflow-hidden" style={{ padding: 6, borderRadius: "999px 999px 10px 10px", boxShadow: "inset 0 0 0 1.5px #6d685c" }}>
+                        <div className="relative h-full w-full overflow-hidden" style={{ borderRadius: "999px 999px 6px 6px" }}>
+                          <Image src={MEGA_FEATURE.image} alt="" fill sizes="280px" className="object-cover" />
+                        </div>
+                      </div>
+                      <p className="font-figtree text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: "#6d685c" }}>
+                        {MEGA_FEATURE.kicker}
+                      </p>
+                      <span className="font-lora text-lg transition-colors group-hover:text-[#a93415]" style={{ textWrap: "balance" }}>
+                        {MEGA_FEATURE.title}
+                      </span>
+                      <span className="mt-1 inline-flex items-center gap-1.5 text-[13px] font-semibold" style={{ color: "#a93415" }}>
+                        {MEGA_FEATURE.cta}
+                        <IconArrowRight className="h-3.5 w-3.5" />
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Link
+            href="/artikkel/nordisk-rad"
+            className="border-b border-transparent py-2 text-[13px] font-normal uppercase tracking-[0.2em] transition-colors hover:border-[#a93415] hover:text-[#a93415]"
+          >
+            Nordisk råd
+          </Link>
+          <Link
+            href="/om-oss"
+            className="border-b py-2 text-[13px] font-normal uppercase tracking-[0.2em] transition-colors hover:border-[#a93415] hover:text-[#a93415]"
+            style={pathname === "/om-oss" ? { color: "#111110", borderBottomColor: "#a93415" } : { borderBottomColor: "transparent" }}
+          >
+            Om RAVN
+          </Link>
         </nav>
 
-        {/* HØYRE: søk, del råd, meny (meny kun mobil nå, se over) */}
-        <div className="flex items-center justify-end gap-4 sm:gap-6" style={{ gridColumn: 3, color: HEADER_TEXT }}>
+        {/* Høyre: søk, logg inn, del et råd (desktop), hamburger (<981px). */}
+        <div className="flex shrink-0 items-center gap-5" style={{ color: "#111110" }}>
           <button
             aria-label="Søk"
             onClick={(e) => {
-              // blur: musetrykk skal ikke la en firkantet fokusring henge
-              // igjen på selve ikon-knappen (den er ikke rund/avlang, så
-              // ringen leser som en løsrevet firkant) — fokus flyttes uansett
-              // videre til søkefeltet rett etter, se under.
               e.currentTarget.blur();
               setSearchOpen((open) => {
                 const next = !open;
@@ -231,104 +243,50 @@ export function SiteHeader() {
                 return next;
               });
             }}
-            className="no-focus-ring flex items-center justify-center rounded-full p-1 transition-opacity hover:opacity-70 active:opacity-50"
+            className="no-focus-ring -m-2.5 grid h-11 w-11 place-items-center rounded-[2px] transition-colors hover:text-[#a93415]"
           >
             <IconSearch className="h-5 w-5" />
           </button>
-          <SignInMenu />
-          <SecondaryButton
-            href="/del-rad"
-            tone="dark"
-            className="hidden !px-5 !py-2.5 sm:inline-flex"
-          >
-            Del råd
-          </SecondaryButton>
-          <div className="md:hidden">
-            <SiteMenu tone={HEADER_TEXT} />
+          <div className="hidden [@media(min-width:981px)]:block">
+            <SignInMenu />
+          </div>
+          <div className="hidden [@media(min-width:981px)]:block">
+            <SecondaryButton href="/del-rad" tone="forest" className="!px-6 !py-[14px] !text-[11px]">
+              Del et råd
+            </SecondaryButton>
+          </div>
+          <div className="[@media(min-width:981px)]:hidden">
+            <SiteMenu tone="#111110" />
           </div>
         </div>
       </div>
 
-      {/* Hover-dropdown — samme mørke bakgrunn+korn som headeren selv, så den
-          leser som én sammenhengende papirflate ned fra navbaren, ikke et
-          separat popup-panel. Full bredde uansett hvilken lenke som er
-          aktiv, med kort + sitat/tagline + "se hele"-lenke, etter
-          referansebildet. onMouseEnter/-Leave her også, så det ikke lukker
-          seg idet musen flytter fra lenken ned til selve panelet. */}
-      {activeEntry && (
-        <div
-          className="absolute inset-x-0 top-full z-30 hidden overflow-hidden md:block"
-          style={{ background: HEADER_BG, borderBottom: "3px solid #E1B08C" }}
-          onMouseEnter={keepOpen}
-          onMouseLeave={scheduleClose}
-        >
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{ backgroundImage: GRAIN_BG, opacity: 0.4 }}
-          />
-          <div className="relative" style={{ paddingInline: "var(--page-pad)", paddingTop: 32, paddingBottom: 28 }}>
-            <div className="flex flex-wrap gap-8">
-              {activeEntry.cards.map((card) => (
-                <Link key={card.key} href={card.href} onClick={closeEntry} className="group w-44 shrink-0">
-                  <p className="font-serif-display mb-2 truncate text-sm" style={{ color: HEADER_TEXT }}>
-                    {card.label}
-                  </p>
-                  <span className="relative block aspect-4/3 overflow-hidden">
-                    <Image
-                      src={card.image}
-                      alt=""
-                      fill
-                      sizes="180px"
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </span>
-                </Link>
-              ))}
-            </div>
-            <div
-              className="mt-8 flex items-center justify-between gap-8 border-t pt-4"
-              style={{ borderColor: "rgba(226,221,215,0.18)" }}
-            >
-              <p className="font-serif-display max-w-xl truncate text-sm italic" style={{ color: "rgba(226,221,215,0.75)" }}>
-                “{activeEntry.tagline}”
-              </p>
-              <Link
-                href={activeEntry.href}
-                onClick={closeEntry}
-                className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] transition-opacity hover:opacity-75"
-                style={{ color: "#E1B08C" }}
-              >
-                Se hele {activeEntry.name.toLowerCase()} →
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Søk-panel — samme flyt-ut-under-headeren for alle bredder nå (før kun
-          mobil), åpnes/lukkes med søk-ikonet i stedet for å stå fast synlig. */}
+      {/* Søk-panel — flyter ut under headeren, åpnes/lukkes med søk-ikonet. */}
       {searchOpen && (
-        <div
-          className="absolute inset-x-0 top-full z-20 flex justify-center"
-          style={{ paddingInline: "var(--page-pad)" }}
-        >
+        <div className="absolute inset-x-0 top-full z-20 flex justify-center" style={{ paddingInline: "clamp(20px,3vw,40px)" }}>
           <div className="relative mt-2 w-full sm:w-[460px]">
-            {/* Solid papirbunn (var(--paper)) i stedet for en nesten
-                gjennomsiktig mørk tone — søkefeltet flyter oppå hva som helst
-                (hero-fotoet på forsiden, artikkelbilder), og en 7%-opasitet
-                bakgrunn ga knapt noen flate å lese den mørke teksten mot. */}
+            {/* Samme oppskrift som søkefeltet på kategorisiden nå (6px radius,
+                #cdc6b4-kant, Paper-tekstur), i stedet for sin egen gamle
+                "ink"-pallett (rgba(17,17,16,…), svart hover, helt avrundede
+                hjørner) — ett felles boks-språk, ikke to. Selve inputen er
+                bg-transparent slik at korn-laget bak (lavere z) skinner
+                gjennom overalt, også der du skriver, uten å ligge oppå
+                teksten. Fokusringen settes her på selve pillen (inset,
+                group-focus-within) i stedet for sidens vanlige --focus-ring
+                på inputen — en ytre glødering ville blitt kuttet av
+                overflow-hidden (som trengs for å klippe Paper-teksturen til
+                de runde hjørnene). */}
             <div
-              className="flex items-center gap-2 px-4"
-              style={{
-                height: 38,
-                borderRadius: 20,
-                background: "var(--paper)",
-                border: "1px solid rgba(44,35,46,0.14)",
-                boxShadow: "0 8px 24px rgba(20,14,10,0.22)",
-              }}
+              className="group relative flex items-center gap-2 overflow-hidden px-4 transition-shadow duration-200"
+              style={{ height: 44, borderRadius: 6, background: "#fffaf0", boxShadow: "inset 0 0 0 1px #cdc6b4" }}
             >
-              <IconSearch className="h-4 w-4 shrink-0 text-ink" />
+              <Paper id="nav-search" variant="light" mottle={false} />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-focus-within:opacity-100"
+                style={{ boxShadow: "inset 0 0 0 2px #a93415" }}
+              />
+              <IconSearch className="relative z-10 h-4 w-4 shrink-0 text-[#111110]" />
               <input
                 ref={inputRef}
                 value={query}
@@ -339,35 +297,47 @@ export function SiteHeader() {
                   if (!query) setSearchOpen(false);
                 }}
                 placeholder="Søk råd"
-                className="no-focus-ring w-full rounded-full bg-transparent font-sans text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none"
+                className="no-focus-ring relative z-10 font-figtree w-full rounded-[6px] bg-transparent text-sm placeholder:text-[#6d685c] focus:outline-none"
+                style={{ color: "#111110" }}
               />
             </div>
             {focused && query.trim() && (
-              <div className="hairline absolute inset-x-0 top-[calc(100%+8px)] z-10 overflow-hidden rounded-2xl bg-paper shadow-2xl">
+              <div
+                className="absolute inset-x-0 top-[calc(100%+8px)] z-10 overflow-hidden rounded-[6px]"
+                style={{ background: "#fffaf0", boxShadow: "inset 0 0 0 1px #6d685c, 0 20px 48px rgba(20,14,10,0.22)" }}
+              >
+                <Paper id="nav-search-results" variant="light" mottle={false} />
                 {searchResults.length > 0 ? (
-                  <ul className="divide-y divide-ink/10">
+                  <ul className="relative z-10 divide-y" style={{ borderColor: "#d9d2c1" }}>
                     {searchResults.map((r) => (
                       <li key={`${r.type}-${r.id}`}>
                         <Link
                           href={r.type === "problem" ? `/problem/${r.id}` : `/remedy/${r.id}`}
-                          className="flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-paper-deep active:bg-paper-deep"
+                          className="flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-[#f0e5cf]"
                         >
-                          <span className="truncate font-sans text-sm font-medium text-ink">{r.label}</span>
-                          <span className="shrink-0 text-xs uppercase tracking-wide text-ink-soft">{r.sub}</span>
+                          <span className="font-figtree truncate text-sm font-medium" style={{ color: "#111110" }}>
+                            {r.label}
+                          </span>
+                          <span className="shrink-0 text-xs uppercase tracking-wide" style={{ color: "#4a473f" }}>
+                            {r.sub}
+                          </span>
                         </Link>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div className="px-4 py-3">
-                    <p className="text-sm text-ink-soft">Fant ingen treff på «{query.trim()}».</p>
+                  <div className="relative z-10 px-4 py-3">
+                    <p className="text-sm" style={{ color: "#4a473f" }}>
+                      Fant ingen treff på «{query.trim()}».
+                    </p>
                     {fuzzySuggestions.length > 0 && (
                       <ul className="mt-2 flex flex-wrap gap-2">
                         {fuzzySuggestions.map((s) => (
                           <li key={`${s.type}-${s.id}`}>
                             <Link
                               href={s.type === "problem" ? `/problem/${s.id}` : `/remedy/${s.id}`}
-                              className="hairline rounded-full px-3 py-1 text-sm text-ink transition-colors hover:bg-paper-deep active:bg-paper-deep"
+                              className="rounded-[2px] px-3 py-1 text-sm transition-colors hover:bg-[#f0e5cf]"
+                              style={{ boxShadow: "inset 0 0 0 1px #cdc6b4", color: "#111110" }}
                             >
                               {s.label}
                             </Link>

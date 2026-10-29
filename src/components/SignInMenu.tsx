@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { IconUser } from "@/components/icons";
+import { IconUser, IconArrowRight } from "@/components/icons";
 import { PrimaryButton } from "@/components/Button";
 import { useProfile } from "@/lib/useProfile";
 
@@ -31,10 +31,10 @@ export function SignInMenu() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex items-center gap-1.5 text-xs font-normal uppercase tracking-[0.14em] transition-colors hover:text-[#E1B08C]"
+        className="flex items-center gap-1.5 text-xs font-normal uppercase tracking-[0.14em] transition-colors hover:text-[#a93415]"
       >
         <IconUser className="h-4 w-4" />
-        <span className="hidden sm:inline">{displayName ?? "Logg inn"}</span>
+        <span>{displayName ?? "Logg inn"}</span>
       </button>
 
       {open && (
@@ -46,9 +46,10 @@ export function SignInMenu() {
               <Link
                 href="/mine-lagrede-rad"
                 onClick={() => setOpen(false)}
-                className="mt-4 block text-sm font-semibold text-plum-700 transition-colors hover:text-plum-800"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-plum-700 transition-colors hover:text-plum-800"
               >
-                Mine lagrede råd →
+                Mine lagrede råd
+                <IconArrowRight className="h-3.5 w-3.5" />
               </Link>
               <button
                 onClick={() => {
@@ -79,7 +80,7 @@ export function SignInMenu() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Navnet ditt"
                 className="mt-3 w-full rounded-lg border border-ink/15 px-3 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-plum-600"
-                style={{ background: "rgba(61,46,58,0.04)" }}
+                style={{ background: "rgba(17,17,16,0.04)" }}
               />
               <PrimaryButton type="submit" disabled={!name.trim()} className="mt-3 w-full disabled:opacity-40">
                 Logg inn
