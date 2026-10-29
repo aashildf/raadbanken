@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lora, Figtree, IBM_Plex_Mono } from "next/font/google";
+import { Lora, Figtree, IBM_Plex_Mono, Alegreya, Source_Sans_3 } from "next/font/google";
 import { DisclaimerGate } from "@/components/DisclaimerGate";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Footer } from "@/components/Footer";
@@ -31,8 +31,24 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
+// RAVN-seksjonene på forsiden (design_handoff_ravn_trinnvis, src/components/ravn):
+// Alegreya (serif) + Source Sans 3 (sans). Brukes bare der, via .ravn i
+// globals.css, så resten av siden beholder Lora/Figtree.
+const alegreya = Alegreya({
+  variable: "--font-alegreya",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
+
+const sourceSans = Source_Sans_3({
+  variable: "--font-source-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
-  title: "Rådbanken",
+  title: "RAVN",
   description: "Del og finn erfaringer med gamle husråd og hjemmeremedier",
 };
 
@@ -44,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="nb"
-      className={`${lora.variable} ${figtree.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${lora.variable} ${figtree.variable} ${ibmPlexMono.variable} ${alegreya.variable} ${sourceSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SiteHeader />
