@@ -44,22 +44,6 @@ service-account.json
 *.tsbuildinfo
 next-env.d.ts
 
-# local AI-agent config/instructions (not meant to be public)
-.claude/
-AGENTS.md
-CLAUDE.md
-
-# local AI-agent skill tooling (installed per-machine, not project code)
-.agents/
-skills-lock.json
-
-# Playwright MCP debug output (console/network logs, screenshots) — can contain
-# request URLs with API keys/tokens, never meant to be committed
-.playwright-mcp/
-
-# local design-hook tooling config/cache (per-machine, not project code)
-.impeccable/
-
 # design handoff reference material (local-only, not meant to be public)
 /design/
 /DESIGN.md
