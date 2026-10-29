@@ -10,8 +10,13 @@ import { Paper } from "@/components/Paper";
 // bruker <PrimaryButton>; se forsidens hero (src/app/page.tsx) for fasiten
 // denne er hentet fra.
 //
-// Firkantet (radius 2px) med hjørnekrøller, etter redesign-pakken
-// (design/design_handoff_radbanken_forside/README.md, avsnittet "Knapper").
+// Pille (radius 999px) i RAVN-fargene, etter design_handoff_ravn_trinnvis
+// (SPEC: "Alle knapper er piller", Ink #111110, Ember #a93415). Hover-
+// reaksjonen er den samme som før (rolig 550 ms fargeovergang med 60 ms
+// forsinkelse og papirkorn), bare med ny målfarge: svart → ember. Den
+// gamle firkantede stilen med hjørnemarkering (redesign-pakken
+// design_handoff_radbanken_forside) er byttet ut; CornerFlourish brukes
+// fortsatt av footeren.
 // Siden denne komponenten er delt, gjelder den nye stilen med én gang på
 // hele siten, ikke bare forsiden — det er tilsiktet (README beskriver "ett
 // knappe-system"), men verdt å vite siden forsiden er det eneste stedet
@@ -21,7 +26,7 @@ import { Paper } from "@/components/Paper";
 // hover ville gjort synlig ingenting (samme fallgruve som er beskrevet ved
 // SecondaryButton under).
 const PRIMARY_BASE =
-  "relative isolate inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[2px] bg-[#6f7d61] px-[31px] py-[17px] font-figtree text-xs font-semibold uppercase tracking-[0.2em] leading-none text-[#f5eee0] transition-colors delay-[60ms] duration-[550ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)] hover:bg-[#566349]";
+  "relative isolate inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full bg-[#111110] px-[31px] py-[17px] font-figtree text-xs font-semibold uppercase tracking-[0.2em] leading-none text-[#f4f0e6] transition-colors delay-[60ms] duration-[550ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)] hover:bg-[#a93415]";
 
 // Papirtekstur.md, tabellen: "Primærknapper: dark (uten flekker) inni
 // knappen, tekst z-index:1". useId gir hvert knappe-instans sin egen,
@@ -80,7 +85,6 @@ export function PrimaryButton(props: PrimaryLinkProps | PrimaryNativeButtonProps
   const content = (
     <>
       <Paper id={`btn-primary-${id}`} variant="dark" mottle={false} />
-      <CornerFlourish className="text-[rgba(245,238,224,0.75)]" />
       <span className="relative z-10 flex items-center gap-2">{children}</span>
     </>
   );
@@ -109,23 +113,62 @@ export function PrimaryButton(props: PrimaryLinkProps | PrimaryNativeButtonProps
 // tyngre ut enn den skal). "terracotta" (f.eks. nederste CTA): samme idé i
 // terrakotta. "light" (vanlig papirbunn) er uendret fra før.
 const SECONDARY_BASE =
-  "group relative isolate inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[2px] px-[31px] py-[17px] font-figtree text-xs font-semibold uppercase tracking-[0.2em] leading-none transition-colors delay-[60ms] duration-[550ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)]";
+  "group relative isolate inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full px-[31px] py-[17px] font-figtree text-xs font-semibold uppercase tracking-[0.2em] leading-none transition-colors delay-[60ms] duration-[550ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)]";
 
 const SECONDARY_TONE_CLASS = {
-  dark: "border border-[#e6dcc0] text-[#efe6cf] hover:bg-[#efe6cf] hover:text-[#152318] hover:[-webkit-text-stroke:0.35px]",
-  terracotta: "border border-[#8a5c47] text-[#8a5c47] hover:bg-[#8a5c47] hover:text-[#f5eee0]",
-  light: "border border-[rgba(44,35,46,0.35)] text-ink hover:bg-[rgba(44,35,46,0.06)]",
+  dark: "border border-[#cdc6b4] text-[#efe6cf] hover:bg-[#efe6cf] hover:text-[#111110] hover:[-webkit-text-stroke:0.35px]",
+  terracotta: "border border-[#a93415] text-[#a93415] hover:bg-[#a93415] hover:text-[#f4f0e6]",
+  light: "border border-[#cdc6b4] text-[#111110] hover:bg-[#e9e3d6]",
+  // rb-btn--on-light (komponent-modal.html) — olivegrønn kontur/tekst, fylles
+  // oliven ved hover/trykket. Brukes der knappen ligger på lys papirbunn og
+  // trenger en rolegere farge enn terrakotta (f.eks. Stem/Lagre i
+  // råd-forhåndsvisningen).
+  // Nå svart kontur som fylles ember ved hover/trykket (RAVN: Ember er
+  // signalfargen for aktiv stemme og lagret).
+  olive: "border border-[#111110] text-[#111110] hover:border-[#a93415] hover:bg-[#a93415] hover:text-[#f4f0e6] aria-pressed:border-[#a93415] aria-pressed:bg-[#a93415] aria-pressed:text-[#f4f0e6]",
+  // Fylt mørkegrønn — ENDRINGER-logo-og-tone.md pkt. 2: "Del et råd" i
+  // heroen, ved siden av den fylte (oliven) PrimaryButton. I motsetning til
+  // "dark" (kontur, fylles ved hover) er denne fylt i hvile, og mørkner ved
+  // hover i stedet.
+  // Nå samme som PrimaryButton: fylt svart, ember ved hover.
+  forest: "bg-[#111110] text-[#f4f0e6] hover:bg-[#a93415]",
 } as const;
 
+// Toner som er fylt fra start (ikke kontur-til-fylt ved hover, se "forest"
+// over) trenger en permanent mørk papirkorn (som PrimaryButton), ikke
+// SecondaryGrain sin lyse korn som bare fades inn ved hover — den var laget
+// for kontur-tonene og ville sett feil ut (lys korn oppå en mørk bunn).
+const FILLED_SECONDARY_TONES = new Set<keyof typeof SECONDARY_TONE_CLASS>(["forest"]);
+
+// Hvilken Paper-variant korn-avsløringen skal bruke per tone — avhenger av
+// hvor LYS bunnfargen blir ved hover, ikke av tone-navnet. "dark" og "light"
+// fylles til en lys bunn ved hover (champagne/nesten uendret papir), så lyst
+// korn stemmer. "terracotta" og "olive" fylles til en mørk/mettet bunn ved
+// hover, lyst korn der hadde blitt "grått slør" (se papirtekstur.md, Vanlige
+// feil) — mørkt korn i stedet.
+const SECONDARY_GRAIN_VARIANT: Record<keyof typeof SECONDARY_TONE_CLASS, "light" | "dark"> = {
+  dark: "light",
+  light: "light",
+  terracotta: "dark",
+  olive: "dark",
+  forest: "dark",
+};
+
 // Papirtekstur.md, tabellen: "Sekundærknapper: light (uten flekker),
-// opacity:0 i hvile → 1 ved hover".
-function SecondaryGrain({ id }: { id: string }) {
+// opacity:0 i hvile → 1 ved hover". Korn-alfaen i Paper er kalibrert for
+// hele seksjoner (store flater der kornet leses som en samlet tekstur) —
+// på en knapps noen titalls piksler blir samme alfa nesten usynlig.
+// contrast()+saturate() her (bare på denne lille visningen av det, ikke på
+// Paper-komponenten selv) punsjer det opp igjen uten å røre teksturen andre
+// steder på siden.
+function SecondaryGrain({ id, variant }: { id: string; variant: "light" | "dark" }) {
   return (
     <span
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[550ms] group-hover:opacity-100"
+      style={{ filter: "contrast(1.8) saturate(1.3)" }}
     >
-      <Paper id={id} variant="light" mottle={false} />
+      <Paper id={id} variant={variant} mottle={false} />
     </span>
   );
 }
@@ -145,10 +188,14 @@ type SecondaryNativeButtonProps = SecondaryButtonProps &
 export function SecondaryButton(props: SecondaryLinkProps | SecondaryNativeButtonProps) {
   const { children, className = "", tone = "dark" } = props;
   const id = useId();
+  const isFilled = FILLED_SECONDARY_TONES.has(tone);
   const content = (
     <>
-      {tone !== "light" && <SecondaryGrain id={`btn-secondary-${id}`} />}
-      <CornerFlourish className="text-current transition-colors duration-[550ms] [transition-timing-function:cubic-bezier(0.3,0.6,0.25,1)]" />
+      {isFilled ? (
+        <Paper id={`btn-secondary-${id}`} variant="dark" mottle={false} />
+      ) : (
+        <SecondaryGrain id={`btn-secondary-${id}`} variant={SECONDARY_GRAIN_VARIANT[tone]} />
+      )}
       <span className="relative z-10 flex items-center gap-2">{children}</span>
     </>
   );
