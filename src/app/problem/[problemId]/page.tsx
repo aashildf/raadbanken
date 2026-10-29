@@ -8,11 +8,15 @@ import { useAnonAuth } from "@/lib/useAnonAuth";
 import { castVote } from "@/lib/votes";
 import { setSaved } from "@/lib/saves";
 import { wilsonScore } from "@/lib/wilson";
-import { ACUTE_RISK_SLUGS } from "@/lib/categories";
+import { ACUTE_RISK_SLUGS, TOP_CATEGORIES, subcategoryForSlug } from "@/lib/categories";
+import { REMEDY_IMAGES } from "@/lib/remedyImages";
 import { EmergencyButton } from "@/components/EmergencyButton";
 import { RemedyPreviewModal } from "@/components/RemedyPreviewModal";
-import { PrimaryButton } from "@/components/Button";
-import { IconArrowDown, IconArrowUp, IconHeart } from "@/components/icons";
+import { RemedyCard } from "@/components/RemedyCard";
+import { SecondaryButton } from "@/components/Button";
+import { Paper } from "@/components/Paper";
+import { CATEGORY_ICON, IconSprig } from "@/components/icons";
+import { ShareAdviceBox } from "@/components/ShareAdviceBox";
 import type { Problem, Remedy, Vote } from "@/lib/types";
 
 export default function RemediesPage({
@@ -31,6 +35,7 @@ export default function RemediesPage({
   const [openRemedyId, setOpenRemedyId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<"stemt" | "nyeste">("stemt");
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "problems", problemId), (snap) => {
@@ -50,13 +55,22 @@ export default function RemediesPage({
     return unsub;
   }, [problemId]);
 
-  const rankedRemedies = useMemo(
-    () =>
-      [...remedies].sort(
-        (a, b) => wilsonScore(b.votesUp, b.totalVotes) - wilsonScore(a.votesUp, a.totalVotes)
-      ),
-    [remedies]
-  );
+  const rankedRemedies = useMemo(() => {
+    if (sortMode === "nyeste") {
+      return [...remedies].sort((a, b) => (b.createdAt?.toMillis() ?? 0) - (a.createdAt?.toMillis() ?? 0));
+    }
+    return [...remedies].sort(
+      (a, b) => wilsonScore(b.votesUp, b.totalVotes) - wilsonScore(a.votesUp, a.totalVotes)
+    );
+  }, [remedies, sortMode]);
+
+  const topCategory = useMemo(() => {
+    if (!problem) return undefined;
+    const sub = subcategoryForSlug(problem.slug);
+    return sub ? TOP_CATEGORIES.find((c) => c.id === sub.topCategoryId) : undefined;
+  }, [problem]);
+
+  const totalVotesSum = useMemo(() => remedies.reduce((sum, r) => sum + r.totalVotes, 0), [remedies]);
 
   useEffect(() => {
     if (!uid) return;
@@ -114,130 +128,141 @@ export default function RemediesPage({
     }
   }
 
+  const RankIcon = (problem && CATEGORY_ICON[problem.slug]) || IconSprig;
+
   return (
-    <main className="relative flex min-h-screen flex-col bg-paper">
-      <div
-        className="relative mx-auto w-full max-w-4xl flex-1 py-8 sm:py-12"
-        style={{ paddingInline: "var(--page-pad)" }}
-      >
-        {/* Toppraden */}
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <Link href="/alle" className="text-sm font-medium text-plum-700 transition-opacity hover:opacity-70">
-            ← Alle kategorier
-          </Link>
-          {problem && ACUTE_RISK_SLUGS.includes(problem.slug) && <EmergencyButton />}
-        </div>
-
-        {/* Overskrift — kickeren bruker bevisst IKKE font-display: den klassen
-            peker (etter et tidligere fontbytte) på samme serif som
-            overskriften under, og store bokstaver + bokstavavstand i en
-            kalligrafisk serif er vanskelig å lese uansett størrelse/vekt.
-            Vanlig sans (sidens body-font) leser derimot fint som liten,
-            sporet versal-tekst. */}
-        <p className="font-sans text-sm font-bold uppercase tracking-[0.14em] text-plum-700">Folkemedisin</p>
-        <h1 className="font-serif-display mt-2 text-4xl text-ink sm:text-5xl">
-          {problem ? `Råd mot ${problem.name.toLowerCase()}` : "Råd"}
-        </h1>
-
-        {loading && (
-          <p className="mt-8 text-sm text-ink/40">Laster råd…</p>
-        )}
-
-        {/* Råd-liste — klikk åpner en forhåndsvisning uten å forlate listen (se
-            RemedyPreviewModal), i stedet for å navigere til en egen side og
-            miste scroll-posisjonen når man går tilbake. */}
-        <ul className="mt-6 flex flex-col divide-y divide-ink/10 border-t border-b border-ink/10">
-          {rankedRemedies.map((r, i) => {
-            const myVote = myVoteByRemedy.get(r.id);
-            const isSaved = savedIds.has(r.id);
-            return (
-              <li
-                key={r.id}
-                className="flex items-center gap-3 px-3 py-4 -mx-3 transition-colors hover:bg-[rgba(111,143,108,0.14)] sm:gap-4"
-              >
-                <span className="font-serif-display w-8 shrink-0 text-base sm:text-lg" style={{ color: "var(--gold)" }}>
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <button onClick={() => setOpenRemedyId(r.id)} className="group min-w-0 flex-1 text-left">
-                  <span className="block truncate text-base font-semibold text-ink transition-colors group-hover:text-plum-700 sm:text-lg">
-                    {r.title}
-                  </span>
-                  {r.totalVotes > 0 && (
-                    <span className="mt-0.5 block truncate text-xs text-ink-soft">
-                      {r.successRate}% positiv · {r.totalVotes} stemmer
-                    </span>
-                  )}
-                </button>
-                <div className="hidden h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-ink/10 sm:block md:w-32">
-                  <div className="h-full rounded-full bg-sage" style={{ width: `${r.successRate ?? 0}%` }} />
-                </div>
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <button
-                    onClick={() => handleVote(r.id, "up")}
-                    disabled={!uid || votingId !== null}
-                    aria-label="Fungerte"
-                    aria-pressed={myVote === "up"}
-                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors disabled:opacity-40 ${
-                      myVote === "up" ? "text-[#f5efeb]" : "text-ink hover:bg-[#E1B08C] hover:text-[#2c232e]"
-                    }`}
-                    style={
-                      myVote === "up"
-                        ? { background: "rgba(79,107,74,0.55)", border: "1px solid rgba(79,107,74,0.55)" }
-                        : { border: "1px solid rgba(44,35,46,0.22)" }
-                    }
-                  >
-                    <IconArrowUp className="h-3 w-3" />
-                  </button>
-                  <button
-                    onClick={() => handleVote(r.id, "down")}
-                    disabled={!uid || votingId !== null}
-                    aria-label="Fungerte ikke"
-                    aria-pressed={myVote === "down"}
-                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors disabled:opacity-40 ${
-                      myVote === "down" ? "text-[#2c232e]" : "text-ink hover:bg-[#E1B08C] hover:text-[#2c232e]"
-                    }`}
-                    style={
-                      myVote === "down"
-                        ? { background: "rgba(225,176,140,0.82)", border: "1px solid rgba(225,176,140,0.82)" }
-                        : { border: "1px solid rgba(44,35,46,0.22)" }
-                    }
-                  >
-                    <IconArrowDown className="h-3 w-3" />
-                  </button>
-                  <button
-                    onClick={() => handleToggleSaved(r.id)}
-                    disabled={!uid || savingId === r.id}
-                    aria-label={isSaved ? "Fjern fra mine lagrede råd" : "Lagre i mine lagrede råd"}
-                    aria-pressed={isSaved}
-                    className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-[#E1B08C] hover:text-[#2c232e] disabled:opacity-40 ${
-                      isSaved ? "text-[#E1B08C]" : "text-ink"
-                    }`}
-                    style={{ border: "1px solid rgba(44,35,46,0.22)" }}
-                  >
-                    <IconHeart
-                      className="h-3 w-3"
-                      filled={isSaved}
-                      style={isSaved ? { stroke: "var(--ink-soft)" } : undefined}
-                    />
-                  </button>
-                </div>
+    <main className="relative flex min-h-screen flex-col" style={{ background: "#efe6cf" }}>
+      {/* Sidehode — mørk skogsgrønn, matcher fasit/mal-liste-dybde.html sin
+          .phead-variant (samme farge/stil som navbaren, ikke den lyse
+          standardvarianten). */}
+      <header className="relative overflow-hidden" style={{ background: "#111110" }}>
+        <Paper id="problem-head" variant="dark" mottle={false} />
+        <div
+          className="relative z-10 mx-auto flex flex-col gap-4"
+          style={{ maxWidth: 1480, paddingInline: "clamp(20px,3vw,40px)", paddingBlock: "56px 60px" }}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <ol className="m-0 flex flex-wrap gap-2 p-0 text-[13px]" style={{ color: "#cdc6b4" }} aria-label="Brødsmuler">
+              <li>
+                <Link href="/" className="transition-colors hover:text-[#a93415]">
+                  Forside
+                </Link>
               </li>
-            );
-          })}
-        </ul>
+              {topCategory && (
+                <li className="before:mr-2 before:content-['/'] before:text-[#6d685c]">
+                  <Link href={`/kategori/${topCategory.id}`} className="transition-colors hover:text-[#a93415]">
+                    {topCategory.name}
+                  </Link>
+                </li>
+              )}
+              <li aria-current="page" className="before:mr-2 before:content-['/'] before:text-[#6d685c]" style={{ color: "#f5eee0" }}>
+                {problem?.name}
+              </li>
+            </ol>
+            {problem && ACUTE_RISK_SLUGS.includes(problem.slug) && <EmergencyButton />}
+          </div>
 
-        {!loading && remedies.length === 0 && (
-          <p className="mt-8 text-sm text-ink/50">Ingen råd registrert for denne plagen ennå.</p>
-        )}
+          <div className="flex items-center gap-5">
+            <span className="grid h-[76px] w-[76px] shrink-0 place-items-center rounded-[6px]" style={{ background: "#efe6cf", color: "#111110" }}>
+              <RankIcon className="h-[38px] w-[38px]" />
+            </span>
+            <div className="flex flex-col gap-1.5">
+              <p className="font-lora m-0 text-[clamp(16px,1.4vw,20px)] font-medium uppercase leading-[1.2] tracking-[0.16em]" style={{ color: "#d4c9b3" }}>
+                Plage
+              </p>
+              <h1 className="font-lora m-0 text-[clamp(34px,3.6vw,52px)] leading-[1.08] text-balance" style={{ color: "#f5eee0" }}>
+                {problem ? problem.name : "Råd"}
+              </h1>
+            </div>
+          </div>
 
-        <PrimaryButton href={`/problem/${problemId}/legg-til`} className="mt-8 w-full">
-          + Legg til nytt råd
-        </PrimaryButton>
-      </div>
+          {!loading && remedies.length > 0 && (
+            <p className="m-0 text-sm" style={{ color: "#cdc6b4" }}>
+              <b style={{ color: "#f5eee0", fontWeight: 600 }}>{remedies.length}</b> råd ·{" "}
+              <b style={{ color: "#f5eee0", fontWeight: 600 }}>{totalVotesSum}</b> stemmer
+            </p>
+          )}
+        </div>
+      </header>
+
+      {/* Liste — råd-kort i rutenett, samme komponent (RemedyCard) som resten
+          av siten etter hvert skal bruke. Ingen fabrikkerte filter-chips
+          eller "Prøvd av"-tall her (se RemedyCard-kommentaren) — bare et ekte
+          sorteringsvalg (stemmer/nyeste), som vi faktisk har data til. */}
+      <section className="relative flex-1" style={{ background: "#efe6cf" }}>
+        <div
+          className="relative z-10 mx-auto flex flex-col gap-[22px]"
+          style={{ maxWidth: 1480, paddingInline: "clamp(20px,3vw,40px)", paddingBlock: "36px 72px" }}
+        >
+          {rankedRemedies.length > 1 && (
+            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Sorter etter">
+              <SecondaryButton
+                tone="olive"
+                aria-pressed={sortMode === "stemt"}
+                onClick={() => setSortMode("stemt")}
+                className="!px-4 !py-3 !text-[13px] !font-semibold !normal-case !tracking-normal"
+              >
+                Mest stemt
+              </SecondaryButton>
+              <SecondaryButton
+                tone="olive"
+                aria-pressed={sortMode === "nyeste"}
+                onClick={() => setSortMode("nyeste")}
+                className="!px-4 !py-3 !text-[13px] !font-semibold !normal-case !tracking-normal"
+              >
+                Nyeste
+              </SecondaryButton>
+            </div>
+          )}
+
+          {loading && <p className="text-sm text-[#4a473f]">Laster råd…</p>}
+
+          {!loading && remedies.length === 0 && (
+            <p className="text-sm text-[#4a473f]">Ingen råd registrert for denne plagen ennå.</p>
+          )}
+
+          {rankedRemedies.length > 0 && (
+            <ul className="m-0 grid list-none gap-x-[22px] gap-y-7 p-0" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,270px),1fr))" }}>
+              {rankedRemedies.map((r) => {
+                const myVote = myVoteByRemedy.get(r.id);
+                const isSaved = savedIds.has(r.id);
+                return (
+                  <li key={r.id} className="flex">
+                    <RemedyCard
+                      remedy={r}
+                      categoryLabel={topCategory?.name ?? "RAVN"}
+                      image={REMEDY_IMAGES[r.title]?.src}
+                      isVoted={myVote === "up"}
+                      onToggleVote={() => handleVote(r.id, "up")}
+                      voting={votingId === r.id}
+                      isSaved={isSaved}
+                      onToggleSave={() => handleToggleSaved(r.id)}
+                      saving={savingId === r.id}
+                      onOpenPreview={() => setOpenRemedyId(r.id)}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      <ShareAdviceBox
+        id="problem-cta"
+        title={<>Har du et råd mot {problem?.name.toLowerCase()}?</>}
+        href={`/problem/${problemId}/legg-til`}
+        button="+ Legg til nytt råd"
+      />
 
       <RemedyPreviewModal
         remedy={openRemedy}
         problemName={problem?.name}
+        note={
+          problem && ACUTE_RISK_SLUGS.includes(problem.slug)
+            ? "Smertene akutte eller uforklarlige? Ring Legevakten på 116 117 (gratis, døgnåpent), eller 113 ved livstruende tilstander."
+            : undefined
+        }
         onClose={() => setOpenRemedyId(null)}
         onVote={(direction) => openRemedy && handleVote(openRemedy.id, direction)}
         voting={votingId !== null}
